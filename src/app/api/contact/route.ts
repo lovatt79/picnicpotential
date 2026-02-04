@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error("RESEND_API_KEY environment variable is not set");
+  }
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 interface FormData {
   firstName: string;
@@ -193,6 +198,7 @@ function generateCustomerEmailHTML(data: FormData): string {
 export async function POST(request: Request) {
   try {
     const data: FormData = await request.json();
+    const resend = getResend();
 
     // Send notification email to operations team
     await resend.emails.send({
