@@ -1,20 +1,11 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 
-export default async function AdminLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  // The middleware should handle this, but double-check
-  if (!user) {
-    redirect("/admin/login");
-  }
-
+  // Auth is handled by middleware, no need to check here
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
