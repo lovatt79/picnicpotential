@@ -40,6 +40,24 @@ interface FormData {
   notes: string;
 }
 
+interface PricedOption {
+  label: string;
+  price: number | null;
+  price_unit: string | null;
+  min_quantity: number | null;
+  is_vegan?: boolean;
+  category?: string;
+}
+
+function formatPrice(price: number | null, priceUnit: string | null): string {
+  if (!price) return "";
+  const unit = priceUnit === "per_person" ? "/person"
+    : priceUnit === "per_dozen" ? "/dozen"
+    : priceUnit === "per_hour" ? "/hour"
+    : "";
+  return `$${price % 1 === 0 ? price.toFixed(0) : price.toFixed(2)}${unit}`;
+}
+
 const eventTypes = [
   "Picnic",
   "Tablescapes",
@@ -186,6 +204,57 @@ function CheckboxOption({ label, checked, onChange }: { label: string; checked: 
   );
 }
 
+// Checkbox with pricing info for food, desserts, add-ons
+function PricedCheckboxOption({
+  label, price, priceUnit, minQuantity, isVegan, checked, onChange,
+}: {
+  label: string;
+  price: number | null;
+  priceUnit: string | null;
+  minQuantity: number | null;
+  isVegan?: boolean;
+  checked: boolean;
+  onChange: () => void;
+}) {
+  const priceText = formatPrice(price, priceUnit);
+  return (
+    <label
+      className={`flex cursor-pointer items-start gap-3 rounded-xl border-2 p-3 transition-colors ${
+        checked ? "border-gold bg-gold/5" : "border-sage/50 hover:border-sage-dark"
+      }`}
+    >
+      <input type="checkbox" checked={checked} onChange={onChange} className="sr-only" />
+      <div
+        className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 ${
+          checked ? "border-gold bg-gold text-white" : "border-sage"
+        }`}
+      >
+        {checked && (
+          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <span className="text-sm text-charcoal leading-snug">
+            {label}
+            {isVegan && <span className="ml-1.5 inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">Vegan</span>}
+          </span>
+          {priceText && (
+            <span className="flex-shrink-0 rounded-full bg-gold/10 px-2.5 py-0.5 text-xs font-semibold text-gold-dark whitespace-nowrap">
+              {priceText}
+            </span>
+          )}
+        </div>
+        {minQuantity && minQuantity > 1 && (
+          <p className="mt-0.5 text-xs text-warm-gray">Min order: {minQuantity}</p>
+        )}
+      </div>
+    </label>
+  );
+}
+
 // Reusable radio component
 function RadioOption({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
   return (
@@ -216,9 +285,9 @@ export default function MultiStepForm() {
   // Database-driven form options
   const [eventTypes, setEventTypes] = useState<string[]>([]);
   const [colorOptions, setColorOptions] = useState<string[]>([]);
-  const [foodOptions, setFoodOptions] = useState<string[]>([]);
-  const [dessertOptions, setDessertOptions] = useState<string[]>([]);
-  const [addonOptions, setAddonOptions] = useState<string[]>([]);
+  const [foodOptions, setFoodOptions] = useState<PricedOption[]>([]);
+  const [dessertOptions, setDessertOptions] = useState<PricedOption[]>([]);
+  const [addonOptions, setAddonOptions] = useState<PricedOption[]>([]);
   const [occasionOptions, setOccasionOptions] = useState<string[]>([]);
   const [attributionOptions, setAttributionOptions] = useState<string[]>([]);
   const [loadingOptions, setLoadingOptions] = useState(true);
@@ -230,18 +299,18 @@ export default function MultiStepForm() {
       const [events, colors, food, desserts, addons, occasions, attribution] = await Promise.all([
         supabase.from("form_event_types").select("label").eq("is_active", true).order("sort_order"),
         supabase.from("form_color_options").select("label").eq("is_active", true).order("sort_order"),
-        supabase.from("form_food_options").select("label").eq("is_active", true).order("sort_order"),
-        supabase.from("form_dessert_options").select("label").eq("is_active", true).order("sort_order"),
-        supabase.from("form_addon_options").select("label").eq("is_active", true).order("sort_order"),
+        supabase.from("form_food_options").select("label, price, price_unit, min_quantity").eq("is_active", true).order("sort_order"),
+        supabase.from("form_dessert_options").select("label, price, price_unit, min_quantity, is_vegan").eq("is_active", true).order("sort_order"),
+        supabase.from("form_addon_options").select("label, price, price_unit, category").eq("is_active", true).order("sort_order"),
         supabase.from("form_occasion_options").select("label").eq("is_active", true).order("sort_order"),
         supabase.from("form_attribution_options").select("label").eq("is_active", true).order("sort_order"),
       ]);
 
       setEventTypes((events.data || []).map((e: any) => e.label));
       setColorOptions((colors.data || []).map((c: any) => c.label));
-      setFoodOptions((food.data || []).map((f: any) => f.label));
-      setDessertOptions((desserts.data || []).map((d: any) => d.label));
-      setAddonOptions((addons.data || []).map((a: any) => a.label));
+      setFoodOptions((food.data || []) as PricedOption[]);
+      setDessertOptions((desserts.data || []) as PricedOption[]);
+      setAddonOptions((addons.data || []) as PricedOption[]);
       setOccasionOptions((occasions.data || []).map((o: any) => o.label));
       setAttributionOptions((attribution.data || []).map((a: any) => a.label));
       setLoadingOptions(false);
@@ -609,12 +678,15 @@ export default function MultiStepForm() {
               <h3 className="font-serif text-2xl text-charcoal">Food Options</h3>
               <p className="text-sm text-warm-gray mt-1">Select all that apply</p>
               <div className="mt-3 grid gap-2">
-                {foodOptions.map((food) => (
-                  <CheckboxOption
-                    key={food}
-                    label={food}
-                    checked={formData.foodOptions.includes(food)}
-                    onChange={() => toggleArray("foodOptions", food)}
+                {foodOptions.map((item) => (
+                  <PricedCheckboxOption
+                    key={item.label}
+                    label={item.label}
+                    price={item.price}
+                    priceUnit={item.price_unit}
+                    minQuantity={item.min_quantity}
+                    checked={formData.foodOptions.includes(item.label)}
+                    onChange={() => toggleArray("foodOptions", item.label)}
                   />
                 ))}
               </div>
@@ -624,12 +696,16 @@ export default function MultiStepForm() {
               <h3 className="font-serif text-2xl text-charcoal">Dessert Options</h3>
               <p className="text-sm text-warm-gray mt-1">Select all that apply</p>
               <div className="mt-3 grid gap-2">
-                {dessertOptions.map((dessert) => (
-                  <CheckboxOption
-                    key={dessert}
-                    label={dessert}
-                    checked={formData.dessertOptions.includes(dessert)}
-                    onChange={() => toggleArray("dessertOptions", dessert)}
+                {dessertOptions.map((item) => (
+                  <PricedCheckboxOption
+                    key={item.label}
+                    label={item.label}
+                    price={item.price}
+                    priceUnit={item.price_unit}
+                    minQuantity={item.min_quantity}
+                    isVegan={item.is_vegan}
+                    checked={formData.dessertOptions.includes(item.label)}
+                    onChange={() => toggleArray("dessertOptions", item.label)}
                   />
                 ))}
               </div>
@@ -654,12 +730,15 @@ export default function MultiStepForm() {
               <h3 className="font-serif text-2xl text-charcoal">Add-Ons</h3>
               <p className="text-sm text-warm-gray mt-1">Select all that apply</p>
               <div className="mt-3 grid gap-2">
-                {addonOptions.map((addon) => (
-                  <CheckboxOption
-                    key={addon}
-                    label={addon}
-                    checked={formData.addOns.includes(addon)}
-                    onChange={() => toggleArray("addOns", addon)}
+                {addonOptions.map((item) => (
+                  <PricedCheckboxOption
+                    key={item.label}
+                    label={item.label}
+                    price={item.price}
+                    priceUnit={item.price_unit}
+                    minQuantity={null}
+                    checked={formData.addOns.includes(item.label)}
+                    onChange={() => toggleArray("addOns", item.label)}
                   />
                 ))}
               </div>
