@@ -1,14 +1,63 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ServiceCard from "@/components/ServiceCard";
-import { SERVICES, WINERY_PARTNERS } from "@/lib/constants";
+import { WINERY_PARTNERS } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Services",
   description: "Explore our luxury picnic services, corporate events, tablescapes, proposals, and more in Sonoma County wine country.",
 };
 
-export default function ServicesPage() {
+// Force dynamic rendering to always fetch fresh content
+export const dynamic = 'force-dynamic';
+
+async function getServices() {
+  try {
+    const supabase = await createClient();
+    const { data: services, error } = await supabase
+      .from("services")
+      .select("*")
+      .eq("is_published", true)
+      .order("sort_order", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching services:", error);
+      return [];
+    }
+
+    // Fetch images for services
+    const servicesWithImages = await Promise.all(
+      (services || []).map(async (service) => {
+        let imageUrl = service.image_url; // Fallback to image_url if exists
+
+        if (service.image_id) {
+          const { data: imageData } = await supabase
+            .from("media")
+            .select("url")
+            .eq("id", service.image_id)
+            .single();
+          if (imageData) {
+            imageUrl = imageData.url;
+          }
+        }
+
+        return {
+          ...service,
+          image: imageUrl,
+        };
+      })
+    );
+
+    return servicesWithImages;
+  } catch (error) {
+    console.error("Error in getServices:", error);
+    return [];
+  }
+}
+
+export default async function ServicesPage() {
+  const services = await getServices();
   return (
     <>
       {/* Hero */}
@@ -34,12 +83,13 @@ export default function ServicesPage() {
       <section className="py-20">
         <div className="mx-auto max-w-7xl px-4">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {SERVICES.map((service) => (
+            {services.map((service) => (
               <ServiceCard
                 key={service.slug}
                 title={service.title}
                 description={service.description}
                 image={service.image}
+                href={`/services/${service.slug}`}
               />
             ))}
           </div>

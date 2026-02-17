@@ -23,15 +23,16 @@ export default function ServiceCard({ title, description, image, href }: Service
   const content = (
     <div className="group overflow-hidden rounded-2xl bg-white shadow-sm transition-all hover:shadow-lg">
       <div className="aspect-[4/3] overflow-hidden">
-        <div
-          className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-          style={{ backgroundImage: `url(${image})` }}
-        >
-          {/* Placeholder gradient when no image */}
+        {image ? (
+          <div
+            className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+            style={{ backgroundImage: `url(${image})` }}
+          />
+        ) : (
           <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${gradient}`}>
             <span className="font-serif text-lg text-charcoal/50">{title}</span>
           </div>
-        </div>
+        )}
       </div>
       <div className="p-6">
         <h3 className="font-serif text-xl text-charcoal">{title}</h3>
