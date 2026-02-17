@@ -152,14 +152,14 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
       </section>
 
       {/* About Section */}
-      {partnerPage?.about_text && (
+      {(partner.description || partnerPage?.about_text) && (
         <section className="py-20 bg-white">
           <div className="max-w-4xl mx-auto px-4">
             <h2 className="font-serif text-3xl md:text-4xl text-charcoal mb-6">
               About {partner.name}
             </h2>
             <p className="text-lg leading-relaxed text-warm-gray whitespace-pre-line">
-              {partnerPage.about_text}
+              {partner.description || partnerPage.about_text}
             </p>
           </div>
         </section>
@@ -180,7 +180,7 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
       )}
 
       {/* Contact Information */}
-      {(partnerPage?.contact_email || partnerPage?.contact_phone || partner.url) && (
+      {(partnerPage?.contact_email || partnerPage?.contact_phone || partner.website || partner.instagram) && (
         <section className="py-20 bg-white">
           <div className="max-w-4xl mx-auto px-4">
             <h2 className="font-serif text-3xl md:text-4xl text-charcoal mb-6">
@@ -209,16 +209,29 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                   </a>
                 </div>
               )}
-              {partner.url && (
+              {partner.website && (
                 <div className="flex items-center gap-3">
                   <span className="text-warm-gray">Website:</span>
                   <a
-                    href={partner.url}
+                    href={partner.website}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-gold hover:underline"
                   >
-                    {partner.url}
+                    {partner.website}
+                  </a>
+                </div>
+              )}
+              {partner.instagram && (
+                <div className="flex items-center gap-3">
+                  <span className="text-warm-gray">Instagram:</span>
+                  <a
+                    href={partner.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gold hover:underline"
+                  >
+                    {partner.instagram}
                   </a>
                 </div>
               )}
