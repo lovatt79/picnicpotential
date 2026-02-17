@@ -16,6 +16,20 @@ function slugify(text: string): string {
     .trim();
 }
 
+function addUTMTracking(url: string): string {
+  if (!url) return url;
+
+  try {
+    const urlObj = new URL(url);
+    urlObj.searchParams.set("utm_source", "picnicpotential");
+    urlObj.searchParams.set("utm_medium", "partner_referral");
+    return urlObj.toString();
+  } catch {
+    // If URL is invalid, return as-is
+    return url;
+  }
+}
+
 async function getPartner(slug: string) {
   const supabase = await createClient();
 
@@ -63,11 +77,23 @@ async function getPartner(slug: string) {
     partnerLogo = imageData;
   }
 
+  // Fetch the hero image
+  let heroImage = null;
+  if (partnerPage?.hero_image_id) {
+    const { data: heroImageData } = await supabase
+      .from("media")
+      .select("url")
+      .eq("id", partnerPage.hero_image_id)
+      .single();
+    heroImage = heroImageData;
+  }
+
   return {
     partner,
     partnerPage,
     galleryImages: galleryImagesData || [],
     partnerLogo,
+    heroImage,
   };
 }
 
@@ -95,44 +121,87 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
     notFound();
   }
 
-  const { partner, partnerPage, galleryImages, partnerLogo } = data;
+  const { partner, partnerPage, galleryImages, partnerLogo, heroImage } = data;
 
   const displayLogo = partnerLogo?.url || partner.logo_url;
+  const displayHeroImage = heroImage?.url;
 
   return (
     <>
       {/* Hero Section */}
-      <section className="bg-sage py-20">
-        <div className="mx-auto max-w-4xl px-4 text-center">
-          {displayLogo && (
-            <div className="mb-8 flex justify-center">
-              <div className="bg-white rounded-xl p-6 shadow-md max-w-xs">
-                <img
-                  src={displayLogo}
-                  alt={partner.name}
-                  className="max-h-32 w-full object-contain"
-                />
-              </div>
-            </div>
-          )}
-          <h1 className="font-serif text-4xl md:text-5xl text-charcoal mb-4">
-            {partner.name}
-          </h1>
-          <div className="flex items-center justify-center gap-4 text-sm">
-            <span className="px-4 py-2 rounded-full bg-gold/20 text-gold font-medium">
-              {partner.partner_type} Partner
-            </span>
-            {partner.category && (
-              <span className="px-4 py-2 rounded-full bg-charcoal/10 text-charcoal">
-                {partner.category}
-              </span>
-            )}
-            {partner.location && (
-              <span className="text-warm-gray">📍 {partner.location}</span>
-            )}
+      {displayHeroImage ? (
+        <section className="relative h-[400px] md:h-[500px]">
+          <div className="absolute inset-0">
+            <img
+              src={displayHeroImage}
+              alt={partner.name}
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-charcoal/40 via-charcoal/20 to-charcoal/60"></div>
           </div>
-        </div>
-      </section>
+          <div className="relative mx-auto max-w-4xl px-4 h-full flex flex-col justify-center text-center">
+            {displayLogo && (
+              <div className="mb-8 flex justify-center">
+                <div className="bg-white rounded-xl p-6 shadow-md max-w-xs">
+                  <img
+                    src={displayLogo}
+                    alt={partner.name}
+                    className="max-h-32 w-full object-contain"
+                  />
+                </div>
+              </div>
+            )}
+            <h1 className="font-serif text-4xl md:text-5xl text-white mb-4 drop-shadow-lg">
+              {partner.name}
+            </h1>
+            <div className="flex items-center justify-center gap-4 text-sm flex-wrap">
+              <span className="px-4 py-2 rounded-full bg-gold/90 text-charcoal font-medium shadow-md">
+                {partner.partner_type} Partner
+              </span>
+              {partner.category && (
+                <span className="px-4 py-2 rounded-full bg-white/90 text-charcoal shadow-md">
+                  {partner.category}
+                </span>
+              )}
+              {partner.location && (
+                <span className="text-white drop-shadow-md">📍 {partner.location}</span>
+              )}
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="bg-sage py-20">
+          <div className="mx-auto max-w-4xl px-4 text-center">
+            {displayLogo && (
+              <div className="mb-8 flex justify-center">
+                <div className="bg-white rounded-xl p-6 shadow-md max-w-xs">
+                  <img
+                    src={displayLogo}
+                    alt={partner.name}
+                    className="max-h-32 w-full object-contain"
+                  />
+                </div>
+              </div>
+            )}
+            <h1 className="font-serif text-4xl md:text-5xl text-charcoal mb-4">
+              {partner.name}
+            </h1>
+            <div className="flex items-center justify-center gap-4 text-sm">
+              <span className="px-4 py-2 rounded-full bg-gold/20 text-gold font-medium">
+                {partner.partner_type} Partner
+              </span>
+              {partner.category && (
+                <span className="px-4 py-2 rounded-full bg-charcoal/10 text-charcoal">
+                  {partner.category}
+                </span>
+              )}
+              {partner.location && (
+                <span className="text-warm-gray">📍 {partner.location}</span>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Breadcrumb */}
       <section className="bg-white py-4 border-b border-gray-200">
@@ -152,14 +221,14 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
       </section>
 
       {/* About Section */}
-      {(partner.description || partnerPage?.about_text) && (
+      {partner.description && (
         <section className="py-20 bg-white">
           <div className="max-w-4xl mx-auto px-4">
             <h2 className="font-serif text-3xl md:text-4xl text-charcoal mb-6">
               About {partner.name}
             </h2>
             <p className="text-lg leading-relaxed text-warm-gray whitespace-pre-line">
-              {partner.description || partnerPage.about_text}
+              {partner.description}
             </p>
           </div>
         </section>
@@ -213,7 +282,7 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                 <div className="flex items-center gap-3">
                   <span className="text-warm-gray">Website:</span>
                   <a
-                    href={partner.website}
+                    href={addUTMTracking(partner.website)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-gold hover:underline"
@@ -226,7 +295,7 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                 <div className="flex items-center gap-3">
                   <span className="text-warm-gray">Instagram:</span>
                   <a
-                    href={partner.instagram}
+                    href={addUTMTracking(partner.instagram)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-gold hover:underline"
@@ -290,23 +359,6 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
           >
             Request Services
           </Link>
-        </div>
-      </section>
-
-      {/* Related Partners */}
-      <section className="py-20 bg-sage-light/20">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="font-serif text-3xl md:text-4xl text-charcoal text-center mb-12">
-            Explore Other Partners
-          </h2>
-          <div className="text-center">
-            <Link
-              href="/partners"
-              className="inline-block rounded-full bg-charcoal px-8 py-3 text-base font-medium text-white transition-colors hover:bg-gold hover:text-charcoal"
-            >
-              View All Partners →
-            </Link>
-          </div>
         </div>
       </section>
     </>

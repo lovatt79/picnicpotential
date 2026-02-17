@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import ImageUpload from "@/components/admin/ImageUpload";
+import MultiImageUpload from "@/components/admin/MultiImageUpload";
 
 type TabType = "basic" | "content" | "gallery";
 
@@ -44,7 +45,8 @@ export default function EditPartnerPage() {
   const [partnerPageId, setPartnerPageId] = useState<string | null>(null);
 
   // Page Content
-  const [aboutText, setAboutText] = useState("");
+  const [heroImageUrl, setHeroImageUrl] = useState("");
+  const [heroImageId, setHeroImageId] = useState<string | null>(null);
   const [servicesOffered, setServicesOffered] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
@@ -124,12 +126,24 @@ export default function EditPartnerPage() {
       }
 
       setPartnerPageId(partnerPage.id);
-      setAboutText(partnerPage.about_text || "");
       setServicesOffered(partnerPage.services_offered || "");
       setContactEmail(partnerPage.contact_email || "");
       setContactPhone(partnerPage.contact_phone || "");
       setGallerySectionTitle(partnerPage.gallery_section_title || "Gallery");
       setGallerySectionDescription(partnerPage.gallery_section_description || "");
+
+      // Fetch hero image URL if hero_image_id exists
+      if (partnerPage.hero_image_id) {
+        const { data: heroImageData } = await supabase
+          .from("media")
+          .select("url")
+          .eq("id", partnerPage.hero_image_id)
+          .single();
+        if (heroImageData) {
+          setHeroImageUrl(heroImageData.url);
+          setHeroImageId(partnerPage.hero_image_id);
+        }
+      }
 
       // Load gallery images
       await loadGalleryImages(partnerPage.id);
@@ -154,6 +168,11 @@ export default function EditPartnerPage() {
   const handleLogoUpload = (url: string, mediaId: string) => {
     setLogoUrl(url);
     setLogoId(mediaId);
+  };
+
+  const handleHeroImageUpload = (url: string, mediaId: string) => {
+    setHeroImageUrl(url);
+    setHeroImageId(mediaId);
   };
 
   async function handleSaveBasicInfo() {
@@ -195,7 +214,7 @@ export default function EditPartnerPage() {
     const { error } = await supabase
       .from("partner_pages")
       .update({
-        about_text: aboutText || null,
+        hero_image_id: heroImageId,
         services_offered: servicesOffered || null,
         contact_email: contactEmail || null,
         contact_phone: contactPhone || null,
@@ -207,6 +226,8 @@ export default function EditPartnerPage() {
 
     if (error) {
       setError(error.message);
+    } else {
+      alert("Page content saved successfully!");
     }
 
     setSaving(false);
@@ -221,6 +242,26 @@ export default function EditPartnerPage() {
       caption: "",
       sort_order: galleryImages.length,
     });
+
+    if (error) {
+      setError(error.message);
+    } else {
+      await loadGalleryImages(partnerPageId);
+    }
+  }
+
+  async function handleAddMultipleGalleryImages(images: Array<{ url: string; mediaId: string }>) {
+    if (!partnerPageId) return;
+
+    const startIndex = galleryImages.length;
+    const inserts = images.map((img, index) => ({
+      partner_page_id: partnerPageId,
+      image_id: img.mediaId,
+      caption: "",
+      sort_order: startIndex + index,
+    }));
+
+    const { error } = await supabase.from("partner_gallery_images").insert(inserts);
 
     if (error) {
       setError(error.message);
@@ -513,17 +554,20 @@ export default function EditPartnerPage() {
       {activeTab === "content" && (
         <div className="max-w-4xl space-y-8">
           <div className="bg-white rounded-xl p-6 shadow-sm space-y-6">
-            <h2 className="font-serif text-xl text-charcoal">About Section</h2>
-            <div>
-              <label className="block text-sm font-medium text-charcoal mb-1">About Text</label>
-              <textarea
-                value={aboutText}
-                onChange={(e) => setAboutText(e.target.value)}
-                rows={8}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold resize-none"
-                placeholder="Tell the story of this partner..."
-              />
-            </div>
+            <h2 className="font-serif text-xl text-charcoal">Hero Section</h2>
+            <p className="text-sm text-warm-gray">
+              Upload a hero image to display at the top of the partner page. If no image is uploaded, a default sage background will be used.
+            </p>
+            <ImageUpload
+              label="Hero Image"
+              onImageUploaded={handleHeroImageUpload}
+              currentImageUrl={heroImageUrl || undefined}
+              aspectRatio="21/9"
+            />
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm space-y-6">
+            <h2 className="font-serif text-xl text-charcoal">Services Offered</h2>
             <div>
               <label className="block text-sm font-medium text-charcoal mb-1">
                 Services Offered
@@ -610,11 +654,11 @@ export default function EditPartnerPage() {
       {activeTab === "gallery" && (
         <div className="max-w-6xl">
           <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
-            <h2 className="font-serif text-xl text-charcoal mb-4">Add Gallery Image</h2>
-            <ImageUpload
-              label="Upload Image"
-              onImageUploaded={handleAddGalleryImage}
-              aspectRatio="4/3"
+            <h2 className="font-serif text-xl text-charcoal mb-4">Add Gallery Images</h2>
+            <p className="text-sm text-warm-gray mb-4">Upload multiple images at once to add to the gallery</p>
+            <MultiImageUpload
+              label="Upload Multiple Images"
+              onImagesUploaded={handleAddMultipleGalleryImages}
             />
           </div>
 
