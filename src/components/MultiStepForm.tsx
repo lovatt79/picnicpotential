@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 const STEPS = [
   "Contact Info",
@@ -39,7 +40,7 @@ interface FormData {
   notes: string;
 }
 
-const EVENT_TYPES = [
+const eventTypes = [
   "Picnic",
   "Tablescapes",
   "Event Decor",
@@ -53,7 +54,7 @@ const ADDITIONAL_TIME = [
   "4+ Hours (we will contact you to discuss pricing)",
 ];
 
-const COLOR_OPTIONS = [
+const colorOptions = [
   "Pretty in Pink",
   "Citrus Party (Orange, White, Yellow and Green)",
   "Coral and Sage",
@@ -73,7 +74,7 @@ const COLOR_OPTIONS = [
   "Surprise Me!",
 ];
 
-const FOOD_OPTIONS = [
+const foodOptions = [
   "Charcuterie $25/person (Min order of 2)",
   "Brunch Board/Box $25",
   "Individual Sandwich Box $20",
@@ -85,7 +86,7 @@ const FOOD_OPTIONS = [
   "Skewer Platter (Serves 6-8) $85",
 ];
 
-const DESSERT_OPTIONS = [
+const dessertOptions = [
   "Assorted Dessert Box $30",
   "Dozen Themed Cookies $50/dozen",
   "Personalized Place Card Cookies $6/each",
@@ -110,7 +111,7 @@ const DESSERT_OPTIONS = [
   "VEGAN: Biscoff Brownie - 1 Dozen $30",
 ];
 
-const ADDON_OPTIONS = [
+const addonOptions = [
   "Adirondack Chair $40",
   "Juice Carafe $20/each",
   "Large Juice Dispenser $50",
@@ -128,7 +129,7 @@ const ADDON_OPTIONS = [
   "Professional Photographer - Starting at $300 (1 hour, 30 edited photos)",
 ];
 
-const OCCASION_OPTIONS = [
+const occasionOptions = [
   "Friends Get Together",
   "Bachelor/Bachelorette",
   "Bridal Shower",
@@ -146,7 +147,7 @@ const OCCASION_OPTIONS = [
   "Date Night",
 ];
 
-const HEAR_ABOUT_OPTIONS = [
+const attributionOptions = [
   "I am a past client",
   "Facebook",
   "Instagram (@Picnic.Potential)",
@@ -212,6 +213,43 @@ export default function MultiStepForm() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // Database-driven form options
+  const [eventTypes, setEventTypes] = useState<string[]>([]);
+  const [colorOptions, setColorOptions] = useState<string[]>([]);
+  const [foodOptions, setFoodOptions] = useState<string[]>([]);
+  const [dessertOptions, setDessertOptions] = useState<string[]>([]);
+  const [addonOptions, setAddonOptions] = useState<string[]>([]);
+  const [occasionOptions, setOccasionOptions] = useState<string[]>([]);
+  const [attributionOptions, setAttributionOptions] = useState<string[]>([]);
+  const [loadingOptions, setLoadingOptions] = useState(true);
+
+  useEffect(() => {
+    async function loadFormOptions() {
+      const supabase = createClient();
+
+      const [events, colors, food, desserts, addons, occasions, attribution] = await Promise.all([
+        supabase.from("form_event_types").select("label").eq("is_active", true).order("sort_order"),
+        supabase.from("form_color_options").select("label").eq("is_active", true).order("sort_order"),
+        supabase.from("form_food_options").select("label").eq("is_active", true).order("sort_order"),
+        supabase.from("form_dessert_options").select("label").eq("is_active", true).order("sort_order"),
+        supabase.from("form_addon_options").select("label").eq("is_active", true).order("sort_order"),
+        supabase.from("form_occasion_options").select("label").eq("is_active", true).order("sort_order"),
+        supabase.from("form_attribution_options").select("label").eq("is_active", true).order("sort_order"),
+      ]);
+
+      setEventTypes((events.data || []).map((e: any) => e.label));
+      setColorOptions((colors.data || []).map((c: any) => c.label));
+      setFoodOptions((food.data || []).map((f: any) => f.label));
+      setDessertOptions((desserts.data || []).map((d: any) => d.label));
+      setAddonOptions((addons.data || []).map((a: any) => a.label));
+      setOccasionOptions((occasions.data || []).map((o: any) => o.label));
+      setAttributionOptions((attribution.data || []).map((a: any) => a.label));
+      setLoadingOptions(false);
+    }
+
+    loadFormOptions();
+  }, []);
+
   const scrollToTop = () => {
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -274,6 +312,15 @@ export default function MultiStepForm() {
       setSubmitting(false);
     }
   };
+
+  if (loadingOptions) {
+    return (
+      <div className="mx-auto max-w-2xl rounded-2xl bg-white p-12 text-center shadow-sm">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold mx-auto"></div>
+        <p className="mt-4 text-warm-gray">Loading form options...</p>
+      </div>
+    );
+  }
 
   if (submitted) {
     return (
@@ -391,7 +438,7 @@ export default function MultiStepForm() {
             <div>
               <label className="block text-sm font-medium text-charcoal mb-1">What type of event are you interested in? *</label>
               <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                {EVENT_TYPES.map((type) => (
+                {eventTypes.map((type) => (
                   <RadioOption
                     key={type}
                     label={type}
@@ -420,7 +467,7 @@ export default function MultiStepForm() {
                   className="w-full rounded-lg border border-sage px-4 py-2.5 text-sm focus:border-gold focus:outline-none"
                 >
                   <option value="">Select an occasion</option>
-                  {OCCASION_OPTIONS.map((o) => (
+                  {occasionOptions.map((o) => (
                     <option key={o} value={o}>{o}</option>
                   ))}
                 </select>
@@ -500,7 +547,7 @@ export default function MultiStepForm() {
               <h3 className="font-serif text-2xl text-charcoal">Preferred Picnic Set Up</h3>
               <p className="text-sm text-warm-gray mt-1">1st Choice</p>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                {COLOR_OPTIONS.map((color) => (
+                {colorOptions.map((color) => (
                   <RadioOption
                     key={color}
                     label={color}
@@ -528,7 +575,7 @@ export default function MultiStepForm() {
             <div>
               <p className="text-sm font-medium text-charcoal">2nd Choice</p>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                {COLOR_OPTIONS.map((color) => (
+                {colorOptions.map((color) => (
                   <RadioOption
                     key={`2-${color}`}
                     label={color}
@@ -562,7 +609,7 @@ export default function MultiStepForm() {
               <h3 className="font-serif text-2xl text-charcoal">Food Options</h3>
               <p className="text-sm text-warm-gray mt-1">Select all that apply</p>
               <div className="mt-3 grid gap-2">
-                {FOOD_OPTIONS.map((food) => (
+                {foodOptions.map((food) => (
                   <CheckboxOption
                     key={food}
                     label={food}
@@ -577,7 +624,7 @@ export default function MultiStepForm() {
               <h3 className="font-serif text-2xl text-charcoal">Dessert Options</h3>
               <p className="text-sm text-warm-gray mt-1">Select all that apply</p>
               <div className="mt-3 grid gap-2">
-                {DESSERT_OPTIONS.map((dessert) => (
+                {dessertOptions.map((dessert) => (
                   <CheckboxOption
                     key={dessert}
                     label={dessert}
@@ -607,7 +654,7 @@ export default function MultiStepForm() {
               <h3 className="font-serif text-2xl text-charcoal">Add-Ons</h3>
               <p className="text-sm text-warm-gray mt-1">Select all that apply</p>
               <div className="mt-3 grid gap-2">
-                {ADDON_OPTIONS.map((addon) => (
+                {addonOptions.map((addon) => (
                   <CheckboxOption
                     key={addon}
                     label={addon}
@@ -621,7 +668,7 @@ export default function MultiStepForm() {
             <div>
               <label className="block text-sm font-medium text-charcoal mb-1">How did you hear about us? *</label>
               <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                {HEAR_ABOUT_OPTIONS.map((option) => (
+                {attributionOptions.map((option) => (
                   <RadioOption
                     key={option}
                     label={option}
