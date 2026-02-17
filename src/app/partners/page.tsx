@@ -159,7 +159,7 @@ export default async function PartnersPage() {
       )}
 
       {/* Winery Partners */}
-      {wineryPartners.length > 0 && (
+      {wineryPartners && wineryPartners.length > 0 && (
         <section className="bg-cream py-20">
           <div className="mx-auto max-w-6xl px-4">
             <div className="mx-auto max-w-3xl text-center">
