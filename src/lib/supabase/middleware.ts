@@ -2,6 +2,11 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
+  // Skip middleware for login page to prevent redirect loops
+  if (request.nextUrl.pathname === "/admin/login") {
+    return NextResponse.next();
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -34,20 +39,11 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect admin routes
+  // Protect admin routes (except login which we already handled above)
   if (request.nextUrl.pathname.startsWith("/admin")) {
-    // Allow login page without auth
-    if (request.nextUrl.pathname === "/admin/login") {
-      // If already logged in, redirect to admin dashboard
-      if (user) {
-        return NextResponse.redirect(new URL("/admin", request.url));
-      }
-      return supabaseResponse;
-    }
-
-    // Require auth for all other admin pages
     if (!user) {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
+      const loginUrl = new URL("/admin/login", request.url);
+      return NextResponse.redirect(loginUrl);
     }
   }
 
