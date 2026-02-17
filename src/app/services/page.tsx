@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ServiceCard from "@/components/ServiceCard";
 import { createClient } from "@/lib/supabase/server";
+import { generateItemListSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Services",
@@ -169,8 +170,19 @@ export default async function ServicesPage() {
     return acc;
   }, {});
 
+  // Generate schema markup
+  const serviceListSchema = services.length > 0 ? generateItemListSchema(services, "services") : null;
+
   return (
     <>
+      {/* Schema.org structured data */}
+      {serviceListSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceListSchema) }}
+        />
+      )}
+
       {/* Hero */}
       <section className="bg-sage py-20">
         <div className="mx-auto max-w-4xl px-4 text-center">

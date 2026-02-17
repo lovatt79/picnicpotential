@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SeatingCard from "@/components/SeatingCard";
 import { createClient } from "@/lib/supabase/server";
+import { generateItemListSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Seating Styles",
@@ -67,8 +68,20 @@ async function getSeatingOptions() {
 
 export default async function SeatingPage() {
   const seatingOptions = await getSeatingOptions();
+
+  // Generate schema markup
+  const seatingListSchema = seatingOptions.length > 0 ? generateItemListSchema(seatingOptions, "seating") : null;
+
   return (
     <>
+      {/* Schema.org structured data */}
+      {seatingListSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(seatingListSchema) }}
+        />
+      )}
+
       {/* Hero */}
       <section className="bg-sage py-20">
         <div className="mx-auto max-w-4xl px-4 text-center">

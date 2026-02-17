@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { generatePartnerSchema, generateBreadcrumbSchema } from "@/lib/schema";
 
 interface PartnerPageProps {
   params: Promise<{ slug: string }>;
@@ -126,8 +127,30 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
   const displayLogo = partnerLogo?.url || partner.logo_url;
   const displayHeroImage = heroImage?.url;
 
+  // Generate schema markup
+  const partnerSchema = generatePartnerSchema({
+    ...partner,
+    logo: displayLogo,
+    slug
+  });
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Partners", url: "/partners" },
+    { name: partner.name }
+  ]);
+
   return (
     <>
+      {/* Schema.org structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(partnerSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
       {/* Hero Section */}
       {displayHeroImage ? (
         <section className="relative h-[400px] md:h-[500px]">

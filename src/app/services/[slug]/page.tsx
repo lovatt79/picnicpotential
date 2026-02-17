@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { generateServiceSchema, generateBreadcrumbSchema } from "@/lib/schema";
 
 interface ServicePageProps {
   params: Promise<{ slug: string }>;
@@ -117,6 +118,14 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
 
   const { service, servicePage, features, galleryImages, serviceImage, heroImage } = data;
 
+  // Generate schema markup
+  const serviceSchema = generateServiceSchema(service);
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Services", url: "/services" },
+    { name: service.title }
+  ]);
+
   const gradients = [
     "from-blush to-peach-light",
     "from-lavender-light to-sky-light",
@@ -130,6 +139,16 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
 
   return (
     <>
+      {/* Schema.org structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
       {/* Hero Section */}
       <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
         {displayImage ? (

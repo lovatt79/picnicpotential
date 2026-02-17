@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { generateProductSchema, generateBreadcrumbSchema } from "@/lib/schema";
 
 interface SeatingPageProps {
   params: Promise<{ slug: string }>;
@@ -107,8 +108,31 @@ export default async function SeatingDetailPage({ params }: SeatingPageProps) {
 
   const displayImage = seatingImage?.url || seatingOption.image_url;
 
+  // Generate schema markup
+  const productSchema = generateProductSchema({
+    title: seatingOption.title,
+    description: seatingOption.description,
+    slug,
+    image: displayImage
+  });
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Seating Styles", url: "/seating" },
+    { name: seatingOption.title }
+  ]);
+
   return (
     <>
+      {/* Schema.org structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
       {/* Hero Section */}
       <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
         {displayImage ? (

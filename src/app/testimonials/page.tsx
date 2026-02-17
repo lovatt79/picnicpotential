@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { generateReviewsSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Testimonials",
@@ -34,8 +35,19 @@ async function getTestimonials() {
 export default async function TestimonialsPage() {
   const testimonials = await getTestimonials();
 
+  // Generate review schema
+  const reviewsSchema = testimonials.length > 0 ? generateReviewsSchema(testimonials) : null;
+
   return (
     <>
+      {/* Schema.org structured data */}
+      {reviewsSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewsSchema) }}
+        />
+      )}
+
       {/* Hero */}
       <section className="bg-sage py-20">
         <div className="mx-auto max-w-4xl px-4 text-center">

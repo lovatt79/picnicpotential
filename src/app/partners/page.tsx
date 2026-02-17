@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import VendorCard from "@/components/VendorCard";
 import { createClient } from "@/lib/supabase/server";
+import { generateItemListSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Preferred Vendor Partners",
@@ -73,8 +74,24 @@ async function getPartners() {
 export default async function PartnersPage() {
   const { vipPartners, preferredPartners, wineryPartners } = await getPartners();
 
+  // Generate schema markup - combine all partners
+  const allPartners = [
+    ...(vipPartners ?? []),
+    ...(preferredPartners ?? []),
+    ...(wineryPartners ?? [])
+  ];
+  const partnerListSchema = allPartners.length > 0 ? generateItemListSchema(allPartners, "partners") : null;
+
   return (
     <>
+      {/* Schema.org structured data */}
+      {partnerListSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(partnerListSchema) }}
+        />
+      )}
+
       {/* Hero */}
       <section className="bg-sage py-20">
         <div className="mx-auto max-w-4xl px-4 text-center">

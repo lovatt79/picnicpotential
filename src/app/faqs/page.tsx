@@ -3,6 +3,7 @@ import Link from "next/link";
 import FAQAccordion from "@/components/FAQAccordion";
 import { CONTACT_EMAIL } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
+import { generateFAQSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "FAQs",
@@ -36,8 +37,19 @@ async function getFAQs() {
 export default async function FAQsPage() {
   const faqs = await getFAQs();
 
+  // Generate FAQ schema
+  const faqSchema = faqs.length > 0 ? generateFAQSchema(faqs) : null;
+
   return (
     <>
+      {/* Schema.org structured data */}
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
+
       {/* Hero */}
       <section className="bg-sage py-20">
         <div className="mx-auto max-w-4xl px-4 text-center">

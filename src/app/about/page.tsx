@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { generateOrganizationSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "About",
@@ -7,8 +8,16 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage() {
+  const organizationSchema = generateOrganizationSchema();
+
   return (
     <>
+      {/* Schema.org structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+
       {/* Hero */}
       <section className="bg-sage py-20">
         <div className="mx-auto max-w-4xl px-4 text-center">

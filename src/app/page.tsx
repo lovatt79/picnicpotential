@@ -2,6 +2,7 @@ import Link from "next/link";
 import ServiceCard from "@/components/ServiceCard";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
 import { createClient } from "@/lib/supabase/server";
+import { generateOrganizationSchema, generateItemListSchema } from "@/lib/schema";
 
 // Force dynamic rendering to always fetch fresh content
 export const dynamic = 'force-dynamic';
@@ -120,8 +121,23 @@ export default async function Home() {
   const ctaButtonText = content?.cta_button_text || "Book Your Picnic or Event";
   const ctaButtonLink = content?.cta_button_link || "/request";
 
+  // Generate schema markup
+  const organizationSchema = generateOrganizationSchema();
+  const serviceListSchema = services.length > 0 ? generateItemListSchema(services, "services") : null;
+
   return (
     <>
+      {/* Schema.org structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      {serviceListSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceListSchema) }}
+        />
+      )}
       {/* Hero Section */}
       <section className="relative flex min-h-[80vh] items-center justify-center overflow-hidden">
         {/* Background - uploaded image or gradient fallback */}

@@ -6,6 +6,8 @@ const optionTypes = [
   { href: "/admin/form-options/food", label: "Food Options", description: "Charcuterie, sandwiches, platters with pricing" },
   { href: "/admin/form-options/desserts", label: "Dessert Options", description: "Cookies, cakes, vegan options with pricing" },
   { href: "/admin/form-options/addons", label: "Add-ons", description: "Chairs, games, tents, flowers with pricing" },
+  { href: "/admin/form-options/time-addons", label: "Additional Time", description: "Extra hours with pricing (1hr/$50, 2hrs/$100, etc.)" },
+  { href: "/admin/form-options/locations", label: "Locations/Venues", description: "Wineries, parks, venues with notes" },
   { href: "/admin/form-options/occasions", label: "Occasion Types", description: "Birthday, wedding, corporate, etc." },
   { href: "/admin/form-options/attribution", label: "How Did You Hear", description: "Referral sources and attribution" },
 ];
