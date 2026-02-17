@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 export default function NewPartnerPage() {
   const router = useRouter();
@@ -13,16 +14,30 @@ export default function NewPartnerPage() {
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
   const [url, setUrl] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [logoId, setLogoId] = useState<string | null>(null);
   const [partnerType, setPartnerType] = useState<"VIP" | "Preferred">("Preferred");
   const [isPublished, setIsPublished] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const handleLogoUpload = (url: string, mediaId: string) => {
+    setLogoUrl(url);
+    setLogoId(mediaId);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     const { error } = await supabase.from("vendor_partners").insert({
-      name, category, location, url: url || null, partner_type: partnerType, is_published: isPublished,
+      name,
+      category,
+      location,
+      url: url || null,
+      logo_url: logoUrl || null,
+      logo_id: logoId,
+      partner_type: partnerType,
+      is_published: isPublished,
     });
     if (error) { setError(error.message); setSaving(false); }
     else { router.push("/admin/partners"); router.refresh(); }
@@ -69,6 +84,14 @@ export default function NewPartnerPage() {
           <div>
             <label className="block text-sm font-medium text-charcoal mb-1">Website URL</label>
             <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold" placeholder="https://..." />
+          </div>
+          <div>
+            <ImageUpload
+              label="Partner Logo"
+              onImageUploaded={handleLogoUpload}
+              currentImageUrl={logoUrl || undefined}
+              aspectRatio="16/9"
+            />
           </div>
           <div className="flex items-center gap-3">
             <label className="relative inline-flex items-center cursor-pointer">
