@@ -306,9 +306,7 @@ export default function LuxuryPicnicsAdmin() {
                     </option>
                   ))}
                 </select>
-                <div className="mt-2 h-20 rounded-lg bg-gradient-to-br" style={{
-                  background: `linear-gradient(to bottom right, var(--tw-gradient-stops))`,
-                }} className={`mt-2 h-20 rounded-lg bg-gradient-to-br ${formData.gradient_class}`} />
+                <div className={`mt-2 h-20 rounded-lg bg-gradient-to-br ${formData.gradient_class}`} />
               </div>
 
               <div className="flex items-center gap-3">
