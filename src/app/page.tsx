@@ -12,7 +12,11 @@ async function getHomepageContent() {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("homepage_content")
-      .select("*")
+      .select(`
+        *,
+        hero_image:media!homepage_content_hero_image_id_fkey(url),
+        about_image:media!homepage_content_about_preview_image_id_fkey(url)
+      `)
       .single();
 
     if (error) {
@@ -52,9 +56,21 @@ export default async function Home() {
     <>
       {/* Hero Section */}
       <section className="relative flex min-h-[80vh] items-center justify-center overflow-hidden">
-        {/* Background gradient placeholder - will be replaced with uploaded hero image */}
-        <div className="absolute inset-0 bg-gradient-to-br from-sage via-blush-light to-peach-light" />
-        <div className="absolute inset-0 bg-black/20" />
+        {/* Background - uploaded image or gradient fallback */}
+        {content?.hero_image?.[0]?.url ? (
+          <>
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${content.hero_image[0].url})` }}
+            />
+            <div className="absolute inset-0 bg-black/40" />
+          </>
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-br from-sage via-blush-light to-peach-light" />
+            <div className="absolute inset-0 bg-black/20" />
+          </>
+        )}
         <div className="relative z-10 mx-auto max-w-4xl px-4 text-center text-white">
           <h1 className="font-serif text-5xl leading-tight md:text-7xl">
             {heroTitle}

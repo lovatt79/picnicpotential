@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 interface HomepageContent {
   id: string;
@@ -11,18 +12,29 @@ interface HomepageContent {
   hero_description: string;
   hero_cta_text: string;
   hero_cta_link: string;
+  hero_image_id: string | null;
+  hero_background_color: string | null;
   featured_title: string | null;
   featured_subtitle: string | null;
   about_preview_title: string | null;
   about_preview_text: string | null;
+  about_preview_image_id: string | null;
   cta_title: string | null;
   cta_subtitle: string | null;
   cta_button_text: string | null;
   cta_button_link: string | null;
+  cta_background_color: string | null;
+}
+
+interface Media {
+  id: string;
+  url: string;
 }
 
 export default function HomepageEditor() {
   const [content, setContent] = useState<HomepageContent | null>(null);
+  const [heroImage, setHeroImage] = useState<Media | null>(null);
+  const [aboutImage, setAboutImage] = useState<Media | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -42,6 +54,26 @@ export default function HomepageEditor() {
 
       if (error) throw error;
       setContent(data);
+
+      // Load hero image if exists
+      if (data.hero_image_id) {
+        const { data: heroImgData } = await supabase
+          .from("media")
+          .select("id, url")
+          .eq("id", data.hero_image_id)
+          .single();
+        if (heroImgData) setHeroImage(heroImgData);
+      }
+
+      // Load about preview image if exists
+      if (data.about_preview_image_id) {
+        const { data: aboutImgData } = await supabase
+          .from("media")
+          .select("id, url")
+          .eq("id", data.about_preview_image_id)
+          .single();
+        if (aboutImgData) setAboutImage(aboutImgData);
+      }
     } catch (error) {
       console.error("Error loading homepage content:", error);
       setMessage({ type: "error", text: "Failed to load homepage content" });
@@ -77,6 +109,16 @@ export default function HomepageEditor() {
 
   const handleChange = (field: keyof HomepageContent, value: string) => {
     setContent(prev => prev ? { ...prev, [field]: value } : null);
+  };
+
+  const handleHeroImageUpload = (url: string, mediaId: string) => {
+    setHeroImage(mediaId ? { id: mediaId, url } : null);
+    setContent(prev => prev ? { ...prev, hero_image_id: mediaId || null } : null);
+  };
+
+  const handleAboutImageUpload = (url: string, mediaId: string) => {
+    setAboutImage(mediaId ? { id: mediaId, url } : null);
+    setContent(prev => prev ? { ...prev, about_preview_image_id: mediaId || null } : null);
   };
 
   if (loading) {
@@ -184,6 +226,14 @@ export default function HomepageEditor() {
                 />
               </div>
             </div>
+
+            <ImageUpload
+              currentImageUrl={heroImage?.url}
+              onImageUploaded={handleHeroImageUpload}
+              label="Hero Background Image (Optional)"
+              aspectRatio="16/6"
+              maxSizeMB={10}
+            />
           </div>
         </div>
 
@@ -248,6 +298,14 @@ export default function HomepageEditor() {
                 placeholder="Brief introduction..."
               />
             </div>
+
+            <ImageUpload
+              currentImageUrl={aboutImage?.url}
+              onImageUploaded={handleAboutImageUpload}
+              label="About Preview Image (Optional)"
+              aspectRatio="4/3"
+              maxSizeMB={5}
+            />
           </div>
         </div>
 
