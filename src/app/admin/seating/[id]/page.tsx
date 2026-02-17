@@ -118,6 +118,9 @@ export default function EditSeatingPage() {
           <button type="submit" disabled={saving} className="bg-charcoal text-white px-6 py-2 rounded-lg hover:bg-gold hover:text-charcoal transition-colors disabled:opacity-50">
             {saving ? "Saving..." : "Save Changes"}
           </button>
+          <Link href={`/admin/seating/${params.id}/content`} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+            Edit Page Content
+          </Link>
           <Link href="/admin/seating" className="text-warm-gray hover:text-charcoal transition-colors">Cancel</Link>
         </div>
       </form>

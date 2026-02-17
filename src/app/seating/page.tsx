@@ -1,14 +1,72 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SeatingCard from "@/components/SeatingCard";
-import { SEATING_OPTIONS } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Seating Styles",
   description: "Explore our seating options including picnic, lounge, chair vignettes, cabanas, tablescapes, and igloo tents.",
 };
 
-export default function SeatingPage() {
+// Force dynamic rendering to always fetch fresh content
+export const dynamic = 'force-dynamic';
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+}
+
+async function getSeatingOptions() {
+  try {
+    const supabase = await createClient();
+    const { data: seatingOptions, error } = await supabase
+      .from("seating_options")
+      .select("*")
+      .eq("is_published", true)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching seating options:", error);
+      return [];
+    }
+
+    // Fetch images for seating options
+    const seatingWithImages = await Promise.all(
+      (seatingOptions || []).map(async (option) => {
+        let imageUrl = option.image_url;
+
+        if (option.image_id) {
+          const { data: imageData } = await supabase
+            .from("media")
+            .select("url")
+            .eq("id", option.image_id)
+            .single();
+          if (imageData) {
+            imageUrl = imageData.url;
+          }
+        }
+
+        return {
+          ...option,
+          image: imageUrl,
+          slug: slugify(option.title),
+        };
+      })
+    );
+
+    return seatingWithImages;
+  } catch (error) {
+    console.error("Error in getSeatingOptions:", error);
+    return [];
+  }
+}
+
+export default async function SeatingPage() {
+  const seatingOptions = await getSeatingOptions();
   return (
     <>
       {/* Hero */}
@@ -27,12 +85,13 @@ export default function SeatingPage() {
       <section className="py-20">
         <div className="mx-auto max-w-7xl px-4">
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {SEATING_OPTIONS.map((option) => (
+            {seatingOptions.map((option) => (
               <SeatingCard
-                key={option.title}
+                key={option.id}
                 title={option.title}
                 description={option.description}
                 image={option.image}
+                href={`/seating/${option.slug}`}
               />
             ))}
           </div>
