@@ -7,6 +7,22 @@ interface ServicePageProps {
   params: Promise<{ slug: string }>;
 }
 
+function getIconEmoji(icon: string): string {
+  const iconMap: Record<string, string> = {
+    check: "✓",
+    star: "⭐",
+    sparkles: "✨",
+    heart: "❤️",
+    truck: "🚚",
+    camera: "📷",
+    cake: "🎂",
+    gift: "🎁",
+    music: "🎵",
+    palette: "🎨",
+  };
+  return iconMap[icon] || "✓";
+}
+
 async function getService(slug: string) {
   const supabase = await createClient();
 
@@ -22,7 +38,28 @@ async function getService(slug: string) {
     return null;
   }
 
-  // Fetch the service image if it exists
+  // Fetch the service page content
+  const { data: servicePage } = await supabase
+    .from("service_pages")
+    .select("*")
+    .eq("service_id", service.id)
+    .single();
+
+  // Fetch features for "What's Included" section
+  const { data: features } = await supabase
+    .from("service_features")
+    .select("*")
+    .eq("service_page_id", servicePage?.id)
+    .order("sort_order", { ascending: true });
+
+  // Fetch gallery images
+  const { data: galleryImagesData } = await supabase
+    .from("service_gallery_images")
+    .select("*, image:media(url, alt_text)")
+    .eq("service_page_id", servicePage?.id)
+    .order("sort_order", { ascending: true });
+
+  // Fetch the service card image
   let serviceImage = null;
   if (service.image_id) {
     const { data: imageData } = await supabase
@@ -33,35 +70,52 @@ async function getService(slug: string) {
     serviceImage = imageData;
   }
 
+  // Fetch hero image if different from service image
+  let heroImage = null;
+  if (servicePage?.hero_image_id) {
+    const { data: imageData } = await supabase
+      .from("media")
+      .select("url")
+      .eq("id", servicePage.hero_image_id)
+      .single();
+    heroImage = imageData;
+  }
+
   return {
-    ...service,
-    image: serviceImage,
+    service,
+    servicePage,
+    features: features || [],
+    galleryImages: galleryImagesData || [],
+    serviceImage,
+    heroImage,
   };
 }
 
 export async function generateMetadata({ params }: ServicePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const service = await getService(slug);
+  const data = await getService(slug);
 
-  if (!service) {
+  if (!data) {
     return {
       title: "Service Not Found",
     };
   }
 
   return {
-    title: service.title,
-    description: service.description || `Learn more about our ${service.title} services`,
+    title: data.service.title,
+    description: data.service.description || `Learn more about our ${data.service.title} services`,
   };
 }
 
 export default async function ServiceDetailPage({ params }: ServicePageProps) {
   const { slug } = await params;
-  const service = await getService(slug);
+  const data = await getService(slug);
 
-  if (!service) {
+  if (!data) {
     notFound();
   }
+
+  const { service, servicePage, features, galleryImages, serviceImage, heroImage } = data;
 
   const gradients = [
     "from-blush to-peach-light",
@@ -71,15 +125,18 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
   ];
   const randomGradient = gradients[Math.floor(Math.random() * gradients.length)];
 
+  // Use hero image if available, otherwise fall back to service card image
+  const displayImage = heroImage?.url || serviceImage?.url || service.image_url;
+
   return (
     <>
       {/* Hero Section */}
       <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
-        {service.image?.url || service.image_url ? (
+        {displayImage ? (
           <>
             <div
               className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${service.image?.url || service.image_url})` }}
+              style={{ backgroundImage: `url(${displayImage})` }}
             />
             <div className="absolute inset-0 bg-black/40" />
           </>
@@ -91,9 +148,9 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-white mb-6">
             {service.title}
           </h1>
-          {service.description && (
+          {(servicePage?.hero_subtitle || service.description) && (
             <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              {service.description}
+              {servicePage?.hero_subtitle || service.description}
             </p>
           )}
         </div>
@@ -119,15 +176,15 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
       {/* Main Content */}
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4">
-          {service.long_description && (
+          {(servicePage?.intro_text || service.long_description) && (
             <div className="prose prose-lg max-w-none">
               <p className="text-lg leading-relaxed text-warm-gray whitespace-pre-line">
-                {service.long_description}
+                {servicePage?.intro_text || service.long_description}
               </p>
             </div>
           )}
 
-          {!service.long_description && (
+          {!servicePage?.intro_text && !service.long_description && (
             <p className="text-lg leading-relaxed text-warm-gray">
               Transform your celebration into an unforgettable experience with our expertly crafted setups.
               We handle every detail so you can focus on making memories.
@@ -136,51 +193,82 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
         </div>
       </section>
 
-      {/* Features Section - Placeholder for future expansion */}
-      <section className="py-20 bg-sage-light/30">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="font-serif text-3xl md:text-4xl text-charcoal text-center mb-12">
-            What's Included
-          </h2>
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                title: "Full Setup & Breakdown",
-                description: "We handle all the details from start to finish",
-              },
-              {
-                title: "Curated Decor",
-                description: "Thoughtfully designed elements to match your vision",
-              },
-              {
-                title: "Premium Quality",
-                description: "High-end materials and attention to detail",
-              },
-            ].map((feature, index) => (
-              <div key={index} className="bg-white rounded-xl p-6 shadow-sm">
-                <h3 className="font-serif text-xl text-charcoal mb-2">{feature.title}</h3>
-                <p className="text-warm-gray">{feature.description}</p>
-              </div>
-            ))}
+      {/* Features Section */}
+      {features.length > 0 && (
+        <section className="py-20 bg-sage-light/30">
+          <div className="max-w-6xl mx-auto px-4">
+            <h2 className="font-serif text-3xl md:text-4xl text-charcoal text-center mb-12">
+              {servicePage?.features_section_title || "What's Included"}
+            </h2>
+            {servicePage?.features_section_description && (
+              <p className="text-lg text-warm-gray text-center max-w-2xl mx-auto mb-12">
+                {servicePage.features_section_description}
+              </p>
+            )}
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {features.map((feature) => (
+                <div key={feature.id} className="bg-white rounded-xl p-6 shadow-sm">
+                  {feature.icon && (
+                    <div className="text-3xl mb-3">{getIconEmoji(feature.icon)}</div>
+                  )}
+                  <h3 className="font-serif text-xl text-charcoal mb-2">{feature.title}</h3>
+                  <p className="text-warm-gray">{feature.description}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
+
+      {/* Gallery Section */}
+      {galleryImages.length > 0 && (
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4">
+            <h2 className="font-serif text-3xl md:text-4xl text-charcoal text-center mb-12">
+              {servicePage?.gallery_section_title || "Gallery"}
+            </h2>
+            {servicePage?.gallery_section_description && (
+              <p className="text-lg text-warm-gray text-center max-w-2xl mx-auto mb-12">
+                {servicePage.gallery_section_description}
+              </p>
+            )}
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {galleryImages.map((item: any) => (
+                <div key={item.id} className="group overflow-hidden rounded-xl shadow-md">
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <img
+                      src={item.image?.url}
+                      alt={item.image?.alt_text || item.caption || "Gallery image"}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  </div>
+                  {item.caption && (
+                    <div className="bg-white p-4">
+                      <p className="text-sm text-warm-gray">{item.caption}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* CTA Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-sage-light/30">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="font-serif text-3xl md:text-4xl text-charcoal mb-6">
-            Ready to Get Started?
+            {servicePage?.cta_section_title || "Ready to Get Started?"}
           </h2>
           <p className="text-lg text-warm-gray mb-8">
-            Fill out our services request form and we'll get back to you with pricing and details
-            based on your selections.
+            {servicePage?.cta_section_description ||
+              "Fill out our services request form and we'll get back to you with pricing and details based on your selections."}
           </p>
           <Link
-            href="/request"
+            href={servicePage?.cta_button_link || "/request"}
             className="inline-block rounded-full bg-gold px-10 py-4 text-lg font-medium text-charcoal transition-colors hover:bg-gold-light"
           >
-            Request This Service
+            {servicePage?.cta_button_text || "Request This Service"}
           </Link>
         </div>
       </section>
