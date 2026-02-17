@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 import type { Service } from "@/lib/supabase/types";
 
 function slugify(text: string): string {
@@ -26,6 +27,7 @@ export default function EditServicePage() {
   const [description, setDescription] = useState("");
   const [longDescription, setLongDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [imageId, setImageId] = useState<string | null>(null);
   const [isPublished, setIsPublished] = useState(true);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -50,7 +52,21 @@ export default function EditServicePage() {
       setDescription(data.description || "");
       setLongDescription(data.long_description || "");
       setImageUrl(data.image_url || "");
+      setImageId(data.image_id || null);
       setIsPublished(data.is_published);
+
+      // Fetch image URL if image_id exists
+      if (data.image_id) {
+        const { data: imageData } = await supabase
+          .from("media")
+          .select("url")
+          .eq("id", data.image_id)
+          .single();
+        if (imageData) {
+          setImageUrl(imageData.url);
+        }
+      }
+
       setLoading(false);
     }
 
@@ -70,6 +86,7 @@ export default function EditServicePage() {
         description,
         long_description: longDescription,
         image_url: imageUrl || null,
+        image_id: imageId,
         is_published: isPublished,
       })
       .eq("id", params.id);
@@ -81,6 +98,11 @@ export default function EditServicePage() {
       router.push("/admin/services");
       router.refresh();
     }
+  };
+
+  const handleImageUpload = (url: string, mediaId: string) => {
+    setImageUrl(url);
+    setImageId(mediaId);
   };
 
   if (loading) {
@@ -173,17 +195,14 @@ export default function EditServicePage() {
 
           <div>
             <label className="block text-sm font-medium text-charcoal mb-1">
-              Image URL
+              Service Image
             </label>
-            <input
-              type="url"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
-              placeholder="https://..."
+            <ImageUpload
+              onUploadComplete={handleImageUpload}
+              currentImageUrl={imageUrl || undefined}
             />
             <p className="text-xs text-warm-gray mt-1">
-              Enter a URL or leave blank to use a gradient placeholder
+              Upload an image or leave blank to use a gradient placeholder
             </p>
           </div>
 

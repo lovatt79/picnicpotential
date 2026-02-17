@@ -1,11 +1,54 @@
 import Link from "next/link";
-import { SERVICES } from "@/lib/constants";
 import ServiceCard from "@/components/ServiceCard";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
 import { createClient } from "@/lib/supabase/server";
 
 // Force dynamic rendering to always fetch fresh content
 export const dynamic = 'force-dynamic';
+
+async function getServices() {
+  try {
+    const supabase = await createClient();
+    const { data: services, error } = await supabase
+      .from("services")
+      .select("*")
+      .eq("is_published", true)
+      .order("sort_order", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching services:", error);
+      return [];
+    }
+
+    // Fetch images for services
+    const servicesWithImages = await Promise.all(
+      (services || []).map(async (service) => {
+        let imageUrl = service.image_url; // Fallback to image_url if exists
+
+        if (service.image_id) {
+          const { data: imageData } = await supabase
+            .from("media")
+            .select("url")
+            .eq("id", service.image_id)
+            .single();
+          if (imageData) {
+            imageUrl = imageData.url;
+          }
+        }
+
+        return {
+          ...service,
+          image: imageUrl,
+        };
+      })
+    );
+
+    return servicesWithImages;
+  } catch (error) {
+    console.error("Error in getServices:", error);
+    return [];
+  }
+}
 
 async function getHomepageContent() {
   try {
@@ -57,6 +100,7 @@ async function getHomepageContent() {
 
 export default async function Home() {
   const content = await getHomepageContent();
+  const services = await getServices();
 
   // Fallback to default values if database content not available
   const heroTitle = content?.hero_title || "Picnic Potential";
@@ -149,13 +193,13 @@ export default async function Home() {
             </p>
           </div>
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {SERVICES.map((service) => (
+            {services.map((service) => (
               <ServiceCard
                 key={service.slug}
                 title={service.title}
                 description={service.description}
                 image={service.image}
-                href="/services"
+                href={`/services/${service.slug}`}
               />
             ))}
           </div>
