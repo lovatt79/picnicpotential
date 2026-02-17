@@ -7,6 +7,7 @@ export default async function PartnersPage() {
 
   const vipPartners = partners?.filter(p => p.partner_type === "VIP") ?? [];
   const preferredPartners = partners?.filter(p => p.partner_type === "Preferred") ?? [];
+  const wineryPartners = partners?.filter(p => p.partner_type === "Winery") ?? [];
 
   const PartnerCard = ({ partner }: { partner: typeof partners extends (infer T)[] | null ? T : never }) => (
     <div className="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between">
@@ -52,6 +53,15 @@ export default async function PartnersPage() {
             <div className="space-y-3">{preferredPartners.map(p => <PartnerCard key={p.id} partner={p} />)}</div>
           ) : (
             <p className="text-warm-gray">No Preferred partners yet</p>
+          )}
+        </div>
+
+        <div>
+          <h2 className="font-serif text-xl text-charcoal mb-4">Winery Partners ({wineryPartners.length})</h2>
+          {wineryPartners.length > 0 ? (
+            <div className="space-y-3">{wineryPartners.map(p => <PartnerCard key={p.id} partner={p} />)}</div>
+          ) : (
+            <p className="text-warm-gray">No Winery partners yet</p>
           )}
         </div>
       </div>

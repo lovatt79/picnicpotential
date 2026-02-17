@@ -58,19 +58,20 @@ async function getPartners() {
       })
     );
 
-    // Split into VIP and Preferred
+    // Split into VIP, Preferred, and Winery
     const vipPartners = partnersWithLogos.filter(p => p.partner_type === "VIP");
     const preferredPartners = partnersWithLogos.filter(p => p.partner_type === "Preferred");
+    const wineryPartners = partnersWithLogos.filter(p => p.partner_type === "Winery");
 
-    return { vipPartners, preferredPartners };
+    return { vipPartners, preferredPartners, wineryPartners };
   } catch (error) {
     console.error("Error in getPartners:", error);
-    return { vipPartners: [], preferredPartners: [] };
+    return { vipPartners: [], preferredPartners: [], wineryPartners: [] };
   }
 }
 
 export default async function PartnersPage() {
-  const { vipPartners, preferredPartners } = await getPartners();
+  const { vipPartners, preferredPartners, wineryPartners } = await getPartners();
 
   return (
     <>
@@ -143,6 +144,39 @@ export default async function PartnersPage() {
             </div>
             <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
               {preferredPartners.map((partner) => (
+                <VendorCard
+                  key={partner.id}
+                  name={partner.name}
+                  category={partner.category}
+                  location={partner.location}
+                  logo={partner.logo}
+                  href={`/partners/${partner.slug}`}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Winery Partners */}
+      {wineryPartners.length > 0 && (
+        <section className="bg-cream py-20">
+          <div className="mx-auto max-w-6xl px-4">
+            <div className="mx-auto max-w-3xl text-center">
+              <div className="inline-block rounded-full bg-gold/20 px-4 py-1 text-sm font-medium text-gold">
+                Winery Partners
+              </div>
+              <h2 className="mt-4 font-serif text-3xl text-charcoal md:text-4xl">
+                Our Winery Partners
+              </h2>
+              <p className="mt-4 text-warm-gray">
+                We partner with exceptional wineries throughout Sonoma County to create
+                unforgettable experiences. Each location offers unique settings perfect for
+                picnics, events, and celebrations.
+              </p>
+            </div>
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {wineryPartners.map((partner) => (
                 <VendorCard
                   key={partner.id}
                   name={partner.name}
