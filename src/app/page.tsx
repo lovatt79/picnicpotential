@@ -14,8 +14,8 @@ async function getHomepageContent() {
       .from("homepage_content")
       .select(`
         *,
-        hero_image:media!homepage_content_hero_image_id_fkey(url),
-        about_image:media!homepage_content_about_preview_image_id_fkey(url)
+        hero_image:hero_image_id(url),
+        about_image:about_preview_image_id(url)
       `)
       .single();
 
