@@ -11,13 +11,14 @@ export default function NewTestimonialPage() {
   const [text, setText] = useState("");
   const [author, setAuthor] = useState("");
   const [isPublished, setIsPublished] = useState(true);
+  const [showOnHomepage, setShowOnHomepage] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const { error } = await supabase.from("testimonials").insert({ text, author, is_published: isPublished });
+    const { error } = await supabase.from("testimonials").insert({ text, author, is_published: isPublished, show_on_homepage: showOnHomepage });
     if (error) { setError(error.message); setSaving(false); }
     else { router.push("/admin/testimonials"); router.refresh(); }
   };
@@ -49,6 +50,13 @@ export default function NewTestimonialPage() {
               <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sage"></div>
             </label>
             <span className="text-sm text-charcoal">Published</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" checked={showOnHomepage} onChange={(e) => setShowOnHomepage(e.target.checked)} className="sr-only peer" />
+              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold"></div>
+            </label>
+            <span className="text-sm text-charcoal">Show on Homepage Carousel</span>
           </div>
         </div>
         <div className="flex items-center gap-4 mt-6">

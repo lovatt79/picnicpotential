@@ -1,17 +1,49 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { TESTIMONIALS } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/client";
+
+interface Testimonial {
+  id: string;
+  text: string;
+  author: string;
+}
 
 export default function TestimonialCarousel() {
   const [current, setCurrent] = useState(0);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    async function loadTestimonials() {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("testimonials")
+        .select("id, text, author")
+        .eq("is_published", true)
+        .eq("show_on_homepage", true)
+        .order("sort_order", { ascending: true });
+
+      if (!error && data) {
+        setTestimonials(data);
+      }
+      setLoading(false);
+    }
+
+    loadTestimonials();
+  }, []);
+
+  useEffect(() => {
+    if (testimonials.length === 0) return;
     const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % TESTIMONIALS.length);
+      setCurrent((prev) => (prev + 1) % testimonials.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, []);
+  }, [testimonials]);
+
+  if (loading || testimonials.length === 0) {
+    return null;
+  }
 
   return (
     <section className="bg-gradient-to-r from-blush-light via-lavender-light to-peach-light py-20">
@@ -20,9 +52,9 @@ export default function TestimonialCarousel() {
           What Our Clients Say
         </h2>
         <div className="mt-12 relative min-h-[280px] md:min-h-[220px]">
-          {TESTIMONIALS.map((testimonial, index) => (
+          {testimonials.map((testimonial, index) => (
             <div
-              key={index}
+              key={testimonial.id}
               className={`absolute inset-0 flex items-start justify-center transition-opacity duration-700 ${
                 index === current ? "opacity-100" : "opacity-0 pointer-events-none"
               }`}
@@ -47,7 +79,7 @@ export default function TestimonialCarousel() {
         </div>
         {/* Dots */}
         <div className="mt-4 flex justify-center gap-2">
-          {TESTIMONIALS.map((_, index) => (
+          {testimonials.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrent(index)}

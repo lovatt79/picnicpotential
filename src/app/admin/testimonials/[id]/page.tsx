@@ -12,6 +12,7 @@ export default function EditTestimonialPage() {
   const [text, setText] = useState("");
   const [author, setAuthor] = useState("");
   const [isPublished, setIsPublished] = useState(true);
+  const [showOnHomepage, setShowOnHomepage] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +24,7 @@ export default function EditTestimonialPage() {
       setText(data.text);
       setAuthor(data.author);
       setIsPublished(data.is_published);
+      setShowOnHomepage(data.show_on_homepage || false);
       setLoading(false);
     }
     load();
@@ -31,7 +33,7 @@ export default function EditTestimonialPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const { error } = await supabase.from("testimonials").update({ text, author, is_published: isPublished }).eq("id", params.id);
+    const { error } = await supabase.from("testimonials").update({ text, author, is_published: isPublished, show_on_homepage: showOnHomepage }).eq("id", params.id);
     if (error) { setError(error.message); setSaving(false); }
     else { router.push("/admin/testimonials"); router.refresh(); }
   };
@@ -72,6 +74,13 @@ export default function EditTestimonialPage() {
               <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sage"></div>
             </label>
             <span className="text-sm text-charcoal">Published</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" checked={showOnHomepage} onChange={(e) => setShowOnHomepage(e.target.checked)} className="sr-only peer" />
+              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold"></div>
+            </label>
+            <span className="text-sm text-charcoal">Show on Homepage Carousel</span>
           </div>
         </div>
         <div className="flex items-center justify-between mt-6">
