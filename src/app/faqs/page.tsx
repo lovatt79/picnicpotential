@@ -1,14 +1,41 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import FAQAccordion from "@/components/FAQAccordion";
-import { FAQS, CONTACT_EMAIL } from "@/lib/constants";
+import { CONTACT_EMAIL } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "FAQs",
   description: "Frequently asked questions about Picnic Potential services, booking, and policies.",
 };
 
-export default function FAQsPage() {
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+async function getFAQs() {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("faqs")
+      .select("*")
+      .eq("is_published", true)
+      .order("sort_order", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching FAQs:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Error in getFAQs:", error);
+    return [];
+  }
+}
+
+export default async function FAQsPage() {
+  const faqs = await getFAQs();
+
   return (
     <>
       {/* Hero */}
@@ -26,7 +53,13 @@ export default function FAQsPage() {
       {/* FAQs */}
       <section className="py-20">
         <div className="mx-auto max-w-3xl px-4">
-          <FAQAccordion items={FAQS} />
+          {faqs.length > 0 ? (
+            <FAQAccordion items={faqs} />
+          ) : (
+            <div className="text-center py-12 text-warm-gray">
+              <p>No FAQs available at this time.</p>
+            </div>
+          )}
         </div>
       </section>
 
