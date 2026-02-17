@@ -56,8 +56,97 @@ async function getServices() {
   }
 }
 
+async function getLuxuryPicnicCategories() {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("luxury_picnic_categories")
+      .select("*")
+      .eq("is_published", true)
+      .order("sort_order", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching luxury picnic categories:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Error in getLuxuryPicnicCategories:", error);
+    return [];
+  }
+}
+
+async function getServicesPageSections() {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("services_page_sections")
+      .select("*")
+      .eq("is_visible", true)
+      .order("sort_order", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching services page sections:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Error in getServicesPageSections:", error);
+    return [];
+  }
+}
+
+async function getCorporatePartners() {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("corporate_partners")
+      .select("*")
+      .eq("is_published", true)
+      .order("sort_order", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching corporate partners:", error);
+      return [];
+    }
+
+    // Fetch logo URLs
+    const partnersWithLogos = await Promise.all(
+      (data || []).map(async (partner) => {
+        let logoUrl = partner.logo_url;
+        if (partner.logo_id) {
+          const { data: imageData } = await supabase
+            .from("media")
+            .select("url")
+            .eq("id", partner.logo_id)
+            .single();
+          if (imageData) logoUrl = imageData.url;
+        }
+        return { ...partner, logo_url: logoUrl };
+      })
+    );
+
+    return partnersWithLogos;
+  } catch (error) {
+    console.error("Error in getCorporatePartners:", error);
+    return [];
+  }
+}
+
 export default async function ServicesPage() {
   const services = await getServices();
+  const luxuryCategories = await getLuxuryPicnicCategories();
+  const sections = await getServicesPageSections();
+  const corporatePartners = await getCorporatePartners();
+
+  // Organize sections by key for easy access
+  const sectionsByKey = sections.reduce((acc: any, section) => {
+    acc[section.section_key] = section;
+    return acc;
+  }, {});
+
   return (
     <>
       {/* Hero */}
@@ -97,158 +186,155 @@ export default async function ServicesPage() {
       </section>
 
       {/* Luxury Picnics Detail */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-6xl px-4">
-          <h2 className="font-serif text-3xl text-charcoal md:text-4xl">Luxury Picnics</h2>
-          <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              {
-                title: "Private Celebrations",
-                description: "Birthdays, anniversaries, girls' days, date nights and more.",
-              },
-              {
-                title: "Kids Parties",
-                description: "Fun, colorful setups perfect for your little one's special day.",
-              },
-              {
-                title: "Corporate & Community Events",
-                description: "Team building, family days, festivals and community gatherings.",
-              },
-              {
-                title: "Brand Trips",
-                description: "Curated experiences for influencers and brand activations.",
-              },
-            ].map((item, index) => {
-              const gradients = [
-                "from-blush to-peach-light",
-                "from-lavender-light to-sky-light",
-                "from-peach-light to-blush-light",
-                "from-sky-light to-sage-light",
-              ];
-              return (
-              <div key={item.title} className="group overflow-hidden rounded-2xl bg-white shadow-sm">
-                <div className="aspect-square overflow-hidden">
-                  <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${gradients[index]}`}>
-                    <span className="font-serif text-sm text-charcoal/50 text-center px-2">{item.title}</span>
+      {luxuryCategories.length > 0 && (
+        <section className="bg-white py-20">
+          <div className="mx-auto max-w-6xl px-4">
+            <h2 className="font-serif text-3xl text-charcoal md:text-4xl">Luxury Picnics</h2>
+            <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {luxuryCategories.map((category) => (
+                <div key={category.id} className="group overflow-hidden rounded-2xl bg-white shadow-sm">
+                  <div className="aspect-square overflow-hidden">
+                    <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${category.gradient_class}`}>
+                      <span className="font-serif text-sm text-charcoal/50 text-center px-2">{category.title}</span>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-serif text-lg text-charcoal">{category.title}</h3>
+                    <p className="mt-1 text-sm text-warm-gray">{category.description}</p>
                   </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="font-serif text-lg text-charcoal">{item.title}</h3>
-                  <p className="mt-1 text-sm text-warm-gray">{item.description}</p>
-                </div>
-              </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Community Event Seating */}
-      <section className="py-20">
-        <div className="mx-auto max-w-4xl px-4">
-          <h2 className="font-serif text-3xl text-charcoal md:text-4xl">Community Event Seating</h2>
-          <p className="mt-6 text-lg leading-relaxed text-warm-gray">
-            If you are an event organizer seeking to enhance your space with additional seating
-            or decor, we offer thoughtfully designed solutions to suit your needs. Select from
-            a variety of seating styles or incorporate a curated mix, accommodating guests who
-            desire a luxury picnic experience alongside those who prefer traditional chairs or
-            table seating. Our chair vignettes also serve as refined additions to
-            often-overlooked areas &mdash; such as lawns designated for games &mdash; encouraging all guests
-            to engage in the experience, whether actively participating or simply enjoying the
-            atmosphere as spectators.
-          </p>
-          <Link
-            href="/seating"
-            className="mt-6 inline-block text-gold font-medium hover:underline"
-          >
-            View All Seating Styles &rarr;
-          </Link>
-        </div>
-      </section>
+      {sectionsByKey.community_seating && (
+        <section className="py-20">
+          <div className="mx-auto max-w-4xl px-4">
+            <h2 className="font-serif text-3xl text-charcoal md:text-4xl">{sectionsByKey.community_seating.title}</h2>
+            <p className="mt-6 text-lg leading-relaxed text-warm-gray whitespace-pre-line">
+              {sectionsByKey.community_seating.content}
+            </p>
+            {sectionsByKey.community_seating.link_text && sectionsByKey.community_seating.link_url && (
+              <Link
+                href={sectionsByKey.community_seating.link_url}
+                className="mt-6 inline-block text-gold font-medium hover:underline"
+              >
+                {sectionsByKey.community_seating.link_text}
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Corporate Events */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-4xl px-4">
-          <h2 className="font-serif text-3xl text-charcoal md:text-4xl">Corporate Events</h2>
-          <p className="mt-6 text-lg leading-relaxed text-warm-gray">
-            Our picnics, tablescapes, decor and rentals are all great for corporate groups.
-            Whether you are doing a team building off site, a family picnic day or a breakout
-            session for a corporate retreat, we have a setup for you. We will work with your
-            venue and internal coordinator to create spaces that keep your team engaged,
-            comfortable all while offering a unique wine country experience. One of our recent
-            setups was a brand trip for influencers that included a kayak trip down the Russian
-            River and ending with a beachside picnic at Monte Rio Beach!
-          </p>
-        </div>
-      </section>
+      {sectionsByKey.corporate_events && (
+        <section className="bg-white py-20">
+          <div className="mx-auto max-w-4xl px-4">
+            <h2 className="font-serif text-3xl text-charcoal md:text-4xl">{sectionsByKey.corporate_events.title}</h2>
+            <p className="mt-6 text-lg leading-relaxed text-warm-gray whitespace-pre-line">
+              {sectionsByKey.corporate_events.content}
+            </p>
+            {sectionsByKey.corporate_events.link_text && sectionsByKey.corporate_events.link_url && (
+              <Link
+                href={sectionsByKey.corporate_events.link_url}
+                className="mt-6 inline-block text-gold font-medium hover:underline"
+              >
+                {sectionsByKey.corporate_events.link_text}
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Tablescapes */}
-      <section className="py-20">
-        <div className="mx-auto max-w-4xl px-4">
-          <h2 className="font-serif text-3xl text-charcoal md:text-4xl">Tablescapes</h2>
-          <p className="mt-6 text-lg leading-relaxed text-warm-gray">
-            Each guest is welcomed with a thoughtfully curated place setting, including a
-            personalized place card, plate, cutlery, napkin, and drink goblet. The tablescape
-            is further enhanced with elegant runners, ambient LED lighting, curated decor, and
-            statement centerpieces. While our standard setup features high-quality disposable
-            plates and cutlery, clients may opt for premium, non-disposable tableware, available
-            through our trusted local rental partner.
-          </p>
-        </div>
-      </section>
+      {sectionsByKey.tablescapes && (
+        <section className="py-20">
+          <div className="mx-auto max-w-4xl px-4">
+            <h2 className="font-serif text-3xl text-charcoal md:text-4xl">{sectionsByKey.tablescapes.title}</h2>
+            <p className="mt-6 text-lg leading-relaxed text-warm-gray whitespace-pre-line">
+              {sectionsByKey.tablescapes.content}
+            </p>
+            {sectionsByKey.tablescapes.link_text && sectionsByKey.tablescapes.link_url && (
+              <Link
+                href={sectionsByKey.tablescapes.link_url}
+                className="mt-6 inline-block text-gold font-medium hover:underline"
+              >
+                {sectionsByKey.tablescapes.link_text}
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Proposals */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-4xl px-4">
-          <h2 className="font-serif text-3xl text-charcoal md:text-4xl">Proposals</h2>
-          <p className="mt-6 text-lg leading-relaxed text-warm-gray">
-            Curate an exceptional proposal for you and your partner &mdash; one that beautifully
-            captures the significance of &ldquo;I do&rdquo; and creates memories to cherish for
-            a lifetime. Whether you choose from one of our thoughtfully designed proposal
-            packages or craft a fully bespoke experience, our team is dedicated to bringing
-            your vision to life with elegance and care.
-          </p>
-        </div>
-      </section>
+      {sectionsByKey.proposals && (
+        <section className="bg-white py-20">
+          <div className="mx-auto max-w-4xl px-4">
+            <h2 className="font-serif text-3xl text-charcoal md:text-4xl">{sectionsByKey.proposals.title}</h2>
+            <p className="mt-6 text-lg leading-relaxed text-warm-gray whitespace-pre-line">
+              {sectionsByKey.proposals.content}
+            </p>
+            {sectionsByKey.proposals.link_text && sectionsByKey.proposals.link_url && (
+              <Link
+                href={sectionsByKey.proposals.link_url}
+                className="mt-6 inline-block text-gold font-medium hover:underline"
+              >
+                {sectionsByKey.proposals.link_text}
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Wedding Suite */}
-      <section className="py-20">
-        <div className="mx-auto max-w-4xl px-4">
-          <h2 className="font-serif text-3xl text-charcoal md:text-4xl">
-            Wedding Suite &amp; Hotel Suite Decor
-          </h2>
-          <p className="mt-6 text-lg leading-relaxed text-warm-gray">
-            Our wedding suite packages are thoughtfully designed for couples who want their
-            getting-ready space to feel just as beautiful and intentional as the rest of their
-            celebration &mdash; without the stress of coordinating every last detail. We take care of
-            the essentials (and the indulgences), from curated food and drinks to elegant decor
-            and playful, memorable add-ons that elevate the experience and set the tone for
-            your day.
-          </p>
-          <Link
-            href="/request"
-            className="mt-6 inline-block rounded-full bg-charcoal px-8 py-3 text-sm font-medium text-white transition-colors hover:bg-gold"
-          >
-            Wedding Suite Decor Request Form
-          </Link>
-        </div>
-      </section>
+      {sectionsByKey.wedding_suite && (
+        <section className="py-20">
+          <div className="mx-auto max-w-4xl px-4">
+            <h2 className="font-serif text-3xl text-charcoal md:text-4xl">
+              {sectionsByKey.wedding_suite.title}
+            </h2>
+            <p className="mt-6 text-lg leading-relaxed text-warm-gray whitespace-pre-line">
+              {sectionsByKey.wedding_suite.content}
+            </p>
+            {sectionsByKey.wedding_suite.link_text && sectionsByKey.wedding_suite.link_url && (
+              <Link
+                href={sectionsByKey.wedding_suite.link_url}
+                className="mt-6 inline-block rounded-full bg-charcoal px-8 py-3 text-sm font-medium text-white transition-colors hover:bg-gold"
+              >
+                {sectionsByKey.wedding_suite.link_text}
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Rentals */}
-      <section className="bg-sage-light/50 py-20">
-        <div className="mx-auto max-w-4xl px-4 text-center">
-          <h2 className="font-serif text-3xl text-charcoal md:text-4xl">
-            Rentals &amp; DIY Rental Kits
-          </h2>
-          <div className="mx-auto mt-4 inline-block rounded-full bg-gold/20 px-4 py-1 text-sm font-medium text-gold">
-            Coming Spring 2026
+      {sectionsByKey.rentals && (
+        <section className="bg-sage-light/50 py-20">
+          <div className="mx-auto max-w-4xl px-4 text-center">
+            <h2 className="font-serif text-3xl text-charcoal md:text-4xl">
+              {sectionsByKey.rentals.title}
+            </h2>
+            <div className="mx-auto mt-4 inline-block rounded-full bg-gold/20 px-4 py-1 text-sm font-medium text-gold">
+              Coming Spring 2026
+            </div>
+            <p className="mt-6 text-lg text-warm-gray whitespace-pre-line">
+              {sectionsByKey.rentals.content}
+            </p>
+            {sectionsByKey.rentals.link_text && sectionsByKey.rentals.link_url && (
+              <Link
+                href={sectionsByKey.rentals.link_url}
+                className="mt-6 inline-block text-gold font-medium hover:underline"
+              >
+                {sectionsByKey.rentals.link_text}
+              </Link>
+            )}
           </div>
-          <p className="mt-6 text-lg text-warm-gray">
-            Stay tuned for our exciting new rental options and DIY kits, perfect for creating
-            your own beautiful setup with our curated collection.
-          </p>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Corporate & Winery Partners */}
       <section className="bg-white py-20">
@@ -260,22 +346,32 @@ export default async function ServicesPage() {
             We are proud to partner with some of Sonoma County&apos;s finest wineries and businesses.
           </p>
 
-          {/* Corporate logos placeholder */}
-          <div className="mt-12">
-            <h3 className="text-center text-sm font-semibold uppercase tracking-wider text-warm-gray">
-              Corporate Partners
-            </h3>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-8">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div
-                  key={i}
-                  className="flex h-20 w-32 items-center justify-center rounded-lg bg-sage-light"
-                >
-                  <span className="text-xs text-sage-dark">Logo {i}</span>
-                </div>
-              ))}
+          {/* Corporate Partners */}
+          {corporatePartners.length > 0 && (
+            <div className="mt-12">
+              <h3 className="text-center text-sm font-semibold uppercase tracking-wider text-warm-gray">
+                Corporate Partners
+              </h3>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-8">
+                {corporatePartners.map((partner) => (
+                  <div
+                    key={partner.id}
+                    className="flex h-20 w-32 items-center justify-center rounded-lg bg-sage-light p-2"
+                  >
+                    {partner.logo_url ? (
+                      <img
+                        src={partner.logo_url}
+                        alt={partner.name}
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    ) : (
+                      <span className="text-xs text-sage-dark text-center">{partner.name}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Winery Partners */}
           <div className="mt-16">
