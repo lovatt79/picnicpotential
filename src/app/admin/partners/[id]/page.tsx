@@ -145,6 +145,9 @@ export default function EditPartnerPage() {
         <div className="flex items-center justify-between mt-6">
           <div className="flex items-center gap-4">
             <button type="submit" disabled={saving} className="bg-charcoal text-white px-6 py-2 rounded-lg hover:bg-gold hover:text-charcoal transition-colors disabled:opacity-50">{saving ? "Saving..." : "Save Changes"}</button>
+            <Link href={`/admin/partners/${params.id}/content`} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+              Edit Page Content
+            </Link>
             <Link href="/admin/partners" className="text-warm-gray hover:text-charcoal">Cancel</Link>
           </div>
           <button type="button" onClick={handleDelete} className="text-red-600 hover:text-red-800 text-sm">Delete Partner</button>
