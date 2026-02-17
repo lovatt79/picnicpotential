@@ -228,6 +228,12 @@ export default function EditServicePage() {
             {saving ? "Saving..." : "Save Changes"}
           </button>
           <Link
+            href={`/admin/services/${params.id}/content`}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Edit Page Content
+          </Link>
+          <Link
             href="/admin/services"
             className="text-warm-gray hover:text-charcoal transition-colors"
           >
