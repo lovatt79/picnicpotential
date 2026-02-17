@@ -31,7 +31,10 @@ export default function EditPartnerPage() {
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
-  const [url, setUrl] = useState("");
+  const [description, setDescription] = useState("");
+  const [website, setWebsite] = useState("");
+  const [instagram, setInstagram] = useState("");
+  const [url, setUrl] = useState(""); // Legacy field, will sync with website
   const [logoUrl, setLogoUrl] = useState("");
   const [logoId, setLogoId] = useState<string | null>(null);
   const [partnerType, setPartnerType] = useState<"VIP" | "Preferred" | "Winery">("Preferred");
@@ -76,7 +79,10 @@ export default function EditPartnerPage() {
       setName(partnerData.name);
       setCategory(partnerData.category);
       setLocation(partnerData.location || "");
-      setUrl(partnerData.url || "");
+      setDescription(partnerData.description || "");
+      setWebsite(partnerData.website || partnerData.url || "");
+      setInstagram(partnerData.instagram || "");
+      setUrl(partnerData.url || partnerData.website || ""); // Legacy support
       setLogoUrl(partnerData.logo_url || "");
       setLogoId(partnerData.logo_id || null);
       setPartnerType(partnerData.partner_type);
@@ -160,7 +166,10 @@ export default function EditPartnerPage() {
         name,
         category,
         location,
-        url: url || null,
+        description: description || null,
+        website: website || null,
+        instagram: instagram || null,
+        url: website || url || null, // Keep url in sync with website for legacy support
         logo_url: logoUrl || null,
         logo_id: logoId,
         partner_type: partnerType,
@@ -170,6 +179,8 @@ export default function EditPartnerPage() {
 
     if (error) {
       setError(error.message);
+    } else {
+      alert("Basic info saved successfully!");
     }
 
     setSaving(false);
@@ -424,13 +435,33 @@ export default function EditPartnerPage() {
               />
             </div>
             <div>
+              <label className="block text-sm font-medium text-charcoal mb-1">Description</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={4}
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold resize-none"
+                placeholder="Brief description of the partner and what they offer..."
+              />
+            </div>
+            <div>
               <label className="block text-sm font-medium text-charcoal mb-1">Website URL</label>
               <input
                 type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
-                placeholder="https://..."
+                placeholder="https://example.com"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-charcoal mb-1">Instagram URL</label>
+              <input
+                type="url"
+                value={instagram}
+                onChange={(e) => setInstagram(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+                placeholder="https://www.instagram.com/username/"
               />
             </div>
             <div>
