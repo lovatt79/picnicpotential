@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { ImageUpload } from "@/components/admin/ImageUpload";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 function slugify(text: string): string {
   return text
@@ -144,12 +144,11 @@ export default function NewServicePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-charcoal mb-1">
-              Service Image
-            </label>
             <ImageUpload
-              onUploadComplete={handleImageUpload}
+              label="Service Image"
+              onImageUploaded={handleImageUpload}
               currentImageUrl={imageUrl || undefined}
+              aspectRatio="16/9"
             />
             <p className="text-xs text-warm-gray mt-1">
               Upload an image or leave blank to use a gradient placeholder
