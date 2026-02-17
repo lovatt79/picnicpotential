@@ -10,21 +10,45 @@ export const dynamic = 'force-dynamic';
 async function getHomepageContent() {
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase
+
+    // First get the homepage content
+    const { data: contentData, error: contentError } = await supabase
       .from("homepage_content")
-      .select(`
-        *,
-        hero_image:hero_image_id(url),
-        about_image:about_preview_image_id(url)
-      `)
+      .select("*")
       .single();
 
-    if (error) {
-      console.error("Error fetching homepage content:", error);
+    if (contentError) {
+      console.error("Error fetching homepage content:", contentError);
       return null;
     }
 
-    return data;
+    // Then fetch the related images if they exist
+    let heroImage = null;
+    let aboutImage = null;
+
+    if (contentData.hero_image_id) {
+      const { data: heroData } = await supabase
+        .from("media")
+        .select("url")
+        .eq("id", contentData.hero_image_id)
+        .single();
+      heroImage = heroData;
+    }
+
+    if (contentData.about_preview_image_id) {
+      const { data: aboutData } = await supabase
+        .from("media")
+        .select("url")
+        .eq("id", contentData.about_preview_image_id)
+        .single();
+      aboutImage = aboutData;
+    }
+
+    return {
+      ...contentData,
+      hero_image: heroImage,
+      about_image: aboutImage,
+    };
   } catch (error) {
     console.error("Error in getHomepageContent:", error);
     return null;
@@ -57,11 +81,11 @@ export default async function Home() {
       {/* Hero Section */}
       <section className="relative flex min-h-[80vh] items-center justify-center overflow-hidden">
         {/* Background - uploaded image or gradient fallback */}
-        {content?.hero_image?.[0]?.url ? (
+        {content?.hero_image?.url ? (
           <>
             <div
               className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${content.hero_image[0].url})` }}
+              style={{ backgroundImage: `url(${content.hero_image.url})` }}
             />
             <div className="absolute inset-0 bg-black/40" />
           </>
