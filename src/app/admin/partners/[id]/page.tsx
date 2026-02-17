@@ -108,6 +108,10 @@ export default function EditPartnerPage() {
                 <input type="radio" checked={partnerType === "Preferred"} onChange={() => setPartnerType("Preferred")} className="text-gold focus:ring-gold" />
                 <span className="text-sm">Preferred Partner</span>
               </label>
+              <label className="flex items-center gap-2">
+                <input type="radio" checked={partnerType === "Winery"} onChange={() => setPartnerType("Winery")} className="text-gold focus:ring-gold" />
+                <span className="text-sm">Winery</span>
+              </label>
             </div>
           </div>
           <div>

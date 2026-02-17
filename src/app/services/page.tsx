@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ServiceCard from "@/components/ServiceCard";
-import { WINERY_PARTNERS } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -135,11 +134,34 @@ async function getCorporatePartners() {
   }
 }
 
+async function getWineryPartners() {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("vendor_partners")
+      .select("*")
+      .eq("is_published", true)
+      .eq("partner_type", "Winery")
+      .order("name", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching winery partners:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Error in getWineryPartners:", error);
+    return [];
+  }
+}
+
 export default async function ServicesPage() {
   const services = await getServices();
   const luxuryCategories = await getLuxuryPicnicCategories();
   const sections = await getServicesPageSections();
   const corporatePartners = await getCorporatePartners();
+  const wineryPartners = await getWineryPartners();
 
   // Organize sections by key for easy access
   const sectionsByKey = sections.reduce((acc: any, section) => {
@@ -374,21 +396,23 @@ export default async function ServicesPage() {
           )}
 
           {/* Winery Partners */}
-          <div className="mt-16">
-            <h3 className="text-center text-sm font-semibold uppercase tracking-wider text-warm-gray">
-              Winery Partners
-            </h3>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-8">
-              {WINERY_PARTNERS.map((winery) => (
-                <div
-                  key={winery}
-                  className="flex h-20 items-center justify-center rounded-lg bg-sage-light px-6"
-                >
-                  <span className="text-sm font-medium text-charcoal">{winery}</span>
-                </div>
-              ))}
+          {wineryPartners.length > 0 && (
+            <div className="mt-16">
+              <h3 className="text-center text-sm font-semibold uppercase tracking-wider text-warm-gray">
+                Winery Partners
+              </h3>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-8">
+                {wineryPartners.map((winery) => (
+                  <div
+                    key={winery.id}
+                    className="flex h-20 items-center justify-center rounded-lg bg-sage-light px-6"
+                  >
+                    <span className="text-sm font-medium text-charcoal">{winery.name}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
