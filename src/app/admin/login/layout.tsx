@@ -4,6 +4,9 @@ export const metadata: Metadata = {
   title: "Admin Login | Picnic Potential",
 };
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export default function LoginLayout({
   children,
 }: {
