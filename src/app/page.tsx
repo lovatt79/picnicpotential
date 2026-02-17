@@ -1,29 +1,78 @@
 import Link from "next/link";
-import { SERVICES, SITE_TAGLINE } from "@/lib/constants";
+import { SERVICES } from "@/lib/constants";
 import ServiceCard from "@/components/ServiceCard";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
+import { createClient } from "@/lib/supabase/server";
 
-export default function Home() {
+// Force dynamic rendering to always fetch fresh content
+export const dynamic = 'force-dynamic';
+
+async function getHomepageContent() {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("homepage_content")
+      .select("*")
+      .single();
+
+    if (error) {
+      console.error("Error fetching homepage content:", error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error in getHomepageContent:", error);
+    return null;
+  }
+}
+
+export default async function Home() {
+  const content = await getHomepageContent();
+
+  // Fallback to default values if database content not available
+  const heroTitle = content?.hero_title || "Picnic Potential";
+  const heroSubtitle = content?.hero_subtitle || "Luxury Picnics & Events in Sonoma County";
+  const heroDescription = content?.hero_description || "A truly unique picnic and event experience that comes in a variety of styles that fit any occasion";
+  const heroCTAText = content?.hero_cta_text || "Book Your Experience";
+  const heroCTALink = content?.hero_cta_link || "/request";
+
+  const featuredTitle = content?.featured_title || "Why Choose Picnic Potential";
+  const featuredSubtitle = content?.featured_subtitle;
+
+  const aboutPreviewTitle = content?.about_preview_title || "Sit Back, Relax & We'll Take Care of the Rest";
+  const aboutPreviewText = content?.about_preview_text || "Enjoy every minute of your date night, birthday, anniversary or just an afternoon with friends. Don't waste another moment with the prep or clean up — leave that to us. From intimate gatherings to grand celebrations, we create experiences that are as unique as the moments they celebrate.";
+
+  const ctaTitle = content?.cta_title || "Ready to Create Something Beautiful?";
+  const ctaSubtitle = content?.cta_subtitle || "Fill out our Service Request Form and we'll respond with pricing and details based on your selections.";
+  const ctaButtonText = content?.cta_button_text || "Book Your Picnic or Event";
+  const ctaButtonLink = content?.cta_button_link || "/request";
+
   return (
     <>
       {/* Hero Section */}
       <section className="relative flex min-h-[80vh] items-center justify-center overflow-hidden">
-        {/* Background gradient placeholder - replace with hero image */}
+        {/* Background gradient placeholder - will be replaced with uploaded hero image */}
         <div className="absolute inset-0 bg-gradient-to-br from-sage via-blush-light to-peach-light" />
         <div className="absolute inset-0 bg-black/20" />
         <div className="relative z-10 mx-auto max-w-4xl px-4 text-center text-white">
           <h1 className="font-serif text-5xl leading-tight md:text-7xl">
-            Picnic Potential
+            {heroTitle}
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed md:text-xl">
-            {SITE_TAGLINE}
+            {heroSubtitle}
           </p>
+          {heroDescription && (
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed opacity-90">
+              {heroDescription}
+            </p>
+          )}
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
-              href="/request"
+              href={heroCTALink}
               className="rounded-full bg-gold px-8 py-3.5 text-base font-medium text-charcoal transition-colors hover:bg-gold-light"
             >
-              Book Your Experience
+              {heroCTAText}
             </Link>
             <Link
               href="/services"
@@ -35,20 +84,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Intro Section */}
-      <section className="py-20">
-        <div className="mx-auto max-w-3xl px-4 text-center">
-          <h2 className="font-serif text-3xl text-charcoal md:text-4xl">
-            Sit Back, Relax & We&apos;ll Take Care of the Rest
-          </h2>
-          <p className="mt-6 text-lg leading-relaxed text-warm-gray">
-            Enjoy every minute of your date night, birthday, anniversary or just an afternoon
-            with friends. Don&apos;t waste another moment with the prep or clean up &mdash; leave
-            that to us. From intimate gatherings to grand celebrations, we create experiences
-            that are as unique as the moments they celebrate.
-          </p>
-        </div>
-      </section>
+      {/* About Preview / Intro Section */}
+      {aboutPreviewText && (
+        <section className="py-20">
+          <div className="mx-auto max-w-3xl px-4 text-center">
+            <h2 className="font-serif text-3xl text-charcoal md:text-4xl">
+              {aboutPreviewTitle}
+            </h2>
+            <p className="mt-6 text-lg leading-relaxed text-warm-gray whitespace-pre-line">
+              {aboutPreviewText}
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* Services Grid */}
       <section className="bg-white py-20">
@@ -82,13 +130,18 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How It Works */}
+      {/* Featured Section / How It Works */}
       <section className="py-20">
         <div className="mx-auto max-w-5xl px-4">
-          <h2 className="text-center font-serif text-3xl text-charcoal md:text-4xl">
-            How It Works
-          </h2>
-          <div className="mt-12 grid gap-8 md:grid-cols-3">
+          <div className="text-center mb-12">
+            <h2 className="font-serif text-3xl text-charcoal md:text-4xl">
+              {featuredTitle}
+            </h2>
+            {featuredSubtitle && (
+              <p className="mt-4 text-lg text-warm-gray">{featuredSubtitle}</p>
+            )}
+          </div>
+          <div className="grid gap-8 md:grid-cols-3">
             {[
               {
                 step: "01",
@@ -128,17 +181,16 @@ export default function Home() {
       <section className="py-20">
         <div className="mx-auto max-w-3xl px-4 text-center">
           <h2 className="font-serif text-3xl text-charcoal md:text-4xl">
-            Ready to Create Something Beautiful?
+            {ctaTitle}
           </h2>
           <p className="mt-6 text-lg text-warm-gray">
-            Fill out our Service Request Form and we&apos;ll respond with pricing and details
-            based on your selections.
+            {ctaSubtitle}
           </p>
           <Link
-            href="/request"
+            href={ctaButtonLink}
             className="mt-8 inline-block rounded-full bg-gold px-10 py-4 text-lg font-medium text-charcoal transition-colors hover:bg-gold-light"
           >
-            Book Your Picnic or Event
+            {ctaButtonText}
           </Link>
         </div>
       </section>
