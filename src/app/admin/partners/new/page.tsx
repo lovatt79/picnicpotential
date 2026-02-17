@@ -16,7 +16,7 @@ export default function NewPartnerPage() {
   const [url, setUrl] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [logoId, setLogoId] = useState<string | null>(null);
-  const [partnerType, setPartnerType] = useState<"VIP" | "Preferred">("Preferred");
+  const [partnerType, setPartnerType] = useState<"VIP" | "Preferred" | "Winery">("Preferred");
   const [isPublished, setIsPublished] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
