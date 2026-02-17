@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import ImageUpload from "@/components/admin/ImageUpload";
 import type { SeatingOption } from "@/lib/supabase/types";
 
 export default function EditSeatingPage() {
@@ -14,6 +15,7 @@ export default function EditSeatingPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [imageId, setImageId] = useState<string | null>(null);
   const [isPublished, setIsPublished] = useState(true);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -26,11 +28,30 @@ export default function EditSeatingPage() {
       setTitle(data.title);
       setDescription(data.description || "");
       setImageUrl(data.image_url || "");
+      setImageId(data.image_id || null);
       setIsPublished(data.is_published);
+
+      // Fetch image URL if image_id exists
+      if (data.image_id) {
+        const { data: imageData } = await supabase
+          .from("media")
+          .select("url")
+          .eq("id", data.image_id)
+          .single();
+        if (imageData) {
+          setImageUrl(imageData.url);
+        }
+      }
+
       setLoading(false);
     }
     load();
   }, [params.id, router, supabase]);
+
+  const handleImageUpload = (url: string, mediaId: string) => {
+    setImageUrl(url);
+    setImageId(mediaId);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +59,11 @@ export default function EditSeatingPage() {
     setError(null);
 
     const { error } = await supabase.from("seating_options").update({
-      title, description, image_url: imageUrl || null, is_published: isPublished,
+      title,
+      description,
+      image_url: imageUrl || null,
+      image_id: imageId,
+      is_published: isPublished,
     }).eq("id", params.id);
 
     if (error) { setError(error.message); setSaving(false); }
@@ -72,8 +97,12 @@ export default function EditSeatingPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-charcoal mb-1">Image URL</label>
-            <input type="url" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold" />
+            <ImageUpload
+              label="Seating Image"
+              onImageUploaded={handleImageUpload}
+              currentImageUrl={imageUrl || undefined}
+              aspectRatio="4/3"
+            />
           </div>
 
           <div className="flex items-center gap-3">

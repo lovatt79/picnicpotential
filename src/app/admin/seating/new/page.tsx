@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 export default function NewSeatingPage() {
   const router = useRouter();
@@ -12,9 +13,15 @@ export default function NewSeatingPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [imageId, setImageId] = useState<string | null>(null);
   const [isPublished, setIsPublished] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleImageUpload = (url: string, mediaId: string) => {
+    setImageUrl(url);
+    setImageId(mediaId);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +32,7 @@ export default function NewSeatingPage() {
       title,
       description,
       image_url: imageUrl || null,
+      image_id: imageId,
       is_published: isPublished,
     });
 
@@ -64,8 +72,12 @@ export default function NewSeatingPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-charcoal mb-1">Image URL</label>
-            <input type="url" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold" placeholder="https://..." />
+            <ImageUpload
+              label="Seating Image"
+              onImageUploaded={handleImageUpload}
+              currentImageUrl={imageUrl || undefined}
+              aspectRatio="4/3"
+            />
           </div>
 
           <div className="flex items-center gap-3">
