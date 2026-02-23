@@ -5,6 +5,7 @@ interface ServiceCardProps {
   description: string;
   image: string;
   href?: string;
+  external?: boolean;
 }
 
 const PASTEL_GRADIENTS = [
@@ -16,12 +17,12 @@ const PASTEL_GRADIENTS = [
   "from-blush-light to-lavender-light",
 ];
 
-export default function ServiceCard({ title, description, image, href }: ServiceCardProps) {
+export default function ServiceCard({ title, description, image, href, external }: ServiceCardProps) {
   const gradientIndex = title.length % PASTEL_GRADIENTS.length;
   const gradient = PASTEL_GRADIENTS[gradientIndex];
 
   const content = (
-    <div className="group overflow-hidden rounded-2xl bg-white shadow-sm transition-all hover:shadow-lg">
+    <div className="group h-full overflow-hidden rounded-2xl bg-white shadow-sm transition-all hover:shadow-lg">
       <div className="aspect-[4/3] overflow-hidden">
         {image ? (
           <div
@@ -41,8 +42,16 @@ export default function ServiceCard({ title, description, image, href }: Service
     </div>
   );
 
+  if (href && external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className="block h-full">
+        {content}
+      </a>
+    );
+  }
+
   if (href) {
-    return <Link href={href}>{content}</Link>;
+    return <Link href={href} className="block h-full">{content}</Link>;
   }
 
   return content;

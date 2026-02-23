@@ -1,36 +1,64 @@
 import Link from "next/link";
-import ServiceCard from "@/components/ServiceCard";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
 import { createClient } from "@/lib/supabase/server";
-import { generateOrganizationSchema, generateItemListSchema } from "@/lib/schema";
+import { generateOrganizationSchema } from "@/lib/schema";
 
 // Force dynamic rendering to always fetch fresh content
 export const dynamic = 'force-dynamic';
 
-async function getServices() {
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+}
+
+/**
+ * Card layout: 3 or 4 columns based on count, with incomplete rows centered.
+ *  2→3col  3→3col  4→4col  5→3col  6→3col  7→4col  8→4col
+ */
+function getCardCols(count: number): 3 | 4 {
+  if (count <= 3) return 3;
+  if (count === 4) return 4;
+  if (count <= 6) return 3;
+  if (count <= 8) return 4;
+  if (count === 9) return 3;
+  if (count % 4 === 1) return 3;
+  return 4;
+}
+
+/** Card width classes for gap-8 (2rem) */
+const sectionCardWidth = {
+  3: "w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.334rem)]",
+  4: "w-full md:w-[calc(50%-1rem)] lg:w-[calc(25%-1.5rem)]",
+} as const;
+
+async function getServiceSections() {
   try {
     const supabase = await createClient();
-    const { data: services, error } = await supabase
-      .from("services")
+    const { data: sections, error } = await supabase
+      .from("service_sections")
       .select("*")
       .eq("is_published", true)
       .order("sort_order", { ascending: true });
 
     if (error) {
-      console.error("Error fetching services:", error);
+      console.error("Error fetching service sections:", error);
       return [];
     }
 
-    // Fetch images for services
-    const servicesWithImages = await Promise.all(
-      (services || []).map(async (service) => {
-        let imageUrl = service.image_url; // Fallback to image_url if exists
+    // Resolve images from media table
+    const sectionsWithImages = await Promise.all(
+      (sections || []).map(async (section) => {
+        let imageUrl = section.image_url;
 
-        if (service.image_id) {
+        if (section.image_id) {
           const { data: imageData } = await supabase
             .from("media")
             .select("url")
-            .eq("id", service.image_id)
+            .eq("id", section.image_id)
             .single();
           if (imageData) {
             imageUrl = imageData.url;
@@ -38,15 +66,16 @@ async function getServices() {
         }
 
         return {
-          ...service,
+          ...section,
           image: imageUrl,
+          slug: slugify(section.title),
         };
       })
     );
 
-    return servicesWithImages;
+    return sectionsWithImages;
   } catch (error) {
-    console.error("Error in getServices:", error);
+    console.error("Error in getServiceSections:", error);
     return [];
   }
 }
@@ -100,8 +129,10 @@ async function getHomepageContent() {
 }
 
 export default async function Home() {
-  const content = await getHomepageContent();
-  const services = await getServices();
+  const [content, serviceSections] = await Promise.all([
+    getHomepageContent(),
+    getServiceSections(),
+  ]);
 
   // Fallback to default values if database content not available
   const heroTitle = content?.hero_title || "Picnic Potential";
@@ -123,7 +154,6 @@ export default async function Home() {
 
   // Generate schema markup
   const organizationSchema = generateOrganizationSchema();
-  const serviceListSchema = services.length > 0 ? generateItemListSchema(services, "services") : null;
 
   return (
     <>
@@ -132,12 +162,7 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
       />
-      {serviceListSchema && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceListSchema) }}
-        />
-      )}
+      {/* Service sections schema is on the /services page */}
       {/* Hero Section */}
       <section className="relative flex min-h-[80vh] items-center justify-center overflow-hidden">
         {/* Background - uploaded image or gradient fallback */}
@@ -198,7 +223,7 @@ export default async function Home() {
         </section>
       )}
 
-      {/* Services Grid */}
+      {/* Services Sections */}
       <section className="bg-white py-20">
         <div className="mx-auto max-w-7xl px-4">
           <div className="text-center">
@@ -208,17 +233,41 @@ export default async function Home() {
               to make your event unforgettable.
             </p>
           </div>
-          <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {services.map((service) => (
-              <ServiceCard
-                key={service.slug}
-                title={service.title}
-                description={service.description}
-                image={service.image}
-                href={`/services/${service.slug}`}
-              />
-            ))}
-          </div>
+          {(() => {
+            const cols = getCardCols(serviceSections.length);
+            return (
+              <div className="mt-12 flex flex-wrap justify-center gap-8">
+                {serviceSections.map((section) => (
+                  <Link
+                    key={section.id}
+                    href={`/services#${section.slug}`}
+                    className={`group block ${sectionCardWidth[cols]}`}
+                  >
+                    <div className="h-full overflow-hidden rounded-2xl bg-white shadow-sm transition-all hover:shadow-lg">
+                      <div className="aspect-[4/3] overflow-hidden">
+                        {section.image ? (
+                          <div
+                            className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                            style={{ backgroundImage: `url(${section.image})` }}
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-sage-light to-peach-light">
+                            <span className="font-serif text-lg text-charcoal/50">{section.title}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-6">
+                        <h3 className="font-serif text-xl text-charcoal">{section.title}</h3>
+                        {section.description && (
+                          <p className="mt-2 text-sm leading-relaxed text-warm-gray">{section.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            );
+          })()}
           <div className="mt-12 text-center">
             <Link
               href="/services"

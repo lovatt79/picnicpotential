@@ -5,10 +5,11 @@ import HeroEditor from "@/components/admin/HeroEditor";
 
 export default async function ServicesPage() {
   const supabase = await createClient();
-  const { data: services } = await supabase
-    .from("services")
-    .select("*")
-    .order("sort_order");
+
+  const [{ data: services }, { data: sections }] = await Promise.all([
+    supabase.from("services").select("*").order("sort_order"),
+    supabase.from("service_sections").select("*").order("sort_order"),
+  ]);
 
   return (
     <div>
@@ -31,7 +32,10 @@ export default async function ServicesPage() {
       <HeroEditor pageKey="services" label="Services Page Hero" />
 
       <div className="mt-8">
-        <ServicesList initialServices={services ?? []} />
+        <ServicesList
+          initialServices={services ?? []}
+          initialSections={sections ?? []}
+        />
       </div>
     </div>
   );

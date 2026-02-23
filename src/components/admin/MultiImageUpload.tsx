@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
+import MediaPickerModal from "./MediaPickerModal";
 
 interface MultiImageUploadProps {
   onImagesUploaded: (images: Array<{ url: string; mediaId: string }>) => void;
@@ -17,6 +18,7 @@ export default function MultiImageUpload({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<string>("");
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
@@ -119,6 +121,14 @@ export default function MultiImageUpload({
     }
   };
 
+  const handleMediaSelect = (items: Array<{ id: string; url: string }>) => {
+    const selectedImages = items.map((item) => ({
+      url: item.url,
+      mediaId: item.id,
+    }));
+    onImagesUploaded(selectedImages);
+  };
+
   return (
     <div className="space-y-3">
       <label className="block text-sm font-medium text-charcoal">
@@ -153,6 +163,17 @@ export default function MultiImageUpload({
         </div>
       </div>
 
+      <button
+        type="button"
+        onClick={() => setShowMediaPicker(true)}
+        className="flex items-center gap-1.5 text-sm text-gold hover:text-gold-dark font-medium transition-colors"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        or choose from Media Library
+      </button>
+
       <input
         ref={fileInputRef}
         type="file"
@@ -177,6 +198,13 @@ export default function MultiImageUpload({
           {error}
         </div>
       )}
+
+      <MediaPickerModal
+        isOpen={showMediaPicker}
+        onClose={() => setShowMediaPicker(false)}
+        onSelect={handleMediaSelect}
+        multiple={true}
+      />
     </div>
   );
 }

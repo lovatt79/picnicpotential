@@ -21,7 +21,7 @@ export default function SeatingCard({ title, description, image, href }: Seating
   const gradient = PASTEL_GRADIENTS[gradientIndex];
 
   const content = (
-    <div className="group overflow-hidden rounded-2xl bg-white shadow-sm transition-all hover:shadow-lg">
+    <div className="group h-full overflow-hidden rounded-2xl bg-white shadow-sm transition-all hover:shadow-lg">
       <div className="aspect-[4/3] overflow-hidden">
         {image ? (
           <div
@@ -42,7 +42,7 @@ export default function SeatingCard({ title, description, image, href }: Seating
   );
 
   if (href) {
-    return <Link href={href}>{content}</Link>;
+    return <Link href={href} className="block h-full">{content}</Link>;
   }
 
   return content;

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import ImageUpload from "@/components/admin/ImageUpload";
 import MultiImageUpload from "@/components/admin/MultiImageUpload";
+import type { PartnerSection } from "@/lib/supabase/types";
 
 type TabType = "basic" | "content" | "gallery";
 
@@ -39,6 +40,8 @@ export default function EditPartnerPage() {
   const [logoUrl, setLogoUrl] = useState("");
   const [logoId, setLogoId] = useState<string | null>(null);
   const [partnerType, setPartnerType] = useState<"VIP" | "Preferred" | "Winery">("Preferred");
+  const [sectionId, setSectionId] = useState<string | null>(null);
+  const [sections, setSections] = useState<PartnerSection[]>([]);
   const [isPublished, setIsPublished] = useState(true);
 
   // Partner Page ID
@@ -77,6 +80,13 @@ export default function EditPartnerPage() {
         return;
       }
 
+      // Load sections
+      const { data: sectionsData } = await supabase
+        .from("partner_sections")
+        .select("*")
+        .order("sort_order");
+      if (sectionsData) setSections(sectionsData);
+
       // Set basic info
       setName(partnerData.name);
       setCategory(partnerData.category);
@@ -88,6 +98,7 @@ export default function EditPartnerPage() {
       setLogoUrl(partnerData.logo_url || "");
       setLogoId(partnerData.logo_id || null);
       setPartnerType(partnerData.partner_type);
+      setSectionId(partnerData.section_id || null);
       setIsPublished(partnerData.is_published);
 
       // Fetch logo URL if logo_id exists
@@ -192,6 +203,7 @@ export default function EditPartnerPage() {
         logo_url: logoUrl || null,
         logo_id: logoId,
         partner_type: partnerType,
+        section_id: sectionId,
         is_published: isPublished,
       })
       .eq("id", params.id);
@@ -443,6 +455,20 @@ export default function EditPartnerPage() {
                   <span className="text-sm">Winery</span>
                 </label>
               </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-charcoal mb-1">Section</label>
+              <select
+                value={sectionId || ""}
+                onChange={(e) => setSectionId(e.target.value || null)}
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+              >
+                <option value="">Uncategorized</option>
+                {sections.map((section) => (
+                  <option key={section.id} value={section.id}>{section.title}</option>
+                ))}
+              </select>
+              <p className="text-xs text-warm-gray mt-1">Which section this partner appears in on the frontend</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-charcoal mb-1">Name *</label>

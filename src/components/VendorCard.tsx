@@ -36,7 +36,7 @@ export default function VendorCard({ name, category, location, url, logo, href }
     return (
       <Link
         href={href}
-        className="group flex flex-col items-center rounded-2xl bg-white p-6 shadow-sm transition-all hover:shadow-lg"
+        className="group flex h-full flex-col items-center rounded-2xl bg-white p-6 shadow-sm transition-all hover:shadow-lg"
       >
         {content}
       </Link>
@@ -50,7 +50,7 @@ export default function VendorCard({ name, category, location, url, logo, href }
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="group flex flex-col items-center rounded-2xl bg-white p-6 shadow-sm transition-all hover:shadow-lg"
+        className="group flex h-full flex-col items-center rounded-2xl bg-white p-6 shadow-sm transition-all hover:shadow-lg"
       >
         {content}
       </a>
@@ -59,7 +59,7 @@ export default function VendorCard({ name, category, location, url, logo, href }
 
   // Otherwise, just a card without link
   return (
-    <div className="group flex flex-col items-center rounded-2xl bg-white p-6 shadow-sm">
+    <div className="group flex h-full flex-col items-center rounded-2xl bg-white p-6 shadow-sm">
       {content}
     </div>
   );

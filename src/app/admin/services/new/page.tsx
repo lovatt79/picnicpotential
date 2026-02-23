@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import ImageUpload from "@/components/admin/ImageUpload";
+import type { ServiceSection } from "@/lib/supabase/types";
 
 function slugify(text: string): string {
   return text
@@ -26,8 +27,22 @@ export default function NewServicePage() {
   const [imageUrl, setImageUrl] = useState("");
   const [imageId, setImageId] = useState<string | null>(null);
   const [isPublished, setIsPublished] = useState(true);
+  const [sectionId, setSectionId] = useState<string | null>(null);
+  const [externalUrl, setExternalUrl] = useState("");
+  const [sections, setSections] = useState<ServiceSection[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadSections() {
+      const { data } = await supabase
+        .from("service_sections")
+        .select("*")
+        .order("sort_order");
+      if (data) setSections(data);
+    }
+    loadSections();
+  }, []);
 
   const handleTitleChange = (value: string) => {
     setTitle(value);
@@ -52,6 +67,8 @@ export default function NewServicePage() {
       image_url: imageUrl || null,
       image_id: imageId,
       is_published: isPublished,
+      section_id: sectionId,
+      external_url: externalUrl || null,
     });
 
     if (error) {
@@ -152,6 +169,43 @@ export default function NewServicePage() {
             />
             <p className="text-xs text-warm-gray mt-1">
               Upload an image or leave blank to use a gradient placeholder
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-charcoal mb-1">
+              Section
+            </label>
+            <select
+              value={sectionId || ""}
+              onChange={(e) => setSectionId(e.target.value || null)}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+            >
+              <option value="">Uncategorized</option>
+              {sections.map((section) => (
+                <option key={section.id} value={section.id}>
+                  {section.title}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-warm-gray mt-1">
+              Which section this service appears in on the services page
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-charcoal mb-1">
+              External URL <span className="text-warm-gray font-normal">(optional)</span>
+            </label>
+            <input
+              type="url"
+              value={externalUrl}
+              onChange={(e) => setExternalUrl(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+              placeholder="https://..."
+            />
+            <p className="text-xs text-warm-gray mt-1">
+              If set, the card will link to this URL instead of the service detail page
             </p>
           </div>
 

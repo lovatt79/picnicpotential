@@ -5,10 +5,11 @@ import HeroEditor from "@/components/admin/HeroEditor";
 
 export default async function SeatingPage() {
   const supabase = await createClient();
-  const { data: seatingOptions } = await supabase
-    .from("seating_options")
-    .select("*")
-    .order("sort_order");
+
+  const [{ data: seatingOptions }, { data: sections }] = await Promise.all([
+    supabase.from("seating_options").select("*").order("sort_order"),
+    supabase.from("seating_sections").select("*").order("sort_order"),
+  ]);
 
   return (
     <div>
@@ -31,7 +32,10 @@ export default async function SeatingPage() {
       <HeroEditor pageKey="seating" label="Seating Styles Page Hero" />
 
       <div className="mt-8">
-        <SeatingList initialItems={seatingOptions ?? []} />
+        <SeatingList
+          initialItems={seatingOptions ?? []}
+          initialSections={sections ?? []}
+        />
       </div>
     </div>
   );

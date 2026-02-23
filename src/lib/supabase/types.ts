@@ -1,12 +1,39 @@
+export interface ServiceSection {
+  id: string;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  image_id: string | null;
+  sort_order: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SeatingSection {
+  id: string;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  image_id: string | null;
+  sort_order: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Service {
   id: string;
   title: string;
   slug: string;
   image_url: string | null;
+  image_id?: string | null;
   description: string | null;
   long_description: string | null;
   sort_order: number;
   is_published: boolean;
+  section_id: string | null;
+  external_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -15,7 +42,21 @@ export interface SeatingOption {
   id: string;
   title: string;
   image_url: string | null;
+  image_id?: string | null;
   description: string;
+  sort_order: number;
+  is_published: boolean;
+  section_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PartnerSection {
+  id: string;
+  title: string;
+  description: string | null;
+  badge_label: string | null;
+  badge_style: string | null;
   sort_order: number;
   is_published: boolean;
   created_at: string;
@@ -28,17 +69,13 @@ export interface VendorPartner {
   category: string;
   location: string | null;
   url: string | null;
+  website: string | null;
+  instagram: string | null;
+  description: string | null;
   logo_url: string | null;
-  partner_type: "VIP" | "Preferred";
-  sort_order: number;
-  is_published: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface WineryPartner {
-  id: string;
-  name: string;
+  logo_id: string | null;
+  partner_type: "VIP" | "Preferred" | "Winery";
+  section_id: string | null;
   sort_order: number;
   is_published: boolean;
   created_at: string;
@@ -50,6 +87,8 @@ export interface Testimonial {
   text: string;
   author: string;
   rating: number | null;
+  review_date: string | null;
+  show_on_homepage: boolean;
   sort_order: number;
   is_published: boolean;
   created_at: string;

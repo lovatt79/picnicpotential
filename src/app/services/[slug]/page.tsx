@@ -8,6 +8,24 @@ interface ServicePageProps {
   params: Promise<{ slug: string }>;
 }
 
+/**
+ * Card layout: 3 or 4 columns based on count, with incomplete rows centered.
+ */
+function getCardCols(count: number): 3 | 4 {
+  if (count <= 3) return 3;
+  if (count === 4) return 4;
+  if (count <= 6) return 3;
+  if (count <= 8) return 4;
+  if (count === 9) return 3;
+  if (count % 4 === 1) return 3;
+  return 4;
+}
+
+const featureCardWidth = {
+  3: "w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]",
+  4: "w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)]",
+} as const;
+
 function getIconEmoji(icon: string): string {
   const iconMap: Record<string, string> = {
     check: "✓",
@@ -224,17 +242,24 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
                 {servicePage.features_section_description}
               </p>
             )}
-            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {features.map((feature) => (
-                <div key={feature.id} className="bg-white rounded-xl p-6 shadow-sm">
-                  {feature.icon && (
-                    <div className="text-3xl mb-3">{getIconEmoji(feature.icon)}</div>
-                  )}
-                  <h3 className="font-serif text-xl text-charcoal mb-2">{feature.title}</h3>
-                  <p className="text-warm-gray">{feature.description}</p>
+            {(() => {
+              const cols = getCardCols(features.length);
+              return (
+                <div className="flex flex-wrap justify-center gap-6">
+                  {features.map((feature) => (
+                    <div key={feature.id} className={featureCardWidth[cols]}>
+                      <div className="h-full bg-white rounded-xl p-6 shadow-sm">
+                        {feature.icon && (
+                          <div className="text-3xl mb-3">{getIconEmoji(feature.icon)}</div>
+                        )}
+                        <h3 className="font-serif text-xl text-charcoal mb-2">{feature.title}</h3>
+                        <p className="text-warm-gray">{feature.description}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              );
+            })()}
           </div>
         </section>
       )}

@@ -21,6 +21,45 @@ function slugify(text: string): string {
     .trim();
 }
 
+/**
+ * Card layout: 3 or 4 columns based on count, with incomplete rows centered.
+ *  2→3col  3→3col  4→4col  5→3col  6→3col  7→4col  8→4col
+ */
+function getCardCols(count: number): 3 | 4 {
+  if (count <= 3) return 3;
+  if (count === 4) return 4;
+  if (count <= 6) return 3;
+  if (count <= 8) return 4;
+  if (count === 9) return 3;
+  if (count % 4 === 1) return 3;
+  return 4;
+}
+
+/** Card width classes for gap-8 (2rem) */
+const seatingCardWidth = {
+  3: "w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.334rem)]",
+  4: "w-full md:w-[calc(50%-1rem)] lg:w-[calc(25%-1.5rem)]",
+} as const;
+
+async function getSeatingSections() {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("seating_sections")
+      .select("*")
+      .eq("is_published", true)
+      .order("sort_order", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching seating sections:", error);
+      return [];
+    }
+    return data || [];
+  } catch {
+    return [];
+  }
+}
+
 async function getSeatingOptions() {
   try {
     const supabase = await createClient();
@@ -28,7 +67,7 @@ async function getSeatingOptions() {
       .from("seating_options")
       .select("*")
       .eq("is_published", true)
-      .order("created_at", { ascending: true });
+      .order("sort_order", { ascending: true });
 
     if (error) {
       console.error("Error fetching seating options:", error);
@@ -83,11 +122,23 @@ async function getPageHero(pageKey: string) {
 }
 
 export default async function SeatingPage() {
-  const seatingOptions = await getSeatingOptions();
-  const hero = await getPageHero("seating");
+  const [seatingOptions, sections, hero] = await Promise.all([
+    getSeatingOptions(),
+    getSeatingSections(),
+    getPageHero("seating"),
+  ]);
 
   // Generate schema markup
   const seatingListSchema = seatingOptions.length > 0 ? generateItemListSchema(seatingOptions, "seating") : null;
+
+  // Group seating options by section
+  const uncategorizedOptions = seatingOptions.filter((s) => !s.section_id);
+  const optionsBySection: Record<string, typeof seatingOptions> = {};
+  for (const section of sections) {
+    optionsBySection[section.id] = seatingOptions
+      .filter((s) => s.section_id === section.id)
+      .sort((a, b) => a.sort_order - b.sort_order);
+  }
 
   return (
     <>
@@ -131,22 +182,66 @@ export default async function SeatingPage() {
         </div>
       </section>
 
-      {/* Seating Grid */}
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {seatingOptions.map((option) => (
-              <SeatingCard
-                key={option.id}
-                title={option.title}
-                description={option.description}
-                image={option.image}
-                href={`/seating/${option.slug}`}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Uncategorized Seating Options (no section heading) */}
+      {uncategorizedOptions.length > 0 && (() => {
+        const cols = getCardCols(uncategorizedOptions.length);
+        return (
+          <section className="py-20">
+            <div className="mx-auto max-w-7xl px-4">
+              <div className="flex flex-wrap justify-center gap-8">
+                {uncategorizedOptions.map((option) => (
+                  <div key={option.id} className={seatingCardWidth[cols]}>
+                    <SeatingCard
+                      title={option.title}
+                      description={option.description}
+                      image={option.image}
+                      href={`/seating/${option.slug}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      })()}
+
+      {/* Named Sections */}
+      {sections.map((section, index) => {
+        const sectionOptions = optionsBySection[section.id] || [];
+        if (sectionOptions.length === 0) return null;
+
+        const cols = getCardCols(sectionOptions.length);
+        const hasBg = (uncategorizedOptions.length > 0 ? index % 2 === 0 : index % 2 === 1);
+
+        return (
+          <section key={section.id} id={slugify(section.title)} className={`py-20 ${hasBg ? 'bg-white' : ''}`}>
+            <div className="mx-auto max-w-6xl px-4">
+              <div className="text-center">
+                <h2 className="font-serif text-3xl text-charcoal md:text-4xl">
+                  {section.title}
+                </h2>
+                {section.description && (
+                  <p className="mx-auto mt-4 max-w-2xl text-lg text-warm-gray">
+                    {section.description}
+                  </p>
+                )}
+              </div>
+              <div className="mt-8 flex flex-wrap justify-center gap-8">
+                {sectionOptions.map((option) => (
+                  <div key={option.id} className={seatingCardWidth[cols]}>
+                    <SeatingCard
+                      title={option.title}
+                      description={option.description}
+                      image={option.image}
+                      href={`/seating/${option.slug}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      })}
 
       {/* Combination Note */}
       <section className="bg-sage-light/50 py-16">

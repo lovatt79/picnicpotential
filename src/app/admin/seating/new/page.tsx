@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import ImageUpload from "@/components/admin/ImageUpload";
+import type { SeatingSection } from "@/lib/supabase/types";
 
 export default function NewSeatingPage() {
   const router = useRouter();
@@ -15,8 +16,21 @@ export default function NewSeatingPage() {
   const [imageUrl, setImageUrl] = useState("");
   const [imageId, setImageId] = useState<string | null>(null);
   const [isPublished, setIsPublished] = useState(true);
+  const [sectionId, setSectionId] = useState<string | null>(null);
+  const [sections, setSections] = useState<SeatingSection[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadSections() {
+      const { data } = await supabase
+        .from("seating_sections")
+        .select("*")
+        .order("sort_order");
+      if (data) setSections(data);
+    }
+    loadSections();
+  }, []);
 
   const handleImageUpload = (url: string, mediaId: string) => {
     setImageUrl(url);
@@ -34,6 +48,7 @@ export default function NewSeatingPage() {
       image_url: imageUrl || null,
       image_id: imageId,
       is_published: isPublished,
+      section_id: sectionId,
     });
 
     if (error) {
@@ -78,6 +93,21 @@ export default function NewSeatingPage() {
               currentImageUrl={imageUrl || undefined}
               aspectRatio="4/3"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-charcoal mb-1">Section</label>
+            <select
+              value={sectionId || ""}
+              onChange={(e) => setSectionId(e.target.value || null)}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+            >
+              <option value="">Uncategorized</option>
+              {sections.map((section) => (
+                <option key={section.id} value={section.id}>{section.title}</option>
+              ))}
+            </select>
+            <p className="text-xs text-warm-gray mt-1">Which section this seating option appears in</p>
           </div>
 
           <div className="flex items-center gap-3">

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import ImageUpload from "@/components/admin/ImageUpload";
+import type { PartnerSection } from "@/lib/supabase/types";
 
 export default function NewPartnerPage() {
   const router = useRouter();
@@ -17,9 +18,22 @@ export default function NewPartnerPage() {
   const [logoUrl, setLogoUrl] = useState("");
   const [logoId, setLogoId] = useState<string | null>(null);
   const [partnerType, setPartnerType] = useState<"VIP" | "Preferred" | "Winery">("Preferred");
+  const [sectionId, setSectionId] = useState<string | null>(null);
+  const [sections, setSections] = useState<PartnerSection[]>([]);
   const [isPublished, setIsPublished] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadSections() {
+      const { data } = await supabase
+        .from("partner_sections")
+        .select("*")
+        .order("sort_order");
+      if (data) setSections(data);
+    }
+    loadSections();
+  }, []);
 
   const handleLogoUpload = (url: string, mediaId: string) => {
     setLogoUrl(url);
@@ -37,6 +51,7 @@ export default function NewPartnerPage() {
       logo_url: logoUrl || null,
       logo_id: logoId,
       partner_type: partnerType,
+      section_id: sectionId,
       is_published: isPublished,
     });
     if (error) { setError(error.message); setSaving(false); }
@@ -88,6 +103,20 @@ export default function NewPartnerPage() {
           <div>
             <label className="block text-sm font-medium text-charcoal mb-1">Website URL</label>
             <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold" placeholder="https://..." />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-charcoal mb-1">Section</label>
+            <select
+              value={sectionId || ""}
+              onChange={(e) => setSectionId(e.target.value || null)}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+            >
+              <option value="">Uncategorized</option>
+              {sections.map((section) => (
+                <option key={section.id} value={section.id}>{section.title}</option>
+              ))}
+            </select>
+            <p className="text-xs text-warm-gray mt-1">Which section this partner appears in on the frontend</p>
           </div>
           <div>
             <ImageUpload

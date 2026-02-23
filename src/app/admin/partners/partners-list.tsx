@@ -25,16 +25,15 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { createClient } from "@/lib/supabase/client";
-import ImageUpload from "@/components/admin/ImageUpload";
-import type { Service, ServiceSection } from "@/lib/supabase/types";
+import type { VendorPartner, PartnerSection } from "@/lib/supabase/types";
 
 // ─── Sortable Item ─────────────────────────────────────────
 
 function SortableItem({
-  service,
+  partner,
   onDelete,
 }: {
-  service: Service;
+  partner: VendorPartner;
   onDelete: (id: string) => void;
 }) {
   const {
@@ -44,7 +43,7 @@ function SortableItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: service.id });
+  } = useSortable({ id: partner.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -68,30 +67,34 @@ function SortableItem({
         </svg>
       </button>
 
+      {/* Logo thumbnail */}
+      <div className="w-8 h-8 rounded-full bg-sage-light flex items-center justify-center overflow-hidden shrink-0">
+        {partner.logo_url ? (
+          <img src={partner.logo_url} alt="" className="w-full h-full object-contain" />
+        ) : (
+          <span className="text-xs font-serif text-sage-dark">{partner.name.charAt(0)}</span>
+        )}
+      </div>
+
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <h3 className="font-medium text-charcoal truncate text-sm">{service.title}</h3>
+          <h3 className="font-medium text-charcoal truncate text-sm">{partner.name}</h3>
           <span
             className={`px-2 py-0.5 text-xs rounded-full shrink-0 ${
-              service.is_published ? "bg-sage text-charcoal" : "bg-gray-200 text-gray-600"
+              partner.is_published ? "bg-sage text-charcoal" : "bg-gray-200 text-gray-600"
             }`}
           >
-            {service.is_published ? "Published" : "Draft"}
+            {partner.is_published ? "Published" : "Draft"}
           </span>
-          {service.external_url && (
-            <span className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 shrink-0">
-              External
-            </span>
-          )}
         </div>
         <p className="text-xs text-warm-gray truncate mt-0.5">
-          {service.description || "No description"}
+          {partner.category}{partner.location ? ` \u2022 ${partner.location}` : ""}
         </p>
       </div>
 
       <div className="flex items-center gap-1 shrink-0">
         <Link
-          href={`/admin/services/${service.id}`}
+          href={`/admin/partners/${partner.id}`}
           className="p-1.5 text-gray-400 hover:text-charcoal transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -99,7 +102,7 @@ function SortableItem({
           </svg>
         </Link>
         <button
-          onClick={() => onDelete(service.id)}
+          onClick={() => onDelete(partner.id)}
           className="p-1.5 text-gray-400 hover:text-red-600 transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -113,7 +116,7 @@ function SortableItem({
 
 // ─── Drag Overlay Item (rendered while dragging) ───────────
 
-function DragOverlayItem({ service }: { service: Service }) {
+function DragOverlayItem({ partner }: { partner: VendorPartner }) {
   return (
     <div className="bg-white rounded-lg border-2 border-gold p-3 flex items-center gap-3 shadow-lg">
       <div className="text-gold shrink-0">
@@ -122,7 +125,7 @@ function DragOverlayItem({ service }: { service: Service }) {
         </svg>
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="font-medium text-charcoal truncate text-sm">{service.title}</h3>
+        <h3 className="font-medium text-charcoal truncate text-sm">{partner.name}</h3>
       </div>
     </div>
   );
@@ -161,33 +164,33 @@ function SectionModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: { title: string; description: string; is_published: boolean; image_url: string | null; image_id: string | null }) => void;
-  initialData?: { title: string; description: string; is_published: boolean; image_url: string | null; image_id: string | null };
+  onSave: (data: { title: string; description: string; badge_label: string; badge_style: string; is_published: boolean }) => void;
+  initialData?: { title: string; description: string; badge_label: string; badge_style: string; is_published: boolean };
 }) {
   const [title, setTitle] = useState(initialData?.title || "");
   const [description, setDescription] = useState(initialData?.description || "");
+  const [badgeLabel, setBadgeLabel] = useState(initialData?.badge_label || "");
+  const [badgeStyle, setBadgeStyle] = useState(initialData?.badge_style || "gold");
   const [isPublished, setIsPublished] = useState(initialData?.is_published ?? true);
-  const [imageUrl, setImageUrl] = useState<string | null>(initialData?.image_url || null);
-  const [imageId, setImageId] = useState<string | null>(initialData?.image_id || null);
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-xl p-6 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white rounded-xl p-6 w-full max-w-md space-y-4">
         <h3 className="font-serif text-xl text-charcoal">
           {initialData ? "Edit Section" : "Add Section"}
         </h3>
 
         <div>
-          <label className="block text-sm font-medium text-charcoal mb-1">Title</label>
+          <label className="block text-sm font-medium text-charcoal mb-1">Section Title</label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gold focus:border-transparent"
-            placeholder="e.g. Luxury Picnics"
+            placeholder="e.g. Our VIP Partners"
           />
         </div>
 
@@ -198,21 +201,38 @@ function SectionModal({
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            rows={2}
+            rows={3}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gold focus:border-transparent"
-            placeholder="Shown as subtitle below section heading"
+            placeholder="Shown as subtitle below section heading on the partners page"
           />
         </div>
 
-        <ImageUpload
-          currentImageUrl={imageUrl}
-          onImageUploaded={(url, id) => {
-            setImageUrl(url || null);
-            setImageId(id || null);
-          }}
-          label="Thumbnail Image"
-          aspectRatio="4/3"
-        />
+        <div>
+          <label className="block text-sm font-medium text-charcoal mb-1">
+            Badge Label <span className="text-warm-gray font-normal">(optional)</span>
+          </label>
+          <input
+            type="text"
+            value={badgeLabel}
+            onChange={(e) => setBadgeLabel(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gold focus:border-transparent"
+            placeholder="e.g. VIP Partners"
+          />
+          <p className="text-xs text-warm-gray mt-1">Short label shown above section title on frontend</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-charcoal mb-1">Badge Style</label>
+          <select
+            value={badgeStyle}
+            onChange={(e) => setBadgeStyle(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gold focus:border-transparent"
+          >
+            <option value="gold">Gold</option>
+            <option value="sage">Sage</option>
+            <option value="cream">Cream</option>
+          </select>
+        </div>
 
         <label className="flex items-center gap-2 text-sm">
           <input
@@ -237,9 +257,9 @@ function SectionModal({
               onSave({
                 title: title.trim(),
                 description: description.trim(),
+                badge_label: badgeLabel.trim(),
+                badge_style: badgeStyle,
                 is_published: isPublished,
-                image_url: imageUrl,
-                image_id: imageId,
               });
             }}
             disabled={!title.trim()}
@@ -255,18 +275,18 @@ function SectionModal({
 
 // ─── Main Component ────────────────────────────────────────
 
-export function ServicesList({
-  initialServices,
+export function PartnersList({
+  initialPartners,
   initialSections,
 }: {
-  initialServices: Service[];
-  initialSections: ServiceSection[];
+  initialPartners: VendorPartner[];
+  initialSections: PartnerSection[];
 }) {
-  const [services, setServices] = useState(initialServices);
+  const [partners, setPartners] = useState(initialPartners);
   const [sections, setSections] = useState(initialSections);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [showSectionModal, setShowSectionModal] = useState(false);
-  const [editingSection, setEditingSection] = useState<ServiceSection | null>(null);
+  const [editingSection, setEditingSection] = useState<PartnerSection | null>(null);
   const router = useRouter();
   const supabase = createClient();
 
@@ -275,22 +295,22 @@ export function ServicesList({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  // Group services by section
-  const getServicesForSection = useCallback(
+  // Group partners by section
+  const getPartnersForSection = useCallback(
     (sectionId: string | null) =>
-      services
-        .filter((s) => s.section_id === sectionId)
+      partners
+        .filter((p) => p.section_id === sectionId)
         .sort((a, b) => a.sort_order - b.sort_order),
-    [services]
+    [partners]
   );
 
-  // Find which section a service belongs to
-  const findSectionForService = useCallback(
-    (serviceId: string) => {
-      const service = services.find((s) => s.id === serviceId);
-      return service?.section_id ?? null;
+  // Find which section a partner belongs to
+  const findSectionForPartner = useCallback(
+    (partnerId: string) => {
+      const partner = partners.find((p) => p.id === partnerId);
+      return partner?.section_id ?? null;
     },
-    [services]
+    [partners]
   );
 
   // ─── Drag handlers ────────────────────────────────────
@@ -303,28 +323,26 @@ export function ServicesList({
     const { active, over } = event;
     if (!over) return;
 
-    const activeServiceId = active.id as string;
+    const activePartnerId = active.id as string;
     const overId = over.id as string;
 
     // Determine the target section
     let targetSectionId: string | null;
 
-    // Check if dropped over a section container (droppable)
     const isOverSection = overId === "uncategorized" || sections.some((s) => s.id === overId);
     if (isOverSection) {
       targetSectionId = overId === "uncategorized" ? null : overId;
     } else {
-      // Dropped over another service item — use that item's section
-      targetSectionId = findSectionForService(overId);
+      targetSectionId = findSectionForPartner(overId);
     }
 
-    const currentSectionId = findSectionForService(activeServiceId);
+    const currentSectionId = findSectionForPartner(activePartnerId);
 
     // Move to different section
     if (currentSectionId !== targetSectionId) {
-      setServices((prev) =>
-        prev.map((s) =>
-          s.id === activeServiceId ? { ...s, section_id: targetSectionId } : s
+      setPartners((prev) =>
+        prev.map((p) =>
+          p.id === activePartnerId ? { ...p, section_id: targetSectionId } : p
         )
       );
     }
@@ -336,31 +354,31 @@ export function ServicesList({
 
     if (!over) return;
 
-    const activeServiceId = active.id as string;
+    const activePartnerId = active.id as string;
     const overId = over.id as string;
-    const activeService = services.find((s) => s.id === activeServiceId);
-    if (!activeService) return;
+    const activePartner = partners.find((p) => p.id === activePartnerId);
+    if (!activePartner) return;
 
-    const currentSectionId = activeService.section_id;
+    const currentSectionId = activePartner.section_id;
 
     // Handle reordering within the same section
     const isOverSection = overId === "uncategorized" || sections.some((s) => s.id === overId);
     if (!isOverSection && active.id !== over.id) {
-      const sectionServices = getServicesForSection(currentSectionId);
-      const oldIndex = sectionServices.findIndex((s) => s.id === activeServiceId);
-      const newIndex = sectionServices.findIndex((s) => s.id === overId);
+      const sectionPartners = getPartnersForSection(currentSectionId);
+      const oldIndex = sectionPartners.findIndex((p) => p.id === activePartnerId);
+      const newIndex = sectionPartners.findIndex((p) => p.id === overId);
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        const reordered = arrayMove(sectionServices, oldIndex, newIndex);
-        setServices((prev) => {
-          const otherServices = prev.filter((s) => s.section_id !== currentSectionId);
-          return [...otherServices, ...reordered.map((s, i) => ({ ...s, sort_order: i }))];
+        const reordered = arrayMove(sectionPartners, oldIndex, newIndex);
+        setPartners((prev) => {
+          const otherPartners = prev.filter((p) => p.section_id !== currentSectionId);
+          return [...otherPartners, ...reordered.map((p, i) => ({ ...p, sort_order: i }))];
         });
 
-        // Update sort_order in DB for items in this section
+        // Update sort_order in DB
         for (let i = 0; i < reordered.length; i++) {
           await supabase
-            .from("services")
+            .from("vendor_partners")
             .update({ sort_order: i })
             .eq("id", reordered[i].id);
         }
@@ -368,49 +386,49 @@ export function ServicesList({
     }
 
     // Persist section change
-    const originalService = initialServices.find((s) => s.id === activeServiceId);
-    if (originalService && originalService.section_id !== currentSectionId) {
+    const originalPartner = initialPartners.find((p) => p.id === activePartnerId);
+    if (originalPartner && originalPartner.section_id !== currentSectionId) {
       await supabase
-        .from("services")
+        .from("vendor_partners")
         .update({ section_id: currentSectionId })
-        .eq("id", activeServiceId);
+        .eq("id", activePartnerId);
 
       // Update sort_order for items in the new section
-      const newSectionServices = services
-        .filter((s) => s.section_id === currentSectionId)
+      const newSectionPartners = partners
+        .filter((p) => p.section_id === currentSectionId)
         .sort((a, b) => a.sort_order - b.sort_order);
-      for (let i = 0; i < newSectionServices.length; i++) {
+      for (let i = 0; i < newSectionPartners.length; i++) {
         await supabase
-          .from("services")
+          .from("vendor_partners")
           .update({ sort_order: i })
-          .eq("id", newSectionServices[i].id);
+          .eq("id", newSectionPartners[i].id);
       }
     }
   };
 
-  // ─── Service CRUD ─────────────────────────────────────
+  // ─── Partner CRUD ──────────────────────────────────────
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this service?")) return;
-    const { error } = await supabase.from("services").delete().eq("id", id);
+    if (!confirm("Are you sure you want to delete this partner?")) return;
+    const { error } = await supabase.from("vendor_partners").delete().eq("id", id);
     if (!error) {
-      setServices(services.filter((s) => s.id !== id));
+      setPartners(partners.filter((p) => p.id !== id));
       router.refresh();
     }
   };
 
-  // ─── Section CRUD ─────────────────────────────────────
+  // ─── Section CRUD ──────────────────────────────────────
 
-  const handleAddSection = async (data: { title: string; description: string; is_published: boolean; image_url: string | null; image_id: string | null }) => {
+  const handleAddSection = async (data: { title: string; description: string; badge_label: string; badge_style: string; is_published: boolean }) => {
     const maxOrder = sections.length > 0 ? Math.max(...sections.map((s) => s.sort_order)) + 1 : 0;
     const { data: newSection, error } = await supabase
-      .from("service_sections")
+      .from("partner_sections")
       .insert({
         title: data.title,
         description: data.description || null,
+        badge_label: data.badge_label || null,
+        badge_style: data.badge_style || "gold",
         is_published: data.is_published,
-        image_url: data.image_url,
-        image_id: data.image_id,
         sort_order: maxOrder,
       })
       .select()
@@ -422,16 +440,16 @@ export function ServicesList({
     setShowSectionModal(false);
   };
 
-  const handleEditSection = async (data: { title: string; description: string; is_published: boolean; image_url: string | null; image_id: string | null }) => {
+  const handleEditSection = async (data: { title: string; description: string; badge_label: string; badge_style: string; is_published: boolean }) => {
     if (!editingSection) return;
     const { error } = await supabase
-      .from("service_sections")
+      .from("partner_sections")
       .update({
         title: data.title,
         description: data.description || null,
+        badge_label: data.badge_label || null,
+        badge_style: data.badge_style || "gold",
         is_published: data.is_published,
-        image_url: data.image_url,
-        image_id: data.image_id,
         updated_at: new Date().toISOString(),
       })
       .eq("id", editingSection.id);
@@ -443,12 +461,11 @@ export function ServicesList({
   };
 
   const handleDeleteSection = async (sectionId: string) => {
-    if (!confirm("Delete this section? Items in it will become uncategorized.")) return;
-    const { error } = await supabase.from("service_sections").delete().eq("id", sectionId);
+    if (!confirm("Delete this section? Partners in it will become uncategorized.")) return;
+    const { error } = await supabase.from("partner_sections").delete().eq("id", sectionId);
     if (!error) {
       setSections(sections.filter((s) => s.id !== sectionId));
-      // Items become uncategorized (ON DELETE SET NULL)
-      setServices(services.map((s) => (s.section_id === sectionId ? { ...s, section_id: null } : s)));
+      setPartners(partners.map((p) => (p.section_id === sectionId ? { ...p, section_id: null } : p)));
     }
   };
 
@@ -459,7 +476,7 @@ export function ServicesList({
     newSections.forEach((s, i) => (s.sort_order = i));
     setSections(newSections);
     for (const s of newSections) {
-      await supabase.from("service_sections").update({ sort_order: s.sort_order }).eq("id", s.id);
+      await supabase.from("partner_sections").update({ sort_order: s.sort_order }).eq("id", s.id);
     }
   };
 
@@ -470,21 +487,21 @@ export function ServicesList({
     newSections.forEach((s, i) => (s.sort_order = i));
     setSections(newSections);
     for (const s of newSections) {
-      await supabase.from("service_sections").update({ sort_order: s.sort_order }).eq("id", s.id);
+      await supabase.from("partner_sections").update({ sort_order: s.sort_order }).eq("id", s.id);
     }
   };
 
-  // ─── Render ───────────────────────────────────────────
+  // ─── Render ────────────────────────────────────────────
 
-  const activeService = activeId ? services.find((s) => s.id === activeId) : null;
-  const uncategorizedServices = getServicesForSection(null);
+  const activePartner = activeId ? partners.find((p) => p.id === activeId) : null;
+  const uncategorizedPartners = getPartnersForSection(null);
   const sortedSections = [...sections].sort((a, b) => a.sort_order - b.sort_order);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <p className="text-sm text-warm-gray">
-          Drag items between sections to organize them
+          Drag partners between sections to organize them
         </p>
         <button
           onClick={() => setShowSectionModal(true)}
@@ -510,21 +527,21 @@ export function ServicesList({
             <h3 className="text-sm font-semibold text-warm-gray uppercase tracking-wide">
               Uncategorized
             </h3>
-            <span className="text-xs text-gray-400">({uncategorizedServices.length})</span>
+            <span className="text-xs text-gray-400">({uncategorizedPartners.length})</span>
           </div>
           <DroppableSection id="uncategorized">
             <SortableContext
-              items={uncategorizedServices.map((s) => s.id)}
+              items={uncategorizedPartners.map((p) => p.id)}
               strategy={verticalListSortingStrategy}
             >
               <div className="space-y-2">
-                {uncategorizedServices.length === 0 ? (
+                {uncategorizedPartners.length === 0 ? (
                   <p className="text-xs text-gray-400 text-center py-3">
-                    Drag items here to uncategorize them
+                    Drag partners here to uncategorize them
                   </p>
                 ) : (
-                  uncategorizedServices.map((service) => (
-                    <SortableItem key={service.id} service={service} onDelete={handleDelete} />
+                  uncategorizedPartners.map((partner) => (
+                    <SortableItem key={partner.id} partner={partner} onDelete={handleDelete} />
                   ))
                 )}
               </div>
@@ -534,7 +551,7 @@ export function ServicesList({
 
         {/* Named Sections */}
         {sortedSections.map((section, index) => {
-          const sectionServices = getServicesForSection(section.id);
+          const sectionPartners = getPartnersForSection(section.id);
           return (
             <div key={section.id} className="space-y-2">
               <div className="flex items-center gap-2 px-1">
@@ -546,7 +563,7 @@ export function ServicesList({
                     Draft
                   </span>
                 )}
-                <span className="text-xs text-gray-400">({sectionServices.length})</span>
+                <span className="text-xs text-gray-400">({sectionPartners.length})</span>
                 <div className="flex-1" />
 
                 {/* Section controls */}
@@ -592,17 +609,17 @@ export function ServicesList({
 
               <DroppableSection id={section.id}>
                 <SortableContext
-                  items={sectionServices.map((s) => s.id)}
+                  items={sectionPartners.map((p) => p.id)}
                   strategy={verticalListSortingStrategy}
                 >
                   <div className="space-y-2">
-                    {sectionServices.length === 0 ? (
+                    {sectionPartners.length === 0 ? (
                       <p className="text-xs text-gray-400 text-center py-3">
-                        Drag items here to add them to this section
+                        Drag partners here to add them to this section
                       </p>
                     ) : (
-                      sectionServices.map((service) => (
-                        <SortableItem key={service.id} service={service} onDelete={handleDelete} />
+                      sectionPartners.map((partner) => (
+                        <SortableItem key={partner.id} partner={partner} onDelete={handleDelete} />
                       ))
                     )}
                   </div>
@@ -613,25 +630,25 @@ export function ServicesList({
         })}
 
         <DragOverlay>
-          {activeService ? <DragOverlayItem service={activeService} /> : null}
+          {activePartner ? <DragOverlayItem partner={activePartner} /> : null}
         </DragOverlay>
       </DndContext>
 
       {/* Empty state */}
-      {services.length === 0 && sections.length === 0 && (
+      {partners.length === 0 && sections.length === 0 && (
         <div className="bg-white rounded-xl p-12 text-center">
-          <h3 className="font-serif text-xl text-charcoal mb-2">No services yet</h3>
-          <p className="text-warm-gray mb-6">Get started by adding a section and your first service</p>
+          <h3 className="font-serif text-xl text-charcoal mb-2">No partners yet</h3>
+          <p className="text-warm-gray mb-6">Get started by adding a section and your first partner</p>
           <Link
-            href="/admin/services/new"
+            href="/admin/partners/new"
             className="inline-flex items-center gap-2 bg-charcoal text-white px-4 py-2 rounded-lg hover:bg-gold hover:text-charcoal transition-colors"
           >
-            Add Service
+            Add Partner
           </Link>
         </div>
       )}
 
-      {/* Section Modal */}
+      {/* Section Modals */}
       <SectionModal
         isOpen={showSectionModal}
         onClose={() => setShowSectionModal(false)}
@@ -647,9 +664,9 @@ export function ServicesList({
             ? {
                 title: editingSection.title,
                 description: editingSection.description || "",
+                badge_label: editingSection.badge_label || "",
+                badge_style: editingSection.badge_style || "gold",
                 is_published: editingSection.is_published,
-                image_url: editingSection.image_url,
-                image_id: editingSection.image_id,
               }
             : undefined
         }

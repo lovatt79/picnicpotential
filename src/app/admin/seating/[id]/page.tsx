@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import ImageUpload from "@/components/admin/ImageUpload";
-import type { SeatingOption } from "@/lib/supabase/types";
+import type { SeatingOption, SeatingSection } from "@/lib/supabase/types";
 
 type TabType = "basic" | "content" | "gallery";
 
@@ -34,6 +34,8 @@ export default function EditSeatingPage() {
   const [imageUrl, setImageUrl] = useState("");
   const [imageId, setImageId] = useState<string | null>(null);
   const [isPublished, setIsPublished] = useState(true);
+  const [sectionId, setSectionId] = useState<string | null>(null);
+  const [sections, setSections] = useState<SeatingSection[]>([]);
 
   // Page Content
   const [seatingPageId, setSeatingPageId] = useState<string | null>(null);
@@ -72,6 +74,14 @@ export default function EditSeatingPage() {
     setTitle(seatingData.title);
     setDescription(seatingData.description || "");
     setIsPublished(seatingData.is_published);
+    setSectionId(seatingData.section_id || null);
+
+    // Load sections for dropdown
+    const { data: sectionsData } = await supabase
+      .from("seating_sections")
+      .select("*")
+      .order("sort_order");
+    if (sectionsData) setSections(sectionsData);
 
     // Load seating card image
     if (seatingData.image_id) {
@@ -140,6 +150,7 @@ export default function EditSeatingPage() {
         image_url: imageUrl || null,
         image_id: imageId,
         is_published: isPublished,
+        section_id: sectionId,
       })
       .eq("id", params.id);
 
@@ -346,6 +357,21 @@ export default function EditSeatingPage() {
               <p className="text-xs text-warm-gray mt-1">
                 Image shown on seating option cards and as hero image
               </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-charcoal mb-1">Section</label>
+              <select
+                value={sectionId || ""}
+                onChange={(e) => setSectionId(e.target.value || null)}
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+              >
+                <option value="">Uncategorized</option>
+                {sections.map((section) => (
+                  <option key={section.id} value={section.id}>{section.title}</option>
+                ))}
+              </select>
+              <p className="text-xs text-warm-gray mt-1">Which section this seating option appears in</p>
             </div>
 
             <div className="flex items-center gap-3">
