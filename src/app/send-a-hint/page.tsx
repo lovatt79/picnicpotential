@@ -56,10 +56,18 @@ export default function SendAHintPage() {
   return (
     <>
       {/* Hero */}
-      <section className="bg-sage py-20">
-        <div className="mx-auto max-w-4xl px-4 text-center">
-          <h1 className="font-serif text-4xl text-charcoal md:text-5xl">Send a Hint</h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-charcoal/70">
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0">
+          <img
+            src="https://lh3.googleusercontent.com/pw/AP1GczNzQaLeNFLMl6pUO7kRMKA6PeO0eJE7TD9lK_27aCsLbM_FzKZbIOSf-aQasqtfAWqxaP0lSb3veW5jOmV6jrrbPcBiB-bwJTtxVAii-1UFweTYhn2IzEuHDVntEZCaAGRM2U1EJyF8J3ElgadsGPWa0g=w1736-h1148-s-no-gm?authuser=0"
+            alt="Picnic Potential send a hint"
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-charcoal/50" />
+        </div>
+        <div className="relative mx-auto max-w-4xl px-4 py-24 text-center">
+          <h1 className="font-serif text-4xl text-white md:text-5xl">Send a Hint</h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-white/85">
             Want someone special to know about Picnic Potential? Drop a hint and
             we&apos;ll send them a friendly message about our services.
           </p>

@@ -245,19 +245,19 @@ export default async function Home() {
             {[
               {
                 step: "01",
-                title: "You Inquire",
+                title: "Inquiry",
                 description:
                   "Fill out our Service Request Form with your event details, preferences, and vision.",
               },
               {
                 step: "02",
-                title: "We Design",
+                title: "Design",
                 description:
                   "We respond with pricing and a customized plan tailored to your selections and style.",
               },
               {
                 step: "03",
-                title: "We Execute",
+                title: "Execute",
                 description:
                   "We handle all setup and cleanup so you can enjoy every moment of your special event.",
               },

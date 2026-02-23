@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { SeatingList } from "./seating-list";
+import HeroEditor from "@/components/admin/HeroEditor";
 
 export default async function SeatingPage() {
   const supabase = await createClient();
@@ -27,7 +28,11 @@ export default async function SeatingPage() {
         </Link>
       </div>
 
-      <SeatingList initialItems={seatingOptions ?? []} />
+      <HeroEditor pageKey="seating" label="Seating Styles Page Hero" />
+
+      <div className="mt-8">
+        <SeatingList initialItems={seatingOptions ?? []} />
+      </div>
     </div>
   );
 }

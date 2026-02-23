@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { ServicesList } from "./services-list";
+import HeroEditor from "@/components/admin/HeroEditor";
 
 export default async function ServicesPage() {
   const supabase = await createClient();
@@ -27,7 +28,11 @@ export default async function ServicesPage() {
         </Link>
       </div>
 
-      <ServicesList initialServices={services ?? []} />
+      <HeroEditor pageKey="services" label="Services Page Hero" />
+
+      <div className="mt-8">
+        <ServicesList initialServices={services ?? []} />
+      </div>
     </div>
   );
 }

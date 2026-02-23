@@ -45,7 +45,7 @@ export default function Footer() {
             />
             <h3 className="mt-3 font-serif text-2xl">{SITE_NAME}</h3>
             <p className="mt-4 text-sm text-gray-400 leading-relaxed">
-              Creating memorable picnic and event experiences in Sonoma County wine country.
+              Creating memorable picnic and event experiences in Sonoma, Marin and the greater Bay Area.
             </p>
             <div className="mt-6 flex gap-4">
               <a href="https://www.facebook.com/picnicpotential" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-gray-400 hover:text-gold transition-colors">

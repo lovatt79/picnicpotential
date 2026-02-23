@@ -33,10 +33,12 @@ export default function AboutPage() {
         <div className="mx-auto max-w-6xl px-4">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             {/* Image placeholder */}
-            <div className="aspect-[4/3] overflow-hidden rounded-2xl bg-gradient-to-br from-sage to-sage-dark/50">
-              <div className="flex h-full w-full items-center justify-center">
-                <span className="font-serif text-lg text-white/80">Photo of Alison</span>
-              </div>
+            <div className="aspect-[4/3] overflow-hidden rounded-2xl">
+              <img
+                src="https://lh3.googleusercontent.com/pw/AP1GczOi8OMC9Vzzvkg1c5KE0kRM1qAlaPpVbIBkqjxNrlL12iafz3PS7TrU2MNWC6tSVR8dwv7u9PeX1VdksHvmwiWzjmfioh6cgpPdq_bWV76Rz5zvpRXT6iXKe9xqdnHP4qA71kEqRQLj85_EA-QaUC8Jbg=w1024-h771-s-no-gm?authuser=0"
+                alt="Alison, founder of Picnic Potential"
+                className="h-full w-full object-cover"
+              />
             </div>
             <div>
               <h2 className="font-serif text-3xl text-charcoal md:text-4xl">Our Story</h2>

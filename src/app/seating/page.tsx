@@ -66,8 +66,25 @@ async function getSeatingOptions() {
   }
 }
 
+async function getPageHero(pageKey: string) {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("page_heroes")
+      .select("*")
+      .eq("page_key", pageKey)
+      .single();
+
+    if (error) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
 export default async function SeatingPage() {
   const seatingOptions = await getSeatingOptions();
+  const hero = await getPageHero("seating");
 
   // Generate schema markup
   const seatingListSchema = seatingOptions.length > 0 ? generateItemListSchema(seatingOptions, "seating") : null;
@@ -83,14 +100,34 @@ export default async function SeatingPage() {
       )}
 
       {/* Hero */}
-      <section className="bg-sage py-20">
-        <div className="mx-auto max-w-4xl px-4 text-center">
-          <h1 className="font-serif text-4xl text-charcoal md:text-5xl">Seating Styles</h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-charcoal/70">
-            Choose from a variety of seating options to create the perfect atmosphere for your
-            event. Mix and match styles or keep it consistent &mdash; we will help you design the
-            ideal layout for your group.
-          </p>
+      <section className={`relative overflow-hidden ${hero?.image_url ? '' : 'bg-sage'}`}>
+        {hero?.image_url && (
+          <div className="absolute inset-0">
+            <img
+              src={hero.image_url}
+              alt={hero.title || "Picnic Potential seating styles"}
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-charcoal/50" />
+          </div>
+        )}
+        <div className="relative mx-auto max-w-4xl px-4 py-24 text-center">
+          <h1 className={`font-serif text-4xl md:text-5xl ${hero?.image_url ? 'text-white' : 'text-charcoal'}`}>
+            {hero?.title || "Seating Styles"}
+          </h1>
+          {hero?.description && (
+            <p className={`mx-auto mt-6 max-w-2xl text-lg ${hero?.image_url ? 'text-white/85' : 'text-charcoal/70'}`}>
+              {hero.description}
+            </p>
+          )}
+          {hero?.show_cta && hero?.cta_text && hero?.cta_link && (
+            <Link
+              href={hero.cta_link}
+              className="mt-8 inline-block rounded-full bg-gold px-8 py-3.5 text-base font-medium text-charcoal transition-colors hover:bg-gold-light"
+            >
+              {hero.cta_text}
+            </Link>
+          )}
         </div>
       </section>
 

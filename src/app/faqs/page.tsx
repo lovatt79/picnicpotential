@@ -51,12 +51,20 @@ export default async function FAQsPage() {
       )}
 
       {/* Hero */}
-      <section className="bg-sage py-20">
-        <div className="mx-auto max-w-4xl px-4 text-center">
-          <h1 className="font-serif text-4xl text-charcoal md:text-5xl">
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0">
+          <img
+            src="https://lh3.googleusercontent.com/pw/AP1GczP5aPO_J65w7tCQhS_dvxiXPygo2J_mlf15Tap0mZXx0RbWHndP6y4tYv8gH_SM9jE8AKFGCpQshRx8aPjHmVkk7E-5zTEIA-jibuT0GMbdTV-7rwfkbzR7bOeti1VH-sTcEIEPsl7q73K-5daGkP05Mg=w1024-h683-s-no-gm?authuser=0"
+            alt="Picnic Potential FAQ"
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-charcoal/50" />
+        </div>
+        <div className="relative mx-auto max-w-4xl px-4 py-24 text-center">
+          <h1 className="font-serif text-4xl text-white md:text-5xl">
             Frequently Asked Questions
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-charcoal/70">
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-white/85">
             Find answers to common questions about our services, booking process, and more.
           </p>
         </div>
