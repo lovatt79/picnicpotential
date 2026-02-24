@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+// import { Turnstile } from "@marsidev/react-turnstile";
 
 export default function SendAHintPage() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     senderName: "",
     senderEmail: "",
@@ -20,16 +22,24 @@ export default function SendAHintPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // TODO: Re-enable Turnstile check once sitekey is configured
+    // if (!turnstileToken) {
+    //   alert("Please complete the verification challenge.");
+    //   return;
+    // }
     setSubmitting(true);
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, type: "hint" }),
+        body: JSON.stringify({ ...formData, type: "hint", turnstileToken: turnstileToken || "disabled" }),
       });
       if (res.ok) {
         setSubmitted(true);
         window.scrollTo(0, 0);
+      } else {
+        const result = await res.json();
+        alert(result.message || "Something went wrong.");
       }
     } catch {
       alert("Something went wrong. Please try again.");
@@ -152,6 +162,17 @@ export default function SendAHintPage() {
                 />
               </div>
             </div>
+
+            {/* TODO: Re-enable Turnstile once sitekey is configured
+            <div className="mt-6">
+              <Turnstile
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                onSuccess={(token) => setTurnstileToken(token)}
+                onError={() => setTurnstileToken(null)}
+                onExpire={() => setTurnstileToken(null)}
+              />
+            </div>
+            */}
 
             <button
               type="submit"

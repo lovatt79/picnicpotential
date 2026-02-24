@@ -13,7 +13,7 @@ const statusColors: Record<string, string> = {
   cancelled: "bg-red-200 text-red-800",
 };
 
-type Tab = "all" | "service" | "wedding" | "proposal";
+type Tab = "all" | "service" | "hint" | "wedding" | "proposal";
 
 interface ServiceSubmission {
   id: string;
@@ -60,6 +60,7 @@ export default function SubmissionsPage() {
   const supabase = createClient();
   const [tab, setTab] = useState<Tab>("all");
   const [serviceSubmissions, setServiceSubmissions] = useState<ServiceSubmission[]>([]);
+  const [hintSubmissions, setHintSubmissions] = useState<ServiceSubmission[]>([]);
   const [weddingSubmissions, setWeddingSubmissions] = useState<WeddingSubmission[]>([]);
   const [proposalSubmissions, setProposalSubmissions] = useState<ProposalSubmissionRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,7 +83,16 @@ export default function SubmissionsPage() {
       ]);
 
       if (svcRes.data) {
-        setServiceSubmissions(svcRes.data.map((s) => ({ ...s, _type: "service" as const })));
+        setServiceSubmissions(
+          svcRes.data
+            .filter((s) => s.event_type !== "Send a Hint")
+            .map((s) => ({ ...s, _type: "service" as const }))
+        );
+        setHintSubmissions(
+          svcRes.data
+            .filter((s) => s.event_type === "Send a Hint")
+            .map((s) => ({ ...s, _type: "service" as const }))
+        );
       }
       if (wsRes.data) {
         setWeddingSubmissions(wsRes.data.map((s) => ({ ...s, _type: "wedding" as const })));
@@ -98,19 +108,22 @@ export default function SubmissionsPage() {
   const displayed: Submission[] =
     tab === "service"
       ? serviceSubmissions
+      : tab === "hint"
+      ? hintSubmissions
       : tab === "wedding"
       ? weddingSubmissions
       : tab === "proposal"
       ? proposalSubmissions
-      : [...serviceSubmissions, ...weddingSubmissions, ...proposalSubmissions].sort(
+      : [...serviceSubmissions, ...hintSubmissions, ...weddingSubmissions, ...proposalSubmissions].sort(
           (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
 
-  const totalCount = serviceSubmissions.length + weddingSubmissions.length + proposalSubmissions.length;
+  const totalCount = serviceSubmissions.length + hintSubmissions.length + weddingSubmissions.length + proposalSubmissions.length;
 
   const tabs: { key: Tab; label: string; count: number }[] = [
     { key: "all", label: "All Requests", count: totalCount },
     { key: "service", label: "Service Requests", count: serviceSubmissions.length },
+    { key: "hint", label: "Hints", count: hintSubmissions.length },
     { key: "wedding", label: "Wedding Suite", count: weddingSubmissions.length },
     { key: "proposal", label: "Proposals", count: proposalSubmissions.length },
   ];

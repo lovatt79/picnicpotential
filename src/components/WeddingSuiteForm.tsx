@@ -1,13 +1,17 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+// import { Turnstile } from "@marsidev/react-turnstile";
 import { createClient } from "@/lib/supabase/client";
+import { validateStep, type ValidationErrors } from "@/lib/formValidation";
+import { FieldError } from "@/components/form/FieldError";
 import {
   PricedCheckboxOption,
   PricedRadioOption,
   RadioOption,
   formatPrice,
   inputClass,
+  getInputClass,
   getQuantityUnit,
   type PricedOption,
 } from "@/components/form/FormControls";
@@ -107,6 +111,8 @@ export default function WeddingSuiteForm() {
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   // Database-driven form options
   const [packageOptions, setPackageOptions] = useState<PackageOption[]>([]);
@@ -168,6 +174,13 @@ export default function WeddingSuiteForm() {
 
   const updateField = (field: keyof WsFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
   };
 
   const toggleArray = (field: "addonOptions" | "giftOptions", value: string) => {
@@ -198,7 +211,28 @@ export default function WeddingSuiteForm() {
     }));
   };
 
+  const handleNext = () => {
+    const stepErrors = validateStep("weddingSuite", step, formData as unknown as Record<string, unknown>);
+    if (Object.keys(stepErrors).length > 0) {
+      setErrors(stepErrors);
+      return;
+    }
+    setErrors({});
+    setStep(step + 1);
+    scrollToTop();
+  };
+
   const handleSubmit = async () => {
+    const stepErrors = validateStep("weddingSuite", step, formData as unknown as Record<string, unknown>);
+    if (Object.keys(stepErrors).length > 0) {
+      setErrors(stepErrors);
+      return;
+    }
+    // TODO: Re-enable Turnstile check once sitekey is configured
+    // if (!turnstileToken) {
+    //   alert("Please complete the verification challenge.");
+    //   return;
+    // }
     setSubmitting(true);
     try {
       const foodPayload = Object.entries(formData.foodOptions).map(([label, qty]) => ({
@@ -208,6 +242,7 @@ export default function WeddingSuiteForm() {
       const payload = {
         ...formData,
         foodOptions: foodPayload,
+        turnstileToken: turnstileToken || "disabled",
       };
       const res = await fetch("/api/wedding-suite", {
         method: "POST",
@@ -216,9 +251,12 @@ export default function WeddingSuiteForm() {
       });
       if (res.ok) {
         setSubmitted(true);
+      } else {
+        const result = await res.json();
+        alert(result.message || "Something went wrong.");
       }
-    } catch (err) {
-      console.error("Submission error:", err);
+    } catch {
+      alert("Something went wrong. Please try again or email us directly at Info@picnicpotential.com");
     } finally {
       setSubmitting(false);
     }
@@ -372,21 +410,25 @@ export default function WeddingSuiteForm() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="block text-sm font-medium text-charcoal mb-1">First Name *</label>
-                    <input type="text" required value={formData.firstName} onChange={(e) => updateField("firstName", e.target.value)} className={inputClass} />
+                    <input type="text" required value={formData.firstName} onChange={(e) => updateField("firstName", e.target.value)} className={getInputClass("firstName", errors)} />
+                    <FieldError message={errors.firstName} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-charcoal mb-1">Last Name *</label>
-                    <input type="text" required value={formData.lastName} onChange={(e) => updateField("lastName", e.target.value)} className={inputClass} />
+                    <input type="text" required value={formData.lastName} onChange={(e) => updateField("lastName", e.target.value)} className={getInputClass("lastName", errors)} />
+                    <FieldError message={errors.lastName} />
                   </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="block text-sm font-medium text-charcoal mb-1">Phone Number *</label>
-                    <input type="tel" required value={formData.phone} onChange={(e) => updateField("phone", e.target.value)} className={inputClass} />
+                    <input type="tel" required value={formData.phone} onChange={(e) => updateField("phone", e.target.value)} className={getInputClass("phone", errors)} />
+                    <FieldError message={errors.phone} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-charcoal mb-1">Email *</label>
-                    <input type="email" required value={formData.email} onChange={(e) => updateField("email", e.target.value)} className={inputClass} />
+                    <input type="email" required value={formData.email} onChange={(e) => updateField("email", e.target.value)} className={getInputClass("email", errors)} />
+                    <FieldError message={errors.email} />
                   </div>
                 </div>
               </div>
@@ -400,11 +442,13 @@ export default function WeddingSuiteForm() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="block text-sm font-medium text-charcoal mb-1">Partner 1 Name *</label>
-                    <input type="text" required value={formData.coupleName1} onChange={(e) => updateField("coupleName1", e.target.value)} className={inputClass} />
+                    <input type="text" required value={formData.coupleName1} onChange={(e) => updateField("coupleName1", e.target.value)} className={getInputClass("coupleName1", errors)} />
+                    <FieldError message={errors.coupleName1} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-charcoal mb-1">Partner 2 Name *</label>
-                    <input type="text" required value={formData.coupleName2} onChange={(e) => updateField("coupleName2", e.target.value)} className={inputClass} />
+                    <input type="text" required value={formData.coupleName2} onChange={(e) => updateField("coupleName2", e.target.value)} className={getInputClass("coupleName2", errors)} />
+                    <FieldError message={errors.coupleName2} />
                   </div>
                 </div>
               </div>
@@ -417,7 +461,8 @@ export default function WeddingSuiteForm() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="block text-sm font-medium text-charcoal mb-1">Venue Name *</label>
-                    <input type="text" required value={formData.venueName} onChange={(e) => updateField("venueName", e.target.value)} className={inputClass} />
+                    <input type="text" required value={formData.venueName} onChange={(e) => updateField("venueName", e.target.value)} className={getInputClass("venueName", errors)} />
+                    <FieldError message={errors.venueName} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-charcoal mb-1">Venue Address</label>
@@ -446,7 +491,8 @@ export default function WeddingSuiteForm() {
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div>
                     <label className="block text-sm font-medium text-charcoal mb-1">Wedding Date *</label>
-                    <input type="date" required value={formData.eventDate} onChange={(e) => updateField("eventDate", e.target.value)} className={inputClass} />
+                    <input type="date" required value={formData.eventDate} onChange={(e) => updateField("eventDate", e.target.value)} className={getInputClass("eventDate", errors)} />
+                    <FieldError message={errors.eventDate} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-charcoal mb-1">Arrival Time</label>
@@ -589,6 +635,7 @@ export default function WeddingSuiteForm() {
 
                 <div>
                   <label className="block text-sm font-medium text-charcoal mb-1">How did you hear about us? *</label>
+                  <FieldError message={errors.howDidYouHear} />
                   <div className="mt-2 grid gap-2 sm:grid-cols-2">
                     {attributionOptions.map((option) => (
                       <RadioOption key={option} label={option} checked={formData.howDidYouHear === option} onChange={() => updateField("howDidYouHear", option)} />
@@ -613,6 +660,17 @@ export default function WeddingSuiteForm() {
                     placeholder="Tell us more about your vision..."
                   />
                 </div>
+
+                {/* TODO: Re-enable Turnstile once sitekey is configured
+                <div className="mt-6">
+                  <Turnstile
+                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                    onSuccess={(token) => setTurnstileToken(token)}
+                    onError={() => setTurnstileToken(null)}
+                    onExpire={() => setTurnstileToken(null)}
+                  />
+                </div>
+                */}
               </div>
             )}
 
@@ -630,7 +688,7 @@ export default function WeddingSuiteForm() {
               )}
               {step < STEPS.length - 1 ? (
                 <button
-                  onClick={() => { setStep(step + 1); scrollToTop(); }}
+                  onClick={handleNext}
                   className="rounded-full bg-charcoal px-8 py-2.5 text-sm font-medium text-white transition-colors hover:bg-gold"
                 >
                   Next

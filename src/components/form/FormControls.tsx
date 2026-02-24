@@ -36,6 +36,13 @@ export function getQuantityUnit(priceUnit: string | null): string {
 export const inputClass =
   "w-full rounded-lg border border-sage px-4 py-2.5 text-sm focus:border-gold focus:outline-none";
 
+export const inputErrorClass =
+  "w-full rounded-lg border border-red-400 px-4 py-2.5 text-sm focus:border-red-500 focus:outline-none";
+
+export function getInputClass(fieldName: string, errors: Record<string, string>): string {
+  return fieldName in errors ? inputErrorClass : inputClass;
+}
+
 export function CheckboxOption({
   label,
   checked,

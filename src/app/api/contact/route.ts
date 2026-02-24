@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { verifyTurnstileToken } from "@/lib/turnstile";
+import { sendFormNotifications } from "@/lib/email/send-notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +19,23 @@ function getSupabase() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
+
+    // Turnstile verification
+    const turnstileToken = data.turnstileToken;
+    if (!turnstileToken) {
+      return NextResponse.json(
+        { success: false, message: "Verification challenge is required." },
+        { status: 400 }
+      );
+    }
+    const isHuman = await verifyTurnstileToken(turnstileToken);
+    if (!isHuman) {
+      return NextResponse.json(
+        { success: false, message: "Verification failed. Please try again." },
+        { status: 403 }
+      );
+    }
+
     const supabase = getSupabase();
 
     if (supabase) {
@@ -68,10 +87,26 @@ export async function POST(request: Request) {
           };
 
       // Insert into form_submissions table
-      const { error } = await supabase.from("form_submissions").insert(insertData);
+      const { data: inserted, error } = await supabase
+        .from("form_submissions")
+        .insert(insertData)
+        .select("id")
+        .single();
 
       if (error) {
         console.error("Database insert error:", error);
+      }
+
+      // Send email notifications (fire-and-forget — never blocks response)
+      if (!error) {
+        const formType = data.type === "hint" ? "hint" as const : "service-request" as const;
+        const email = data.type === "hint" ? data.senderEmail : data.email;
+        const name = data.type === "hint"
+          ? data.senderName
+          : `${data.firstName} ${data.lastName}`;
+
+        sendFormNotifications(formType, { ...data, id: inserted?.id }, email, name)
+          .catch((err) => console.error("Email notification error:", err));
       }
     } else {
       // Supabase not configured - just log the submission

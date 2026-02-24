@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { verifyTurnstileToken } from "@/lib/turnstile";
+import { sendFormNotifications } from "@/lib/email/send-notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +19,27 @@ function getSupabase() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
+
+    // Turnstile verification
+    const turnstileToken = data.turnstileToken;
+    if (!turnstileToken) {
+      return NextResponse.json(
+        { success: false, message: "Verification challenge is required." },
+        { status: 400 }
+      );
+    }
+    const isHuman = await verifyTurnstileToken(turnstileToken);
+    if (!isHuman) {
+      return NextResponse.json(
+        { success: false, message: "Verification failed. Please try again." },
+        { status: 403 }
+      );
+    }
+
     const supabase = getSupabase();
 
     if (supabase) {
-      const { error } = await supabase.from("ws_submissions").insert({
+      const { data: inserted, error } = await supabase.from("ws_submissions").insert({
         first_name: data.firstName,
         last_name: data.lastName,
         phone: data.phone || null,
@@ -45,10 +64,20 @@ export async function POST(request: Request) {
         how_did_you_hear_other: data.howDidYouHearOther || null,
         notes: data.notes || null,
         status: "new",
-      });
+      }).select("id").single();
 
       if (error) {
         console.error("Database insert error:", error);
+      }
+
+      // Send email notifications (fire-and-forget)
+      if (!error) {
+        sendFormNotifications(
+          "wedding-suite",
+          { ...data, id: inserted?.id },
+          data.email,
+          `${data.firstName} ${data.lastName}`
+        ).catch((err) => console.error("Email notification error:", err));
       }
     } else {
       console.log("Wedding suite form submission received:", JSON.stringify(data, null, 2));

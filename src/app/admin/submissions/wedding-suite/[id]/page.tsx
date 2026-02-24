@@ -26,6 +26,7 @@ export default function WeddingSuiteDetailPage() {
   const [status, setStatus] = useState<SubmissionStatus>("new");
   const [adminNotes, setAdminNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -45,6 +46,27 @@ export default function WeddingSuiteDetailPage() {
     await supabase.from("ws_submissions").update({ status, admin_notes: adminNotes }).eq("id", params.id);
     setSaving(false);
     router.refresh();
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this submission? This cannot be undone.")) return;
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/submissions/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: params.id, table: "ws_submissions" }),
+      });
+      if (res.ok) {
+        router.push("/admin/submissions");
+      } else {
+        alert("Failed to delete submission.");
+        setDeleting(false);
+      }
+    } catch {
+      alert("Failed to delete submission.");
+      setDeleting(false);
+    }
   };
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-charcoal"></div></div>;
@@ -194,6 +216,14 @@ export default function WeddingSuiteDetailPage() {
               className="w-full bg-charcoal text-white py-2 rounded-lg hover:bg-gold hover:text-charcoal transition-colors disabled:opacity-50"
             >
               {saving ? "Saving..." : "Save Changes"}
+            </button>
+
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="mt-3 w-full border border-red-300 text-red-600 py-2 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 text-sm"
+            >
+              {deleting ? "Deleting..." : "Delete Submission"}
             </button>
           </div>
         </div>
