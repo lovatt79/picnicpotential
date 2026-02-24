@@ -25,6 +25,7 @@ export async function POST(request: Request) {
         ? {
             // Send a Hint form — map sender/recipient fields
             first_name: data.senderName || null,
+            last_name: "",
             email: data.senderEmail || null,
             event_type: "Send a Hint",
             occasion: data.occasion || null,

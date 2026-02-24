@@ -29,6 +29,7 @@ export default function SendAHintPage() {
       });
       if (res.ok) {
         setSubmitted(true);
+        window.scrollTo(0, 0);
       }
     } catch {
       alert("Something went wrong. Please try again.");
