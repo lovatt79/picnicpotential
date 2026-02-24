@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import HeroEditor from "@/components/admin/HeroEditor";
 
 interface Testimonial {
   id: string;
@@ -81,6 +82,11 @@ export default function TestimonialsPage() {
           </svg>
           Add Testimonial
         </Link>
+      </div>
+
+      {/* Hero Editor */}
+      <div className="mb-8">
+        <HeroEditor pageKey="testimonials" label="Testimonials Page Hero" />
       </div>
 
       {testimonials.length > 0 ? (

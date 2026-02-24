@@ -246,6 +246,29 @@ export function generatePartnerSchema(partner: {
 }
 
 /**
+ * WebPage schema for general pages (privacy policy, etc.)
+ */
+export function generateWebPageSchema(page: {
+  title: string;
+  description: string;
+  path: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": page.title,
+    "description": page.description,
+    "url": `${SITE_URL}${page.path}`,
+    "isPartOf": {
+      "@id": `${SITE_URL}/#website`
+    },
+    "about": {
+      "@id": `${SITE_URL}/#organization`
+    }
+  };
+}
+
+/**
  * Product schema for seating/rental items
  */
 export function generateProductSchema(item: {

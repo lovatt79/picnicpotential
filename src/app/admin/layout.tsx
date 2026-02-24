@@ -1,4 +1,5 @@
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import AdminHelpPanel from "@/components/admin/AdminHelpPanel";
 
 // Force dynamic rendering for all admin pages
 export const dynamic = 'force-dynamic';
@@ -17,6 +18,7 @@ export default function AdminLayout({
           {children}
         </div>
       </main>
+      <AdminHelpPanel />
     </div>
   );
 }

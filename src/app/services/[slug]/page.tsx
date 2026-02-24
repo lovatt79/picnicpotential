@@ -38,6 +38,36 @@ function getIconEmoji(icon: string): string {
     gift: "🎁",
     music: "🎵",
     palette: "🎨",
+    strawberry: "🍓",
+    flowers: "💐",
+    champagne: "🥂",
+    cheese: "🧀",
+    cupcake: "🧁",
+    vase: "🏺",
+    games: "🎲",
+    drinks: "🍹",
+    soda: "🥤",
+    juicebox: "🧃",
+    frisbee: "🥏",
+    cornhole: "🎯",
+    connect4: "🔴",
+    outdoors: "🌳",
+    events: "🎉",
+    scenery: "🏞️",
+    target: "🎯",
+    chairs: "🪑",
+    tables: "🍽️",
+    wine: "🍷",
+    beer: "🍺",
+    winery: "🍇",
+    garden: "🌿",
+    beach: "🏖️",
+    linen: "🧵",
+    tablecloth: "🫗",
+    lights: "💡",
+    dinnerparty: "🕯️",
+    namecard: "📋",
+    balloons: "🎈",
   };
   return iconMap[icon] || "✓";
 }
@@ -253,7 +283,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
                           <div className="text-3xl mb-3">{getIconEmoji(feature.icon)}</div>
                         )}
                         <h3 className="font-serif text-xl text-charcoal mb-2">{feature.title}</h3>
-                        <p className="text-warm-gray">{feature.description}</p>
+                        <p className="text-warm-gray whitespace-pre-line">{feature.description}</p>
                       </div>
                     </div>
                   ))}

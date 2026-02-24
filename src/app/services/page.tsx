@@ -127,11 +127,11 @@ export default async function ServicesPage() {
     getPageHero("services"),
   ]);
 
-  // Generate schema markup
-  const serviceListSchema = services.length > 0 ? generateItemListSchema(services, "services") : null;
+  // Generate schema markup (only for categorized services shown on this page)
+  const categorizedServices = services.filter((s) => s.section_id);
+  const serviceListSchema = categorizedServices.length > 0 ? generateItemListSchema(categorizedServices, "services") : null;
 
   // Group services by section
-  const uncategorizedServices = services.filter((s) => !s.section_id);
   const servicesBySection: Record<string, typeof services> = {};
   for (const section of sections) {
     servicesBySection[section.id] = services
@@ -181,30 +181,6 @@ export default async function ServicesPage() {
         </div>
       </section>
 
-      {/* Uncategorized Services (no section heading) */}
-      {uncategorizedServices.length > 0 && (() => {
-        const cols = getCardCols(uncategorizedServices.length);
-        return (
-          <section className="py-20">
-            <div className="mx-auto max-w-7xl px-4">
-              <div className="flex flex-wrap justify-center gap-8">
-                {uncategorizedServices.map((service) => (
-                  <div key={service.slug} className={serviceCardWidth[cols]}>
-                    <ServiceCard
-                      title={service.title}
-                      description={service.description}
-                      image={service.image}
-                      href={service.external_url || `/services/${service.slug}`}
-                      external={!!service.external_url}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        );
-      })()}
-
       {/* Named Sections */}
       {sections.map((section, index) => {
         const sectionServices = servicesBySection[section.id] || [];
@@ -212,10 +188,10 @@ export default async function ServicesPage() {
 
         const cols = getCardCols(sectionServices.length);
         // Alternate background for visual separation
-        const hasBg = (uncategorizedServices.length > 0 ? index % 2 === 0 : index % 2 === 1);
+        const hasBg = index % 2 === 1;
 
         return (
-          <section key={section.id} id={slugify(section.title)} className={`py-20 ${hasBg ? 'bg-white' : ''}`}>
+          <section key={section.id} id={slugify(section.title)} className={`py-20 scroll-mt-24 ${hasBg ? 'bg-white' : ''}`}>
             <div className="mx-auto max-w-6xl px-4">
               <div className="text-center">
                 <h2 className="font-serif text-3xl text-charcoal md:text-4xl">

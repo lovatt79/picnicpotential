@@ -5,10 +5,27 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { NAV_LINKS } from "@/lib/constants";
+import type { NavItem } from "@/components/LayoutShell";
 
-export default function Navbar() {
+export default function Navbar({ navItems }: { navItems?: NavItem[] }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [openMobileDropdown, setOpenMobileDropdown] = useState<string | null>(null);
   const pathname = usePathname();
+
+  // Fall back to static NAV_LINKS if no navItems provided
+  const links: NavItem[] = navItems && navItems.length > 0
+    ? navItems
+    : NAV_LINKS.map((link, i) => ({
+        id: String(i),
+        label: link.label,
+        href: link.href,
+        open_in_new_tab: false,
+        children: [],
+      }));
+
+  const toggleMobileDropdown = (id: string) => {
+    setOpenMobileDropdown((prev) => (prev === id ? null : id));
+  };
 
   return (
     <nav className="bg-cream sticky top-0 z-50 border-b border-sage/30">
@@ -28,19 +45,50 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex lg:items-center lg:gap-1">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`px-3 py-2 text-sm font-medium transition-colors hover:text-gold ${
-                  pathname === link.href
-                    ? "text-gold"
-                    : "text-charcoal"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {links.map((link) =>
+              link.children.length > 0 ? (
+                /* Parent with dropdown */
+                <div key={link.id} className="relative group">
+                  <Link
+                    href={link.href}
+                    {...(link.open_in_new_tab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    className={`inline-flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors hover:text-gold ${
+                      pathname === link.href ? "text-gold" : "text-charcoal"
+                    }`}
+                  >
+                    {link.label}
+                    <svg className="w-3 h-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </Link>
+                  {/* Dropdown */}
+                  <div className="absolute top-full left-0 hidden group-hover:block bg-white rounded-lg shadow-lg border border-sage/20 py-2 min-w-[180px] z-50">
+                    {link.children.map((child) => (
+                      <Link
+                        key={child.id}
+                        href={child.href}
+                        {...(child.open_in_new_tab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                        className="block px-4 py-2 text-sm text-charcoal hover:bg-sage-light/50 transition-colors"
+                      >
+                        {child.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                /* Regular link */
+                <Link
+                  key={link.id}
+                  href={link.href}
+                  {...(link.open_in_new_tab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  className={`px-3 py-2 text-sm font-medium transition-colors hover:text-gold ${
+                    pathname === link.href ? "text-gold" : "text-charcoal"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              )
+            )}
             <Link
               href="/request"
               className="ml-4 rounded-full bg-charcoal px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-gold"
@@ -72,18 +120,67 @@ export default function Navbar() {
       {isOpen && (
         <div className="lg:hidden bg-sage-light">
           <div className="px-4 py-6 space-y-4">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setIsOpen(false)}
-                className={`block text-2xl font-serif transition-colors hover:text-gold ${
-                  pathname === link.href ? "text-gold" : "text-charcoal"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {links.map((link) =>
+              link.children.length > 0 ? (
+                <div key={link.id}>
+                  <button
+                    onClick={() => toggleMobileDropdown(link.id)}
+                    className={`flex items-center justify-between w-full text-2xl font-serif transition-colors hover:text-gold ${
+                      pathname === link.href ? "text-gold" : "text-charcoal"
+                    }`}
+                  >
+                    <span>{link.label}</span>
+                    <svg
+                      className={`w-5 h-5 transition-transform ${openMobileDropdown === link.id ? "rotate-180" : ""}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {openMobileDropdown === link.id && (
+                    <div className="ml-4 mt-2 space-y-2">
+                      <Link
+                        href={link.href}
+                        onClick={() => setIsOpen(false)}
+                        {...(link.open_in_new_tab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                        className={`block text-lg font-serif transition-colors hover:text-gold ${
+                          pathname === link.href ? "text-gold" : "text-charcoal"
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                      {link.children.map((child) => (
+                        <Link
+                          key={child.id}
+                          href={child.href}
+                          onClick={() => setIsOpen(false)}
+                          {...(child.open_in_new_tab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                          className={`block text-lg font-serif transition-colors hover:text-gold ${
+                            pathname === child.href ? "text-gold" : "text-charcoal"
+                          }`}
+                        >
+                          {child.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  key={link.id}
+                  href={link.href}
+                  onClick={() => setIsOpen(false)}
+                  {...(link.open_in_new_tab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  className={`block text-2xl font-serif transition-colors hover:text-gold ${
+                    pathname === link.href ? "text-gold" : "text-charcoal"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              )
+            )}
             <Link
               href="/request"
               onClick={() => setIsOpen(false)}

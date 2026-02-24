@@ -302,12 +302,12 @@ export default async function PartnersPage() {
             to quality and creating memorable experiences. Get in touch to learn more
             about our partnership opportunities.
           </p>
-          <Link
-            href="/contact"
+          <a
+            href="mailto:info@picnicpotential.com?subject=Partnership%20Request"
             className="mt-8 inline-block rounded-full bg-charcoal px-8 py-3.5 text-base font-medium text-white transition-colors hover:bg-gold hover:text-charcoal"
           >
             Contact Us About Partnering
-          </Link>
+          </a>
         </div>
       </section>
 

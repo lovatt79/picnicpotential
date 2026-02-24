@@ -64,6 +64,8 @@ export default function SubmissionDetailPage() {
     </div>
   );
 
+  const isHint = submission.event_type === "Send a Hint";
+
   return (
     <div>
       <div className="mb-8">
@@ -74,7 +76,10 @@ export default function SubmissionDetailPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-serif text-3xl text-charcoal">{submission.first_name} {submission.last_name}</h1>
-            <p className="text-warm-gray mt-1">Submitted {new Date(submission.created_at).toLocaleString()}</p>
+            <p className="text-warm-gray mt-1">
+              {isHint && <span className="inline-block px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-700 mr-2">Hint</span>}
+              Submitted {new Date(submission.created_at).toLocaleString()}
+            </p>
           </div>
           <span className={`px-3 py-1 text-sm rounded-full ${statusColors[submission.status]}`}>{submission.status}</span>
         </div>
@@ -83,66 +88,84 @@ export default function SubmissionDetailPage() {
       <div className="grid md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-6">
           <div className="bg-white rounded-xl p-6 shadow-sm">
-            <Section title="Contact Information">
-              <Field label="Name" value={`${submission.first_name} ${submission.last_name}`} />
+            <Section title={isHint ? "Sender Information" : "Contact Information"}>
+              <Field label="Name" value={`${submission.first_name || ""}${submission.last_name ? ` ${submission.last_name}` : ""}`} />
               <Field label="Email" value={submission.email} />
-              <Field label="Phone" value={submission.phone} />
+              {!isHint && <Field label="Phone" value={submission.phone} />}
             </Section>
 
-            <Section title="Event Details">
-              <Field label="Event Type" value={submission.event_type} />
-              <Field label="Event Date" value={submission.event_date ? new Date(submission.event_date).toLocaleDateString() : null} />
-              <Field label="Backup Date" value={submission.backup_date ? new Date(submission.backup_date).toLocaleDateString() : null} />
-              <Field label="Event Time" value={submission.event_time} />
-              <Field label="Additional Time" value={submission.additional_time} />
-              <Field label="Occasion" value={submission.occasion} />
-              <Field label="City" value={submission.city} />
-              <Field label="Location" value={submission.exact_location} />
-              <Field label="Group Size" value={submission.group_size} />
-              <Field label="Guest Names" value={submission.guest_names} />
-            </Section>
-
-            <Section title="Color Choices">
-              <Field label="1st Choice" value={submission.color_choice_1} />
-              {submission.color_choice_1_other && <Field label="1st Choice Other" value={submission.color_choice_1_other} />}
-              <Field label="2nd Choice" value={submission.color_choice_2} />
-              {submission.color_choice_2_other && <Field label="2nd Choice Other" value={submission.color_choice_2_other} />}
-            </Section>
-
-            {(submission.food_options?.length > 0 || submission.dessert_options?.length > 0 || submission.addon_options?.length > 0) && (
-              <Section title="Selections">
-                {submission.food_options?.length > 0 && (
-                  <div className="mb-3">
-                    <p className="text-sm font-medium text-charcoal mb-1">Food:</p>
-                    <ul className="text-sm text-warm-gray list-disc list-inside">{submission.food_options.map((f, i) => <li key={i}>{f}</li>)}</ul>
-                  </div>
+            {isHint ? (
+              <>
+                {submission.occasion && (
+                  <Section title="Hint Details">
+                    <Field label="Occasion" value={submission.occasion} />
+                  </Section>
                 )}
-                {submission.dessert_options?.length > 0 && (
-                  <div className="mb-3">
-                    <p className="text-sm font-medium text-charcoal mb-1">Desserts:</p>
-                    <ul className="text-sm text-warm-gray list-disc list-inside">{submission.dessert_options.map((d, i) => <li key={i}>{d}</li>)}</ul>
-                    {submission.dessert_other && <p className="text-sm text-warm-gray mt-1">Other: {submission.dessert_other}</p>}
-                  </div>
-                )}
-                {submission.addon_options?.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium text-charcoal mb-1">Add-ons:</p>
-                    <ul className="text-sm text-warm-gray list-disc list-inside">{submission.addon_options.map((a, i) => <li key={i}>{a}</li>)}</ul>
-                  </div>
-                )}
-              </Section>
-            )}
 
-            <Section title="Attribution">
-              <Field label="How They Heard" value={submission.how_did_you_hear} />
-              {submission.how_did_you_hear_other && <Field label="Other" value={submission.how_did_you_hear_other} />}
-              {submission.referred_by && <Field label="Referred By" value={submission.referred_by} />}
-            </Section>
+                {submission.notes && (
+                  <Section title="Recipient & Message">
+                    <p className="text-sm text-charcoal whitespace-pre-wrap">{submission.notes}</p>
+                  </Section>
+                )}
+              </>
+            ) : (
+              <>
+                <Section title="Event Details">
+                  <Field label="Event Type" value={submission.event_type} />
+                  <Field label="Event Date" value={submission.event_date ? new Date(submission.event_date).toLocaleDateString() : null} />
+                  <Field label="Backup Date" value={submission.backup_date ? new Date(submission.backup_date).toLocaleDateString() : null} />
+                  <Field label="Event Time" value={submission.event_time} />
+                  <Field label="Additional Time" value={submission.additional_time} />
+                  <Field label="Occasion" value={submission.occasion} />
+                  <Field label="City" value={submission.city} />
+                  <Field label="Location" value={submission.exact_location} />
+                  <Field label="Group Size" value={submission.group_size} />
+                  <Field label="Guest Names" value={submission.guest_names} />
+                </Section>
 
-            {submission.notes && (
-              <Section title="Customer Notes">
-                <p className="text-sm text-charcoal whitespace-pre-wrap">{submission.notes}</p>
-              </Section>
+                <Section title="Color Choices">
+                  <Field label="1st Choice" value={submission.color_choice_1} />
+                  {submission.color_choice_1_other && <Field label="1st Choice Other" value={submission.color_choice_1_other} />}
+                  <Field label="2nd Choice" value={submission.color_choice_2} />
+                  {submission.color_choice_2_other && <Field label="2nd Choice Other" value={submission.color_choice_2_other} />}
+                </Section>
+
+                {(submission.food_options?.length > 0 || submission.dessert_options?.length > 0 || submission.addon_options?.length > 0) && (
+                  <Section title="Selections">
+                    {submission.food_options?.length > 0 && (
+                      <div className="mb-3">
+                        <p className="text-sm font-medium text-charcoal mb-1">Food:</p>
+                        <ul className="text-sm text-warm-gray list-disc list-inside">{submission.food_options.map((f, i) => <li key={i}>{f}</li>)}</ul>
+                      </div>
+                    )}
+                    {submission.dessert_options?.length > 0 && (
+                      <div className="mb-3">
+                        <p className="text-sm font-medium text-charcoal mb-1">Desserts:</p>
+                        <ul className="text-sm text-warm-gray list-disc list-inside">{submission.dessert_options.map((d, i) => <li key={i}>{d}</li>)}</ul>
+                        {submission.dessert_other && <p className="text-sm text-warm-gray mt-1">Other: {submission.dessert_other}</p>}
+                      </div>
+                    )}
+                    {submission.addon_options?.length > 0 && (
+                      <div>
+                        <p className="text-sm font-medium text-charcoal mb-1">Add-ons:</p>
+                        <ul className="text-sm text-warm-gray list-disc list-inside">{submission.addon_options.map((a, i) => <li key={i}>{a}</li>)}</ul>
+                      </div>
+                    )}
+                  </Section>
+                )}
+
+                <Section title="Attribution">
+                  <Field label="How They Heard" value={submission.how_did_you_hear} />
+                  {submission.how_did_you_hear_other && <Field label="Other" value={submission.how_did_you_hear_other} />}
+                  {submission.referred_by && <Field label="Referred By" value={submission.referred_by} />}
+                </Section>
+
+                {submission.notes && (
+                  <Section title="Customer Notes">
+                    <p className="text-sm text-charcoal whitespace-pre-wrap">{submission.notes}</p>
+                  </Section>
+                )}
+              </>
             )}
           </div>
         </div>

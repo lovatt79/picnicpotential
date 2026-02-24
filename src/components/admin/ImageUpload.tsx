@@ -129,73 +129,55 @@ export default function ImageUpload({
       </label>
 
       {previewUrl ? (
-        <div className="relative">
-          <div
-            className="relative overflow-hidden rounded-lg border-2 border-gray-200"
-            style={{ aspectRatio }}
-          >
-            <Image
-              src={previewUrl}
-              alt="Preview"
-              fill
-              className="object-cover"
-            />
+        <div className="flex items-center gap-3">
+          <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 shrink-0">
+            <Image src={previewUrl} alt="Preview" fill className="object-cover" />
           </div>
-          <div className="mt-2 flex gap-3">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="text-sm text-gold hover:text-gold-dark font-medium"
+            >
+              Replace
+            </button>
             <button
               type="button"
               onClick={() => setShowMediaPicker(true)}
               className="text-sm text-gold hover:text-gold-dark font-medium"
             >
-              Replace from Library
+              Library
             </button>
             <button
               type="button"
               onClick={handleRemove}
               className="text-sm text-red-600 hover:text-red-700 font-medium"
             >
-              Remove Image
+              Remove
             </button>
           </div>
         </div>
       ) : (
-        <div className="space-y-2">
-          <div
-            className="relative overflow-hidden rounded-lg border-2 border-dashed border-gray-300 hover:border-gold transition-colors cursor-pointer"
-            style={{ aspectRatio }}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
             onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg text-charcoal hover:border-gold hover:text-gold transition-colors"
           >
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-              <svg
-                className="w-12 h-12 text-gray-400 mb-3"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              <p className="text-sm text-gray-600 font-medium mb-1">
-                Click to upload or drag and drop
-              </p>
-              <p className="text-xs text-gray-500">
-                PNG, JPG, GIF up to {maxSizeMB}MB
-              </p>
-            </div>
-          </div>
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            Upload Image
+          </button>
           <button
             type="button"
             onClick={() => setShowMediaPicker(true)}
-            className="flex items-center gap-1.5 text-sm text-gold hover:text-gold-dark font-medium transition-colors"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg text-charcoal hover:border-gold hover:text-gold transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            or choose from Media Library
+            Choose from Library
           </button>
         </div>
       )}

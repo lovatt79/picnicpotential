@@ -2,6 +2,15 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import {
+  CheckboxOption,
+  PricedCheckboxOption,
+  RadioOption,
+  formatPrice,
+  inputClass,
+  getQuantityUnit,
+  type PricedOption,
+} from "@/components/form/FormControls";
 
 // ─── Step definitions with sidebar content ──────────────────
 
@@ -85,8 +94,8 @@ interface FormData {
   colorChoice1Other: string;
   colorChoice2: string;
   colorChoice2Other: string;
-  foodOptions: string[];
-  dessertOptions: string[];
+  foodOptions: Record<string, number>;
+  dessertOptions: Record<string, number>;
   dessertOther: string;
   addOns: string[];
   howDidYouHear: string;
@@ -95,26 +104,7 @@ interface FormData {
   notes: string;
 }
 
-interface PricedOption {
-  label: string;
-  price: number | null;
-  price_unit: string | null;
-  min_quantity: number | null;
-  is_vegan?: boolean;
-  category?: string;
-}
-
 // ─── Helpers ────────────────────────────────────────────────
-
-function formatPrice(price: number | null, priceUnit: string | null): string {
-  if (!price) return "";
-  const unit =
-    priceUnit === "per_person" ? "/person"
-    : priceUnit === "per_dozen" ? "/dozen"
-    : priceUnit === "per_hour" ? "/hour"
-    : "";
-  return `$${price % 1 === 0 ? price.toFixed(0) : price.toFixed(2)}${unit}`;
-}
 
 const ADDITIONAL_TIME = [
   "1 Hour / $50",
@@ -123,105 +113,7 @@ const ADDITIONAL_TIME = [
   "4+ Hours (we will contact you to discuss pricing)",
 ];
 
-// ─── Sub-components ─────────────────────────────────────────
-
-function CheckboxOption({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
-  return (
-    <label
-      className={`flex cursor-pointer items-start gap-3 rounded-xl border-2 p-3 transition-colors ${
-        checked ? "border-gold bg-gold/5" : "border-sage/50 hover:border-sage-dark"
-      }`}
-    >
-      <input type="checkbox" checked={checked} onChange={onChange} className="sr-only" />
-      <div
-        className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 ${
-          checked ? "border-gold bg-gold text-white" : "border-sage"
-        }`}
-      >
-        {checked && (
-          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-        )}
-      </div>
-      <span className="text-sm text-charcoal leading-snug">{label}</span>
-    </label>
-  );
-}
-
-function PricedCheckboxOption({
-  label, price, priceUnit, minQuantity, isVegan, checked, onChange,
-}: {
-  label: string;
-  price: number | null;
-  priceUnit: string | null;
-  minQuantity: number | null;
-  isVegan?: boolean;
-  checked: boolean;
-  onChange: () => void;
-}) {
-  const priceText = formatPrice(price, priceUnit);
-  return (
-    <label
-      className={`flex cursor-pointer items-start gap-3 rounded-xl border-2 p-3 transition-colors ${
-        checked ? "border-gold bg-gold/5" : "border-sage/50 hover:border-sage-dark"
-      }`}
-    >
-      <input type="checkbox" checked={checked} onChange={onChange} className="sr-only" />
-      <div
-        className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 ${
-          checked ? "border-gold bg-gold text-white" : "border-sage"
-        }`}
-      >
-        {checked && (
-          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <span className="text-sm text-charcoal leading-snug">
-            {label}
-            {isVegan && <span className="ml-1.5 inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">Vegan</span>}
-          </span>
-          {priceText && (
-            <span className="flex-shrink-0 rounded-full bg-gold/10 px-2.5 py-0.5 text-xs font-semibold text-gold-dark whitespace-nowrap">
-              {priceText}
-            </span>
-          )}
-        </div>
-        {minQuantity && minQuantity > 1 && (
-          <p className="mt-0.5 text-xs text-warm-gray">Min order: {minQuantity}</p>
-        )}
-      </div>
-    </label>
-  );
-}
-
-function RadioOption({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
-  return (
-    <label
-      className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-3 transition-colors ${
-        checked ? "border-gold bg-gold/5" : "border-sage/50 hover:border-sage-dark"
-      }`}
-    >
-      <input type="radio" checked={checked} onChange={onChange} className="sr-only" />
-      <div
-        className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 ${
-          checked ? "border-gold" : "border-sage"
-        }`}
-      >
-        {checked && <div className="h-2.5 w-2.5 rounded-full bg-gold" />}
-      </div>
-      <span className="text-sm text-charcoal">{label}</span>
-    </label>
-  );
-}
-
-// ─── Input class helper ─────────────────────────────────────
-
-const inputClass = "w-full rounded-lg border border-sage px-4 py-2.5 text-sm focus:border-gold focus:outline-none";
+// ─── Sub-components imported from @/components/form/FormControls ──
 
 // ─── Main Component ─────────────────────────────────────────
 
@@ -288,8 +180,8 @@ export default function MultiStepForm() {
     colorChoice1Other: "",
     colorChoice2: "",
     colorChoice2Other: "",
-    foodOptions: [],
-    dessertOptions: [],
+    foodOptions: {},
+    dessertOptions: {},
     dessertOther: "",
     addOns: [],
     howDidYouHear: "",
@@ -302,22 +194,54 @@ export default function MultiStepForm() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const toggleArray = (field: "foodOptions" | "dessertOptions" | "addOns", value: string) => {
+  const toggleAddOn = (value: string) => {
     setFormData((prev) => ({
       ...prev,
-      [field]: prev[field].includes(value)
-        ? prev[field].filter((v) => v !== value)
-        : [...prev[field], value],
+      addOns: prev.addOns.includes(value)
+        ? prev.addOns.filter((v) => v !== value)
+        : [...prev.addOns, value],
     }));
+  };
+
+  const toggleQuantityItem = (field: "foodOptions" | "dessertOptions", label: string, defaultQty: number) => {
+    setFormData((prev) => {
+      const current = { ...prev[field] };
+      if (label in current) {
+        delete current[label];
+      } else {
+        current[label] = defaultQty;
+      }
+      return { ...prev, [field]: current };
+    });
+  };
+
+  const updateQuantity = (field: "foodOptions" | "dessertOptions", label: string, qty: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: { ...prev[field], [label]: qty },
+    }));
+  };
+
+  const formatSelections = (items: Record<string, number>, optionsList: PricedOption[]): string[] => {
+    return Object.entries(items).map(([label, qty]) => {
+      const option = optionsList.find((o) => o.label === label);
+      const unit = getQuantityUnit(option?.price_unit ?? null);
+      return unit ? `${label} (${qty} ${unit})` : `${label} (x${qty})`;
+    });
   };
 
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
+      const payload = {
+        ...formData,
+        foodOptions: formatSelections(formData.foodOptions, foodOptions),
+        dessertOptions: formatSelections(formData.dessertOptions, dessertOptions),
+      };
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
       if (res.ok) {
         setSubmitted(true);
@@ -603,8 +527,12 @@ export default function MultiStepForm() {
                       price={item.price}
                       priceUnit={item.price_unit}
                       minQuantity={item.min_quantity}
-                      checked={formData.foodOptions.includes(item.label)}
-                      onChange={() => toggleArray("foodOptions", item.label)}
+                      checked={item.label in formData.foodOptions}
+                      onChange={() => toggleQuantityItem("foodOptions", item.label, item.min_quantity || 1)}
+                      showQuantity
+                      quantity={formData.foodOptions[item.label]}
+                      onQuantityChange={(qty) => updateQuantity("foodOptions", item.label, qty)}
+                      quantityUnit={getQuantityUnit(item.price_unit)}
                     />
                   ))}
                 </div>
@@ -625,8 +553,12 @@ export default function MultiStepForm() {
                       priceUnit={item.price_unit}
                       minQuantity={item.min_quantity}
                       isVegan={item.is_vegan}
-                      checked={formData.dessertOptions.includes(item.label)}
-                      onChange={() => toggleArray("dessertOptions", item.label)}
+                      checked={item.label in formData.dessertOptions}
+                      onChange={() => toggleQuantityItem("dessertOptions", item.label, item.min_quantity || 1)}
+                      showQuantity
+                      quantity={formData.dessertOptions[item.label]}
+                      onQuantityChange={(qty) => updateQuantity("dessertOptions", item.label, qty)}
+                      quantityUnit={getQuantityUnit(item.price_unit)}
                     />
                   ))}
                 </div>
@@ -651,7 +583,7 @@ export default function MultiStepForm() {
                       priceUnit={item.price_unit}
                       minQuantity={null}
                       checked={formData.addOns.includes(item.label)}
-                      onChange={() => toggleArray("addOns", item.label)}
+                      onChange={() => toggleAddOn(item.label)}
                     />
                   ))}
                 </div>

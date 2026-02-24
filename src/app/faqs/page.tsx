@@ -13,6 +13,27 @@ export const metadata: Metadata = {
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
+async function getPageHero() {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("page_heroes")
+      .select("*")
+      .eq("page_key", "faqs")
+      .single();
+
+    if (error) {
+      console.error("Error fetching FAQs hero:", error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error in getPageHero:", error);
+    return null;
+  }
+}
+
 async function getFAQs() {
   try {
     const supabase = await createClient();
@@ -35,7 +56,11 @@ async function getFAQs() {
 }
 
 export default async function FAQsPage() {
-  const faqs = await getFAQs();
+  const [faqs, hero] = await Promise.all([getFAQs(), getPageHero()]);
+
+  const heroTitle = hero?.title || "Frequently Asked Questions";
+  const heroDescription = hero?.description || "Find answers to common questions about our services, booking process, and more.";
+  const heroImageUrl = hero?.image_url || "https://lh3.googleusercontent.com/pw/AP1GczP5aPO_J65w7tCQhS_dvxiXPygo2J_mlf15Tap0mZXx0RbWHndP6y4tYv8gH_SM9jE8AKFGCpQshRx8aPjHmVkk7E-5zTEIA-jibuT0GMbdTV-7rwfkbzR7bOeti1VH-sTcEIEPsl7q73K-5daGkP05Mg=w1024-h683-s-no-gm?authuser=0";
 
   // Generate FAQ schema
   const faqSchema = faqs.length > 0 ? generateFAQSchema(faqs) : null;
@@ -54,7 +79,7 @@ export default async function FAQsPage() {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
           <img
-            src="https://lh3.googleusercontent.com/pw/AP1GczP5aPO_J65w7tCQhS_dvxiXPygo2J_mlf15Tap0mZXx0RbWHndP6y4tYv8gH_SM9jE8AKFGCpQshRx8aPjHmVkk7E-5zTEIA-jibuT0GMbdTV-7rwfkbzR7bOeti1VH-sTcEIEPsl7q73K-5daGkP05Mg=w1024-h683-s-no-gm?authuser=0"
+            src={heroImageUrl}
             alt="Picnic Potential FAQ"
             className="h-full w-full object-cover"
           />
@@ -62,10 +87,10 @@ export default async function FAQsPage() {
         </div>
         <div className="relative mx-auto max-w-4xl px-4 py-24 text-center">
           <h1 className="font-serif text-4xl text-white md:text-5xl">
-            Frequently Asked Questions
+            {heroTitle}
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-white/85">
-            Find answers to common questions about our services, booking process, and more.
+            {heroDescription}
           </p>
         </div>
       </section>
@@ -83,7 +108,7 @@ export default async function FAQsPage() {
         </div>
       </section>
 
-      {/* Privacy Policy */}
+      {/* Privacy Policy & Media Disclaimer */}
       <section className="bg-white py-20">
         <div className="mx-auto max-w-3xl px-4">
           <h2 className="font-serif text-3xl text-charcoal md:text-4xl">Privacy Policy</h2>
@@ -104,6 +129,35 @@ export default async function FAQsPage() {
               and request to be removed from the client contact list. Picnic Potential will
               never sell client information to a third party.
             </p>
+          </div>
+
+          <h2 className="font-serif text-3xl text-charcoal md:text-4xl mt-16">Media Disclaimer</h2>
+          <div className="mt-8 rounded-2xl bg-cream p-8 space-y-4">
+            <p className="text-sm leading-relaxed text-warm-gray">
+              The Client grants the Provider permission to capture photographs, videos, and
+              other media during the event for promotional and marketing use, including on
+              social media, websites, and print materials.
+            </p>
+            <p className="text-sm leading-relaxed text-warm-gray">
+              The Client may opt out of this media release by providing written notice prior
+              to the event. If written non-consent is received, the Provider may still use
+              images of the event setup only, provided no identifying details, names, or
+              images of the Client or guests are included.
+            </p>
+            <p className="text-sm leading-relaxed text-warm-gray">
+              The Client agrees to inform the Provider in advance if a professional
+              photographer, videographer, or social media professional will be present at the
+              event.
+            </p>
+          </div>
+
+          <div className="mt-8 text-center">
+            <Link
+              href="/privacy-policy"
+              className="text-sm text-gold-dark hover:text-gold transition-colors underline"
+            >
+              View Full Privacy Policy &amp; Media Disclaimer
+            </Link>
           </div>
         </div>
       </section>

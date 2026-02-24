@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { PartnersList } from "./partners-list";
+import HeroEditor from "@/components/admin/HeroEditor";
 
 export default async function PartnersPage() {
   const supabase = await createClient();
@@ -28,10 +29,14 @@ export default async function PartnersPage() {
         </Link>
       </div>
 
-      <PartnersList
-        initialPartners={partners || []}
-        initialSections={sections || []}
-      />
+      <HeroEditor pageKey="partners" label="Partners Page Hero" />
+
+      <div className="mt-8">
+        <PartnersList
+          initialPartners={partners || []}
+          initialSections={sections || []}
+        />
+      </div>
     </div>
   );
 }

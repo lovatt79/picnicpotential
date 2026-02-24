@@ -11,6 +11,27 @@ export const metadata: Metadata = {
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
+async function getPageHero() {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("page_heroes")
+      .select("*")
+      .eq("page_key", "testimonials")
+      .single();
+
+    if (error) {
+      console.error("Error fetching testimonials hero:", error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error in getPageHero:", error);
+    return null;
+  }
+}
+
 async function getTestimonials() {
   try {
     const supabase = await createClient();
@@ -56,7 +77,14 @@ function formatReviewDate(dateStr: string | null): string | null {
 }
 
 export default async function TestimonialsPage() {
-  const testimonials = await getTestimonials();
+  const [testimonials, hero] = await Promise.all([
+    getTestimonials(),
+    getPageHero(),
+  ]);
+
+  const heroTitle = hero?.title || "What Our Clients Say";
+  const heroDescription = hero?.description || "We're honored to create unforgettable experiences for our clients. Here's what they have to say.";
+  const heroImageUrl = hero?.image_url;
 
   // Generate review schema
   const reviewsSchema = testimonials.length > 0 ? generateReviewsSchema(testimonials) : null;
@@ -72,36 +100,75 @@ export default async function TestimonialsPage() {
       )}
 
       {/* Hero */}
-      <section className="bg-sage py-20">
-        <div className="mx-auto max-w-4xl px-4 text-center">
-          <h1 className="font-serif text-4xl text-charcoal md:text-5xl">
-            What Our Clients Say
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-charcoal/70">
-            We&apos;re honored to create unforgettable experiences for our clients.
-            Here&apos;s what they have to say.
-          </p>
-          {testimonials.length > 0 && (
-            <div className="mt-8 flex items-center justify-center gap-3">
-              <div className="flex gap-0.5">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <svg
-                    key={star}
-                    className="h-6 w-6 text-gold"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
+      {heroImageUrl ? (
+        <section className="relative overflow-hidden">
+          <div className="absolute inset-0">
+            <img
+              src={heroImageUrl}
+              alt="Picnic Potential Testimonials"
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-charcoal/50" />
+          </div>
+          <div className="relative mx-auto max-w-4xl px-4 py-24 text-center">
+            <h1 className="font-serif text-4xl text-white md:text-5xl">
+              {heroTitle}
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-white/85">
+              {heroDescription}
+            </p>
+            {testimonials.length > 0 && (
+              <div className="mt-8 flex items-center justify-center gap-3">
+                <div className="flex gap-0.5">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg
+                      key={star}
+                      className="h-6 w-6 text-gold"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <span className="text-white/80 text-lg font-medium">
+                  5.0 &middot; 100+ Online Reviews
+                </span>
               </div>
-              <span className="text-charcoal/70 text-lg font-medium">
-                5.0 &middot; 100+ Online Reviews
-              </span>
-            </div>
-          )}
-        </div>
-      </section>
+            )}
+          </div>
+        </section>
+      ) : (
+        <section className="bg-sage py-20">
+          <div className="mx-auto max-w-4xl px-4 text-center">
+            <h1 className="font-serif text-4xl text-charcoal md:text-5xl">
+              {heroTitle}
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-charcoal/70">
+              {heroDescription}
+            </p>
+            {testimonials.length > 0 && (
+              <div className="mt-8 flex items-center justify-center gap-3">
+                <div className="flex gap-0.5">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg
+                      key={star}
+                      className="h-6 w-6 text-gold"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <span className="text-charcoal/70 text-lg font-medium">
+                  5.0 &middot; 100+ Online Reviews
+                </span>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Testimonials Grid */}
       <section className="py-20">
