@@ -178,14 +178,9 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
               {partner.name}
             </h1>
             <div className="flex items-center justify-center gap-4 text-sm flex-wrap">
-              <span className="px-4 py-2 rounded-full bg-gold/90 text-charcoal font-medium shadow-md">
+              <span className="px-4 py-2 rounded-full bg-white/90 text-charcoal font-medium shadow-md">
                 {partner.partner_type} Partner
               </span>
-              {partner.category && (
-                <span className="px-4 py-2 rounded-full bg-white/90 text-charcoal shadow-md">
-                  {partner.category}
-                </span>
-              )}
               {partner.location && (
                 <span className="text-white drop-shadow-md">📍 {partner.location}</span>
               )}
@@ -210,14 +205,9 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
               {partner.name}
             </h1>
             <div className="flex items-center justify-center gap-4 text-sm">
-              <span className="px-4 py-2 rounded-full bg-gold/20 text-gold font-medium">
+              <span className="px-4 py-2 rounded-full bg-charcoal/10 text-charcoal font-medium">
                 {partner.partner_type} Partner
               </span>
-              {partner.category && (
-                <span className="px-4 py-2 rounded-full bg-charcoal/10 text-charcoal">
-                  {partner.category}
-                </span>
-              )}
               {partner.location && (
                 <span className="text-warm-gray">📍 {partner.location}</span>
               )}
