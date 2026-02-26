@@ -408,3 +408,13 @@ export interface ProposalSubmission {
   created_at: string;
   updated_at: string;
 }
+
+// ─── Color Palette Types ──────────────────────────────────
+
+export interface ColorPaletteImage {
+  id: string;
+  image_id: string;
+  sort_order: number;
+  is_published: boolean;
+  created_at: string;
+}
