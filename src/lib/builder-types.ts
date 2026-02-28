@@ -57,15 +57,46 @@ export interface BuilderColumn {
   elements: BuilderElement[];
 }
 
-// ─── Container ───────────────────────────────────────────
+// ─── Row ─────────────────────────────────────────────────
 
 export type ColumnLayout = 1 | 2 | 3 | 4;
 
+export interface BuilderRow {
+  id: string;
+  columnLayout: ColumnLayout;
+  columns: BuilderColumn[];
+}
+
+// ─── Container ───────────────────────────────────────────
+
+export type ContainerBgColor = "" | "white" | "sage" | "sage-light" | "charcoal" | "gold-light";
+
 export interface BuilderContainer {
   id: string;
-  columns: BuilderColumn[];
-  columnLayout: ColumnLayout;
+  rows: BuilderRow[];
   label?: string;
+  bgColor?: ContainerBgColor;
+  // Legacy fields (pre-rows format) — kept for backward compat
+  columns?: BuilderColumn[];
+  columnLayout?: ColumnLayout;
+}
+
+/** Convert a container from legacy (columnLayout/columns) to new (rows) format */
+export function normalizeContainer(container: BuilderContainer): BuilderContainer {
+  if (container.rows && container.rows.length > 0) {
+    return container;
+  }
+  const row: BuilderRow = {
+    id: crypto.randomUUID(),
+    columnLayout: container.columnLayout || 1,
+    columns: container.columns || [{ id: crypto.randomUUID(), elements: [] }],
+  };
+  return {
+    id: container.id,
+    rows: [row],
+    label: container.label,
+    bgColor: container.bgColor || "",
+  };
 }
 
 // ─── Page ────────────────────────────────────────────────

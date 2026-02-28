@@ -32,7 +32,14 @@ export default async function BuilderListPage() {
         {(pages ?? []).map((page) => {
           const containers = (page.content as BuilderContainer[]) || [];
           const elementCount = containers.reduce(
-            (total, c) => total + c.columns.reduce((colTotal, col) => colTotal + col.elements.length, 0),
+            (total, c) => {
+              // Support both new (rows) and legacy (columns) format
+              if (c.rows && c.rows.length > 0) {
+                return total + c.rows.reduce((rt, row) =>
+                  rt + row.columns.reduce((ct, col) => ct + col.elements.length, 0), 0);
+              }
+              return total + (c.columns || []).reduce((ct, col) => ct + col.elements.length, 0);
+            },
             0
           );
 

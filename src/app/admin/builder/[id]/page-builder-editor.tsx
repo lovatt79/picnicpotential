@@ -21,7 +21,8 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { createClient } from "@/lib/supabase/client";
-import type { BuilderPage, BuilderContainer, BuilderColumn } from "@/lib/builder-types";
+import type { BuilderPage, BuilderContainer } from "@/lib/builder-types";
+import { normalizeContainer } from "@/lib/builder-types";
 import ContainerBlock, { ContainerBlockOverlay } from "@/components/admin/builder/ContainerBlock";
 import ImageUpload from "@/components/admin/ImageUpload";
 
@@ -39,8 +40,14 @@ function slugify(text: string): string {
 function createEmptyContainer(): BuilderContainer {
   return {
     id: crypto.randomUUID(),
-    columnLayout: 1,
-    columns: [{ id: crypto.randomUUID(), elements: [] }],
+    rows: [
+      {
+        id: crypto.randomUUID(),
+        columnLayout: 1,
+        columns: [{ id: crypto.randomUUID(), elements: [] }],
+      },
+    ],
+    bgColor: "",
   };
 }
 
@@ -80,7 +87,9 @@ export default function PageBuilderEditor({
   const [settingsMessage, setSettingsMessage] = useState<string | null>(null);
 
   // Content state
-  const [containers, setContainers] = useState<BuilderContainer[]>(page.content || []);
+  const [containers, setContainers] = useState<BuilderContainer[]>(
+    (page.content || []).map(normalizeContainer)
+  );
   const [contentSaving, setContentSaving] = useState(false);
   const [contentMessage, setContentMessage] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -150,7 +159,10 @@ export default function PageBuilderEditor({
   };
 
   const handleDeleteContainer = (index: number) => {
-    if (containers[index].columns.some((col) => col.elements.length > 0)) {
+    const hasElements = containers[index].rows.some((row) =>
+      row.columns.some((col) => col.elements.length > 0)
+    );
+    if (hasElements) {
       if (!confirm("This container has elements. Delete it?")) return;
     }
     updateContainers(containers.filter((_, i) => i !== index));
