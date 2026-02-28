@@ -106,11 +106,33 @@ export default function MediaPickerModal({
     }
   }, [isOpen, onClose]);
 
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
     const nextPage = page + 1;
     setPage(nextPage);
     fetchMedia(nextPage, search, true);
-  };
+  }, [page, search, fetchMedia]);
+
+  // Infinite scroll via IntersectionObserver
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen || !hasMore || loading) return;
+
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [isOpen, hasMore, loading, loadMore]);
 
   const toggleSelection = (item: MediaItem) => {
     setSelected((prev) => {
@@ -370,14 +392,8 @@ export default function MediaPickerModal({
               </div>
 
               {hasMore && (
-                <div className="text-center pt-2">
-                  <button
-                    type="button"
-                    onClick={loadMore}
-                    className="px-5 py-2 text-sm font-medium text-charcoal border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Load More
-                  </button>
+                <div ref={sentinelRef} className="flex justify-center py-4">
+                  <div className="w-6 h-6 border-2 border-gray-300 border-t-gold rounded-full animate-spin" />
                 </div>
               )}
             </>

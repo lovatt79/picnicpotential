@@ -1,6 +1,9 @@
 // ─── Element Types ───────────────────────────────────────
 
-export type ElementType = "title" | "text" | "image" | "code";
+export type ElementType = "title" | "text" | "image" | "code" | "gallery";
+
+export type GalleryLayout = "grid" | "carousel";
+export type GalleryColumns = 1 | 2 | 3 | 4;
 
 export interface TitleElement {
   id: string;
@@ -30,7 +33,22 @@ export interface CodeElement {
   language: string;
 }
 
-export type BuilderElement = TitleElement | TextElement | ImageElement | CodeElement;
+export interface GalleryImage {
+  id: string;
+  image_id: string | null;
+  image_url: string;
+  alt: string;
+}
+
+export interface GalleryElement {
+  id: string;
+  type: "gallery";
+  images: GalleryImage[];
+  layout: GalleryLayout;
+  columns: GalleryColumns;
+}
+
+export type BuilderElement = TitleElement | TextElement | ImageElement | CodeElement | GalleryElement;
 
 // ─── Column ──────────────────────────────────────────────
 

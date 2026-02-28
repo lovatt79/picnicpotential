@@ -9,6 +9,7 @@ const typeLabels: Record<string, { label: string; color: string }> = {
   text: { label: "Text", color: "bg-green-100 text-green-700" },
   image: { label: "Image", color: "bg-purple-100 text-purple-700" },
   code: { label: "Code", color: "bg-orange-100 text-orange-700" },
+  gallery: { label: "Gallery", color: "bg-pink-100 text-pink-700" },
 };
 
 function getPreview(element: BuilderElement): string {
@@ -21,6 +22,8 @@ function getPreview(element: BuilderElement): string {
       return element.alt || "Image";
     case "code":
       return element.code.substring(0, 60) + (element.code.length > 60 ? "..." : "");
+    case "gallery":
+      return `${element.images.length} image${element.images.length !== 1 ? "s" : ""} — ${element.layout}${element.layout === "grid" ? ` (${element.columns} col)` : ""}`;
   }
 }
 
@@ -72,7 +75,7 @@ export default function ElementCard({
         {label}
       </span>
 
-      {/* Preview with thumbnail for images */}
+      {/* Preview with thumbnail for images/gallery */}
       <div className="flex-1 min-w-0 flex items-center gap-2">
         {element.type === "image" && element.image_url && (
           <img
@@ -80,6 +83,23 @@ export default function ElementCard({
             alt=""
             className="w-8 h-8 object-cover rounded shrink-0"
           />
+        )}
+        {element.type === "gallery" && element.images.length > 0 && (
+          <div className="flex -space-x-1.5 shrink-0">
+            {element.images.slice(0, 3).map((img) => (
+              <img
+                key={img.id}
+                src={img.image_url}
+                alt=""
+                className="w-7 h-7 object-cover rounded border border-white"
+              />
+            ))}
+            {element.images.length > 3 && (
+              <div className="w-7 h-7 rounded bg-gray-200 border border-white flex items-center justify-center text-[9px] font-medium text-gray-500">
+                +{element.images.length - 3}
+              </div>
+            )}
+          </div>
         )}
         <span className="text-xs text-gray-600 truncate">{getPreview(element)}</span>
       </div>

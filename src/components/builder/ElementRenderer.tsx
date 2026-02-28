@@ -1,4 +1,12 @@
-import type { BuilderElement } from "@/lib/builder-types";
+import type { BuilderElement, GalleryColumns } from "@/lib/builder-types";
+import GalleryCarousel from "./GalleryCarousel";
+
+const galleryGridClass: Record<GalleryColumns, string> = {
+  1: "grid-cols-1",
+  2: "grid-cols-1 sm:grid-cols-2",
+  3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+  4: "grid-cols-2 lg:grid-cols-4",
+};
 
 export default function ElementRenderer({
   element,
@@ -40,6 +48,30 @@ export default function ElementRenderer({
           />
         </div>
       );
+
+    case "gallery": {
+      if (element.images.length === 0) return null;
+
+      if (element.layout === "carousel") {
+        return <GalleryCarousel images={element.images} />;
+      }
+
+      // Grid layout
+      return (
+        <div className={`grid ${galleryGridClass[element.columns]} gap-3 mb-4`}>
+          {element.images.map((img) => (
+            <div key={img.id} className="aspect-square overflow-hidden rounded-lg">
+              <img
+                src={img.image_url}
+                alt={img.alt || ""}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+            </div>
+          ))}
+        </div>
+      );
+    }
 
     case "code":
       return (

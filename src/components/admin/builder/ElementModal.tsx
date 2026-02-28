@@ -8,8 +8,13 @@ import type {
   TextElement,
   ImageElement,
   CodeElement,
+  GalleryElement,
+  GalleryImage,
+  GalleryLayout,
+  GalleryColumns,
 } from "@/lib/builder-types";
 import ImageUpload from "@/components/admin/ImageUpload";
+import MediaPickerModal from "@/components/admin/MediaPickerModal";
 
 interface ElementModalProps {
   isOpen: boolean;
@@ -22,6 +27,7 @@ const elementTypes: { value: ElementType; label: string; icon: string }[] = [
   { value: "title", label: "Title", icon: "T" },
   { value: "text", label: "Text", icon: "Aa" },
   { value: "image", label: "Image", icon: "Img" },
+  { value: "gallery", label: "Gallery", icon: "GI" },
   { value: "code", label: "Code", icon: "</>" },
 ];
 
@@ -49,6 +55,12 @@ export default function ElementModal({
   const [codeContent, setCodeContent] = useState("");
   const [codeLanguage, setCodeLanguage] = useState("");
 
+  // Gallery fields
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [galleryLayout, setGalleryLayout] = useState<GalleryLayout>("grid");
+  const [galleryColumns, setGalleryColumns] = useState<GalleryColumns>(3);
+  const [showGalleryPicker, setShowGalleryPicker] = useState(false);
+
   // Populate fields when editing
   useEffect(() => {
     if (editingElement) {
@@ -70,6 +82,11 @@ export default function ElementModal({
           setCodeContent(editingElement.code);
           setCodeLanguage(editingElement.language);
           break;
+        case "gallery":
+          setGalleryImages(editingElement.images);
+          setGalleryLayout(editingElement.layout);
+          setGalleryColumns(editingElement.columns);
+          break;
       }
     } else {
       // Reset all fields
@@ -82,6 +99,9 @@ export default function ElementModal({
       setImageAlt("");
       setCodeContent("");
       setCodeLanguage("");
+      setGalleryImages([]);
+      setGalleryLayout("grid");
+      setGalleryColumns(3);
     }
   }, [editingElement, isOpen]);
 
@@ -106,6 +126,10 @@ export default function ElementModal({
       case "code":
         if (!codeContent.trim()) return;
         element = { id, type: "code", code: codeContent, language: codeLanguage.trim() } as CodeElement;
+        break;
+      case "gallery":
+        if (galleryImages.length === 0) return;
+        element = { id, type: "gallery", images: galleryImages, layout: galleryLayout, columns: galleryColumns } as GalleryElement;
         break;
     }
 
@@ -257,6 +281,158 @@ export default function ElementModal({
                   placeholder="Paste your code here..."
                 />
               </div>
+            </>
+          )}
+
+          {type === "gallery" && (
+            <>
+              {/* Layout picker */}
+              <div>
+                <label className="block text-sm font-medium text-charcoal mb-2">
+                  Layout
+                </label>
+                <div className="flex gap-2">
+                  {(["grid", "carousel"] as const).map((layout) => (
+                    <button
+                      key={layout}
+                      type="button"
+                      onClick={() => setGalleryLayout(layout)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        galleryLayout === layout
+                          ? "bg-charcoal text-white"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      }`}
+                    >
+                      {layout === "grid" ? "Grid" : "Carousel"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Column selector (grid only) */}
+              {galleryLayout === "grid" && (
+                <div>
+                  <label className="block text-sm font-medium text-charcoal mb-2">
+                    Columns
+                  </label>
+                  <div className="flex gap-2">
+                    {([1, 2, 3, 4] as const).map((cols) => (
+                      <button
+                        key={cols}
+                        type="button"
+                        onClick={() => setGalleryColumns(cols)}
+                        className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
+                          galleryColumns === cols
+                            ? "bg-charcoal text-white"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                      >
+                        {cols}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Images list */}
+              <div>
+                <label className="block text-sm font-medium text-charcoal mb-2">
+                  Images ({galleryImages.length})
+                </label>
+
+                {galleryImages.length > 0 && (
+                  <div className="space-y-2 mb-3 max-h-48 overflow-y-auto">
+                    {galleryImages.map((img, idx) => (
+                      <div key={img.id} className="flex items-center gap-2 bg-gray-50 rounded-lg p-2">
+                        <img
+                          src={img.image_url}
+                          alt={img.alt}
+                          className="w-12 h-12 object-cover rounded shrink-0"
+                        />
+                        <input
+                          type="text"
+                          value={img.alt}
+                          onChange={(e) => {
+                            const updated = [...galleryImages];
+                            updated[idx] = { ...updated[idx], alt: e.target.value };
+                            setGalleryImages(updated);
+                          }}
+                          placeholder="Alt text..."
+                          className="flex-1 min-w-0 px-2 py-1 text-xs border border-gray-200 rounded focus:ring-1 focus:ring-gold focus:border-transparent"
+                        />
+                        {/* Move up */}
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => {
+                            const updated = [...galleryImages];
+                            [updated[idx - 1], updated[idx]] = [updated[idx], updated[idx - 1]];
+                            setGalleryImages(updated);
+                          }}
+                          className="p-1 text-gray-400 hover:text-charcoal disabled:opacity-30"
+                          title="Move up"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                          </svg>
+                        </button>
+                        {/* Move down */}
+                        <button
+                          type="button"
+                          disabled={idx === galleryImages.length - 1}
+                          onClick={() => {
+                            const updated = [...galleryImages];
+                            [updated[idx], updated[idx + 1]] = [updated[idx + 1], updated[idx]];
+                            setGalleryImages(updated);
+                          }}
+                          className="p-1 text-gray-400 hover:text-charcoal disabled:opacity-30"
+                          title="Move down"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                        {/* Remove */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setGalleryImages(galleryImages.filter((_, i) => i !== idx));
+                          }}
+                          className="p-1 text-gray-400 hover:text-red-600"
+                          title="Remove"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setShowGalleryPicker(true)}
+                  className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-gold hover:text-charcoal transition-colors"
+                >
+                  + Add Images from Library
+                </button>
+              </div>
+
+              <MediaPickerModal
+                isOpen={showGalleryPicker}
+                onClose={() => setShowGalleryPicker(false)}
+                onSelect={(selectedItems) => {
+                  const newImages: GalleryImage[] = selectedItems.map((item) => ({
+                    id: crypto.randomUUID(),
+                    image_id: item.id,
+                    image_url: item.url,
+                    alt: item.alt_text || "",
+                  }));
+                  setGalleryImages((prev) => [...prev, ...newImages]);
+                }}
+                multiple={true}
+              />
             </>
           )}
         </div>
