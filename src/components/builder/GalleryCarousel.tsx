@@ -34,11 +34,11 @@ export default function GalleryCarousel({ images }: { images: GalleryImage[] }) 
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {images.map((img) => (
-          <div key={img.id} className="w-full shrink-0 snap-center aspect-[16/9]">
+          <div key={img.id} className="w-full shrink-0 snap-center">
             <img
               src={img.image_url}
               alt={img.alt || ""}
-              className="w-full h-full object-cover"
+              className="w-full h-auto"
               loading="lazy"
             />
           </div>

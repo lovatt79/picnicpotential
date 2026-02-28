@@ -15,6 +15,7 @@ import type {
 } from "@/lib/builder-types";
 import ImageUpload from "@/components/admin/ImageUpload";
 import MediaPickerModal from "@/components/admin/MediaPickerModal";
+import RichTextEditor from "./RichTextEditor";
 
 interface ElementModalProps {
   isOpen: boolean;
@@ -115,10 +116,12 @@ export default function ElementModal({
         if (!titleText.trim()) return;
         element = { id, type: "title", text: titleText.trim(), level: titleLevel } as TitleElement;
         break;
-      case "text":
-        if (!textContent.trim()) return;
-        element = { id, type: "text", text: textContent.trim() } as TextElement;
+      case "text": {
+        const stripped = textContent.replace(/<[^>]*>/g, "").trim();
+        if (!stripped) return;
+        element = { id, type: "text", text: textContent } as TextElement;
         break;
+      }
       case "image":
         if (!imageUrl) return;
         element = { id, type: "image", image_id: imageId, image_url: imageUrl, alt: imageAlt.trim() } as ImageElement;
@@ -220,12 +223,9 @@ export default function ElementModal({
               <label className="block text-sm font-medium text-charcoal mb-1">
                 Text Content
               </label>
-              <textarea
-                value={textContent}
-                onChange={(e) => setTextContent(e.target.value)}
-                rows={6}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
-                placeholder="Enter paragraph text..."
+              <RichTextEditor
+                content={textContent}
+                onChange={setTextContent}
               />
             </div>
           )}

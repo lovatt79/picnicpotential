@@ -75,6 +75,8 @@ export interface BuilderPage {
   title: string;
   slug: string;
   meta_description: string | null;
+  hero_image_id: string | null;
+  hero_subtitle: string | null;
   content: BuilderContainer[];
   is_published: boolean;
   created_at: string;

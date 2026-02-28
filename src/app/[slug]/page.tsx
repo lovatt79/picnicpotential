@@ -117,7 +117,16 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
         .single();
 
       if (builderData) {
-        return <BuilderPageRenderer page={builderData as BuilderPage} />;
+        let builderHeroUrl: string | null = null;
+        if (builderData.hero_image_id) {
+          const { data: media } = await supabase
+            .from("media")
+            .select("url")
+            .eq("id", builderData.hero_image_id)
+            .single();
+          builderHeroUrl = media?.url || null;
+        }
+        return <BuilderPageRenderer page={builderData as BuilderPage} heroImageUrl={builderHeroUrl} />;
       }
 
       notFound();

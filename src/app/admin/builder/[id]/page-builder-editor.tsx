@@ -23,6 +23,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import type { BuilderPage, BuilderContainer, BuilderColumn } from "@/lib/builder-types";
 import ContainerBlock, { ContainerBlockOverlay } from "@/components/admin/builder/ContainerBlock";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 // ─── Helpers ──────────────────────────────────────────────
 
@@ -56,8 +57,10 @@ type TabKey = (typeof tabs)[number]["key"];
 
 export default function PageBuilderEditor({
   page,
+  initialHeroImageUrl,
 }: {
   page: BuilderPage;
+  initialHeroImageUrl?: string | null;
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -70,6 +73,9 @@ export default function PageBuilderEditor({
   const [slug, setSlug] = useState(page.slug);
   const [metaDescription, setMetaDescription] = useState(page.meta_description || "");
   const [isPublished, setIsPublished] = useState(page.is_published);
+  const [heroImageId, setHeroImageId] = useState<string | null>(page.hero_image_id);
+  const [heroImageUrl, setHeroImageUrl] = useState<string | null>(initialHeroImageUrl || null);
+  const [heroSubtitle, setHeroSubtitle] = useState(page.hero_subtitle || "");
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [settingsMessage, setSettingsMessage] = useState<string | null>(null);
 
@@ -100,6 +106,8 @@ export default function PageBuilderEditor({
         title: title.trim(),
         slug: slug.trim(),
         meta_description: metaDescription.trim() || null,
+        hero_image_id: heroImageId || null,
+        hero_subtitle: heroSubtitle.trim() || null,
         is_published: isPublished,
         updated_at: new Date().toISOString(),
       })
@@ -307,6 +315,33 @@ export default function PageBuilderEditor({
               rows={2}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
               placeholder="Brief description for search engines"
+            />
+          </div>
+
+          <div>
+            <ImageUpload
+              currentImageUrl={heroImageUrl}
+              onImageUploaded={(url, id) => {
+                setHeroImageUrl(url || null);
+                setHeroImageId(id || null);
+              }}
+              label="Hero Image (optional)"
+            />
+            <p className="text-xs text-warm-gray mt-1">
+              Replaces the green hero section with a background image
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-charcoal mb-1">
+              Hero Subtitle <span className="text-warm-gray font-normal">(optional)</span>
+            </label>
+            <input
+              type="text"
+              value={heroSubtitle}
+              onChange={(e) => setHeroSubtitle(e.target.value)}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
+              placeholder="Subtitle text below the page title"
             />
           </div>
 

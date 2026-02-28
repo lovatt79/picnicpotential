@@ -1,12 +1,6 @@
 import type { BuilderElement, GalleryColumns } from "@/lib/builder-types";
 import GalleryCarousel from "./GalleryCarousel";
-
-const galleryGridClass: Record<GalleryColumns, string> = {
-  1: "grid-cols-1",
-  2: "grid-cols-1 sm:grid-cols-2",
-  3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-  4: "grid-cols-2 lg:grid-cols-4",
-};
+import GalleryGrid from "./GalleryGrid";
 
 export default function ElementRenderer({
   element,
@@ -31,9 +25,10 @@ export default function ElementRenderer({
 
     case "text":
       return (
-        <div className="text-warm-gray leading-relaxed whitespace-pre-line mb-4">
-          {element.text}
-        </div>
+        <div
+          className="text-warm-gray leading-relaxed whitespace-pre-line mb-4 builder-prose"
+          dangerouslySetInnerHTML={{ __html: element.text }}
+        />
       );
 
     case "image":
@@ -57,20 +52,7 @@ export default function ElementRenderer({
       }
 
       // Grid layout
-      return (
-        <div className={`grid ${galleryGridClass[element.columns]} gap-3 mb-4`}>
-          {element.images.map((img) => (
-            <div key={img.id} className="aspect-square overflow-hidden rounded-lg">
-              <img
-                src={img.image_url}
-                alt={img.alt || ""}
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </div>
-          ))}
-        </div>
-      );
+      return <GalleryGrid images={element.images} columns={element.columns} />;
     }
 
     case "code":

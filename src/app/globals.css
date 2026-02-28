@@ -74,3 +74,98 @@ html {
 .animate-fade-in {
   animation: fadeIn 0.8s ease-out forwards;
 }
+
+/* Builder rich text output */
+.builder-prose h2 {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-charcoal);
+}
+
+.builder-prose h3 {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-charcoal);
+}
+
+.builder-prose h4 {
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-charcoal);
+}
+
+.builder-prose p {
+  margin-bottom: 0.75rem;
+}
+
+.builder-prose ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.builder-prose ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.builder-prose li {
+  margin-bottom: 0.25rem;
+}
+
+.builder-prose blockquote {
+  border-left: 3px solid var(--color-gold);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: var(--color-warm-gray);
+}
+
+.builder-prose a {
+  color: var(--color-gold);
+  text-decoration: underline;
+}
+
+.builder-prose a:hover {
+  color: var(--color-charcoal);
+}
+
+.builder-prose strong {
+  font-weight: 600;
+  color: var(--color-charcoal);
+}
+
+/* Tiptap editor (admin) */
+.tiptap:focus {
+  outline: none;
+}
+
+.tiptap p {
+  margin-bottom: 0.5rem;
+}
+
+.tiptap ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.tiptap ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+}
+
+.tiptap blockquote {
+  border-left: 3px solid var(--color-gold);
+  padding-left: 1rem;
+  font-style: italic;
+}

@@ -1,10 +1,26 @@
 "use client";
 
+import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
+import { arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+  type DragStartEvent,
+  type DragEndEvent,
+  type DragOverEvent,
+} from "@dnd-kit/core";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import type { BuilderContainer, BuilderColumn, BuilderElement, ColumnLayout } from "@/lib/builder-types";
 import ColumnLayoutPicker from "./ColumnLayoutPicker";
 import ColumnDropZone from "./ColumnDropZone";
+import { ElementCardOverlay } from "./ElementCard";
 
 interface ContainerBlockProps {
   container: BuilderContainer;
@@ -83,6 +99,94 @@ export default function ContainerBlock({
     onUpdate({ ...container, label });
   };
 
+  // ─── Element DnD ────────────────────────────────────────
+  const [activeElement, setActiveElement] = useState<BuilderElement | null>(null);
+
+  const elementSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const findColumnForElement = (elementId: string): number => {
+    return container.columns.findIndex((col) =>
+      col.elements.some((el) => el.id === elementId)
+    );
+  };
+
+  const handleElementDragStart = (event: DragStartEvent) => {
+    const elementId = event.active.id as string;
+    for (const col of container.columns) {
+      const el = col.elements.find((e) => e.id === elementId);
+      if (el) {
+        setActiveElement(el);
+        break;
+      }
+    }
+  };
+
+  const handleElementDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    const activeColIndex = findColumnForElement(activeId);
+    if (activeColIndex === -1) return;
+
+    // Determine target column
+    let targetColIndex = container.columns.findIndex((col) => col.id === overId);
+    if (targetColIndex === -1) {
+      targetColIndex = findColumnForElement(overId);
+    }
+    if (targetColIndex === -1 || activeColIndex === targetColIndex) return;
+
+    // Move element to different column
+    const element = container.columns[activeColIndex].elements.find(
+      (el) => el.id === activeId
+    );
+    if (!element) return;
+
+    const newColumns = container.columns.map((col, i) => {
+      if (i === activeColIndex) {
+        return { ...col, elements: col.elements.filter((el) => el.id !== activeId) };
+      }
+      if (i === targetColIndex) {
+        return { ...col, elements: [...col.elements, element] };
+      }
+      return col;
+    });
+    onUpdate({ ...container, columns: newColumns });
+  };
+
+  const handleElementDragEnd = (event: DragEndEvent) => {
+    setActiveElement(null);
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    const colIndex = findColumnForElement(activeId);
+    if (colIndex === -1) return;
+
+    // Skip if dropped on a column (not an element)
+    if (container.columns.some((col) => col.id === overId)) return;
+
+    // Reorder within same column
+    const col = container.columns[colIndex];
+    const oldIndex = col.elements.findIndex((el) => el.id === activeId);
+    const newIndex = col.elements.findIndex((el) => el.id === overId);
+
+    if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+      const reordered = arrayMove(col.elements, oldIndex, newIndex);
+      const newColumns = container.columns.map((c, i) =>
+        i === colIndex ? { ...c, elements: reordered } : c
+      );
+      onUpdate({ ...container, columns: newColumns });
+    }
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -134,19 +238,31 @@ export default function ContainerBlock({
         </button>
       </div>
 
-      {/* Columns grid */}
-      <div className={`grid ${columnGridClass[container.columnLayout]} gap-3 p-4`}>
-        {container.columns.map((column, colIndex) => (
-          <ColumnDropZone
-            key={column.id}
-            column={column}
-            columnIndex={colIndex}
-            onUpdateElements={(elements) =>
-              handleUpdateColumnElements(colIndex, elements)
-            }
-          />
-        ))}
-      </div>
+      {/* Columns grid with element-level DnD */}
+      <DndContext
+        sensors={elementSensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleElementDragStart}
+        onDragOver={handleElementDragOver}
+        onDragEnd={handleElementDragEnd}
+      >
+        <div className={`grid ${columnGridClass[container.columnLayout]} gap-3 p-4`}>
+          {container.columns.map((column, colIndex) => (
+            <ColumnDropZone
+              key={column.id}
+              column={column}
+              columnIndex={colIndex}
+              onUpdateElements={(elements) =>
+                handleUpdateColumnElements(colIndex, elements)
+              }
+            />
+          ))}
+        </div>
+
+        <DragOverlay>
+          {activeElement ? <ElementCardOverlay element={activeElement} /> : null}
+        </DragOverlay>
+      </DndContext>
     </div>
   );
 }

@@ -21,6 +21,17 @@ export default async function BuilderPreviewPage({ params }: Props) {
     notFound();
   }
 
+  // Resolve hero image URL if set
+  let heroImageUrl: string | null = null;
+  if (page.hero_image_id) {
+    const { data: media } = await supabase
+      .from("media")
+      .select("url")
+      .eq("id", page.hero_image_id)
+      .single();
+    heroImageUrl = media?.url || null;
+  }
+
   return (
     <>
       {/* Draft banner */}
@@ -29,7 +40,7 @@ export default async function BuilderPreviewPage({ params }: Props) {
           Draft Preview — This page is not published yet
         </div>
       )}
-      <BuilderPageRenderer page={page as BuilderPage} />
+      <BuilderPageRenderer page={page as BuilderPage} heroImageUrl={heroImageUrl} />
     </>
   );
 }

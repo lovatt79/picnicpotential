@@ -21,5 +21,16 @@ export default async function BuilderEditorPage({ params }: Props) {
     notFound();
   }
 
-  return <PageBuilderEditor page={page as BuilderPage} />;
+  // Resolve hero image URL if set
+  let heroImageUrl: string | null = null;
+  if (page.hero_image_id) {
+    const { data: media } = await supabase
+      .from("media")
+      .select("url")
+      .eq("id", page.hero_image_id)
+      .single();
+    heroImageUrl = media?.url || null;
+  }
+
+  return <PageBuilderEditor page={page as BuilderPage} initialHeroImageUrl={heroImageUrl} />;
 }

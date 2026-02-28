@@ -16,8 +16,10 @@ function getPreview(element: BuilderElement): string {
   switch (element.type) {
     case "title":
       return element.text || "Untitled";
-    case "text":
-      return element.text.substring(0, 80) + (element.text.length > 80 ? "..." : "");
+    case "text": {
+      const stripped = element.text.replace(/<[^>]*>/g, "");
+      return stripped.substring(0, 80) + (stripped.length > 80 ? "..." : "");
+    }
     case "image":
       return element.alt || "Image";
     case "code":
