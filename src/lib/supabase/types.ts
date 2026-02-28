@@ -409,16 +409,6 @@ export interface ProposalSubmission {
   updated_at: string;
 }
 
-// ─── Color Palette Types ──────────────────────────────────
-
-export interface ColorPaletteImage {
-  id: string;
-  image_id: string;
-  sort_order: number;
-  is_published: boolean;
-  created_at: string;
-}
-
 // ─── Builder Page Types ──────────────────────────────────
 
 export type { BuilderPage, BuilderContainer, BuilderColumn, BuilderElement, ColumnLayout, ElementType } from "@/lib/builder-types";
