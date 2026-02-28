@@ -418,3 +418,7 @@ export interface ColorPaletteImage {
   is_published: boolean;
   created_at: string;
 }
+
+// ─── Builder Page Types ──────────────────────────────────
+
+export type { BuilderPage, BuilderContainer, BuilderColumn, BuilderElement, ColumnLayout, ElementType } from "@/lib/builder-types";

@@ -5,6 +5,8 @@ import ServiceCard from "@/components/ServiceCard";
 import VendorCard from "@/components/VendorCard";
 import { createClient } from "@/lib/supabase/server";
 import { generateItemListSchema } from "@/lib/schema";
+import BuilderPageRenderer from "@/components/builder/BuilderPageRenderer";
+import type { BuilderPage } from "@/lib/builder-types";
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +20,8 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
 
   try {
     const supabase = await createClient();
+
+    // Try collection pages first
     const { data: collection } = await supabase
       .from("collection_pages")
       .select("title, meta_description, description")
@@ -25,11 +29,29 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
       .eq("is_published", true)
       .single();
 
-    if (!collection) return {};
-    return {
-      title: collection.title,
-      description: collection.meta_description || collection.description || undefined,
-    };
+    if (collection) {
+      return {
+        title: collection.title,
+        description: collection.meta_description || collection.description || undefined,
+      };
+    }
+
+    // Fallback to builder pages
+    const { data: builderPage } = await supabase
+      .from("builder_pages")
+      .select("title, meta_description")
+      .eq("slug", slug)
+      .eq("is_published", true)
+      .single();
+
+    if (builderPage) {
+      return {
+        title: builderPage.title,
+        description: builderPage.meta_description || undefined,
+      };
+    }
+
+    return {};
   } catch {
     return {};
   }
@@ -86,6 +108,18 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
       .single();
 
     if (!collectionData) {
+      // Fallback to builder pages
+      const { data: builderData } = await supabase
+        .from("builder_pages")
+        .select("*")
+        .eq("slug", slug)
+        .eq("is_published", true)
+        .single();
+
+      if (builderData) {
+        return <BuilderPageRenderer page={builderData as BuilderPage} />;
+      }
+
       notFound();
     }
 
