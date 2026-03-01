@@ -130,6 +130,8 @@ export interface FormFoodOption {
   price: number | null;
   price_unit: string | null;
   min_quantity: number;
+  is_vegan: boolean;
+  is_gluten_free: boolean;
   sort_order: number;
   is_active: boolean;
   created_at: string;
@@ -143,6 +145,7 @@ export interface FormDessertOption {
   price_unit: string | null;
   min_quantity: number;
   is_vegan: boolean;
+  is_gluten_free: boolean;
   sort_order: number;
   is_active: boolean;
   created_at: string;

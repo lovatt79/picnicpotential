@@ -145,8 +145,8 @@ export default function MultiStepForm() {
       const [events, colors, food, desserts, addons, occasions, attribution] = await Promise.all([
         supabase.from("form_event_types").select("label").eq("is_active", true).order("sort_order"),
         supabase.from("form_color_options").select("label").eq("is_active", true).order("sort_order"),
-        supabase.from("form_food_options").select("label, price, price_unit, min_quantity").eq("is_active", true).order("sort_order"),
-        supabase.from("form_dessert_options").select("label, price, price_unit, min_quantity, is_vegan").eq("is_active", true).order("sort_order"),
+        supabase.from("form_food_options").select("label, price, price_unit, min_quantity, is_vegan, is_gluten_free").eq("is_active", true).order("sort_order"),
+        supabase.from("form_dessert_options").select("label, price, price_unit, min_quantity, is_vegan, is_gluten_free").eq("is_active", true).order("sort_order"),
         supabase.from("form_addon_options").select("label, price, price_unit, category").eq("is_active", true).order("sort_order"),
         supabase.from("form_occasion_options").select("label").eq("is_active", true).order("sort_order"),
         supabase.from("form_attribution_options").select("label").eq("is_active", true).order("sort_order"),
@@ -571,6 +571,8 @@ export default function MultiStepForm() {
                       price={item.price}
                       priceUnit={item.price_unit}
                       minQuantity={item.min_quantity}
+                      isVegan={item.is_vegan}
+                      isGlutenFree={item.is_gluten_free}
                       checked={item.label in formData.foodOptions}
                       onChange={() => toggleQuantityItem("foodOptions", item.label, item.min_quantity || 1)}
                       showQuantity
@@ -597,6 +599,7 @@ export default function MultiStepForm() {
                       priceUnit={item.price_unit}
                       minQuantity={item.min_quantity}
                       isVegan={item.is_vegan}
+                      isGlutenFree={item.is_gluten_free}
                       checked={item.label in formData.dessertOptions}
                       onChange={() => toggleQuantityItem("dessertOptions", item.label, item.min_quantity || 1)}
                       showQuantity

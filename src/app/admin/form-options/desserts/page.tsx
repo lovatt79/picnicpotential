@@ -11,6 +11,7 @@ interface DessertOption {
   price_unit: string | null;
   min_quantity: number | null;
   is_vegan: boolean;
+  is_gluten_free: boolean;
   sort_order: number;
   is_active: boolean;
 }
@@ -26,6 +27,7 @@ export default function DessertsPage() {
     price_unit: "per_dozen",
     min_quantity: null as number | null,
     is_vegan: false,
+    is_gluten_free: false,
     sort_order: 0,
     is_active: true
   });
@@ -36,6 +38,7 @@ export default function DessertsPage() {
     price_unit: "per_dozen",
     min_quantity: null as number | null,
     is_vegan: false,
+    is_gluten_free: false,
     sort_order: 0,
     is_active: true
   });
@@ -61,6 +64,7 @@ export default function DessertsPage() {
       price_unit: "per_dozen",
       min_quantity: null,
       is_vegan: false,
+      is_gluten_free: false,
       sort_order: 0,
       is_active: true
     });
@@ -88,6 +92,7 @@ export default function DessertsPage() {
       price_unit: item.price_unit || "per_dozen",
       min_quantity: item.min_quantity,
       is_vegan: item.is_vegan,
+      is_gluten_free: item.is_gluten_free,
       sort_order: item.sort_order,
       is_active: item.is_active
     });
@@ -207,6 +212,18 @@ export default function DessertsPage() {
               </div>
               <span className="text-sm text-charcoal">Vegan 🌱</span>
             </label>
+            <label className="flex items-center gap-3">
+              <div className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={newForm.is_gluten_free}
+                  onChange={(e) => setNewForm({ ...newForm, is_gluten_free: e.target.checked })}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+              </div>
+              <span className="text-sm text-charcoal">Gluten Free</span>
+            </label>
           </div>
           <div className="mt-4">
             <button
@@ -230,6 +247,7 @@ export default function DessertsPage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">Unit</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">Min Qty</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">Vegan</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">GF</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">Sort</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-right text-xs font-medium text-charcoal uppercase tracking-wider">Actions</th>
@@ -288,6 +306,17 @@ export default function DessertsPage() {
                       </label>
                     </td>
                     <td className="px-6 py-4">
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editForm.is_gluten_free}
+                          onChange={(e) => setEditForm({ ...editForm, is_gluten_free: e.target.checked })}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                      </label>
+                    </td>
+                    <td className="px-6 py-4">
                       <input
                         type="number"
                         value={editForm.sort_order}
@@ -340,6 +369,15 @@ export default function DessertsPage() {
                       {item.is_vegan ? (
                         <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
                           Vegan
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      {item.is_gluten_free ? (
+                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-800">
+                          GF
                         </span>
                       ) : (
                         <span className="text-xs text-gray-400">—</span>

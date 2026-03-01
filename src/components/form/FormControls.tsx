@@ -6,6 +6,7 @@ export interface PricedOption {
   price_unit: string | null;
   min_quantity: number | null;
   is_vegan?: boolean;
+  is_gluten_free?: boolean;
   category?: string;
   description?: string;
 }
@@ -81,6 +82,7 @@ export function PricedCheckboxOption({
   priceUnit,
   minQuantity,
   isVegan,
+  isGlutenFree,
   checked,
   onChange,
   description,
@@ -94,6 +96,7 @@ export function PricedCheckboxOption({
   priceUnit: string | null;
   minQuantity?: number | null;
   isVegan?: boolean;
+  isGlutenFree?: boolean;
   checked: boolean;
   onChange: () => void;
   description?: string;
@@ -128,6 +131,11 @@ export function PricedCheckboxOption({
             {isVegan && (
               <span className="ml-1.5 inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
                 Vegan
+              </span>
+            )}
+            {isGlutenFree && (
+              <span className="ml-1.5 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                GF
               </span>
             )}
           </span>

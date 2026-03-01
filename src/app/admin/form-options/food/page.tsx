@@ -10,6 +10,8 @@ interface FoodOption {
   price: number | null;
   price_unit: string | null;
   min_quantity: number | null;
+  is_vegan: boolean;
+  is_gluten_free: boolean;
   sort_order: number;
   is_active: boolean;
 }
@@ -24,6 +26,8 @@ export default function FoodPage() {
     price: null as number | null,
     price_unit: "per_person",
     min_quantity: null as number | null,
+    is_vegan: false,
+    is_gluten_free: false,
     sort_order: 0,
     is_active: true
   });
@@ -33,6 +37,8 @@ export default function FoodPage() {
     price: null as number | null,
     price_unit: "per_person",
     min_quantity: null as number | null,
+    is_vegan: false,
+    is_gluten_free: false,
     sort_order: 0,
     is_active: true
   });
@@ -57,6 +63,8 @@ export default function FoodPage() {
       price: null,
       price_unit: "per_person",
       min_quantity: null,
+      is_vegan: false,
+      is_gluten_free: false,
       sort_order: 0,
       is_active: true
     });
@@ -83,6 +91,8 @@ export default function FoodPage() {
       price: item.price,
       price_unit: item.price_unit || "per_person",
       min_quantity: item.min_quantity,
+      is_vegan: item.is_vegan,
+      is_gluten_free: item.is_gluten_free,
       sort_order: item.sort_order,
       is_active: item.is_active
     });
@@ -177,17 +187,43 @@ export default function FoodPage() {
               />
             </div>
           </div>
-          <div className="mt-4 flex items-center gap-3">
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={newForm.is_active}
-                onChange={(e) => setNewForm({ ...newForm, is_active: e.target.checked })}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sage"></div>
+          <div className="mt-4 flex items-center gap-6">
+            <label className="flex items-center gap-3">
+              <div className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={newForm.is_active}
+                  onChange={(e) => setNewForm({ ...newForm, is_active: e.target.checked })}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sage"></div>
+              </div>
+              <span className="text-sm text-charcoal">Active</span>
             </label>
-            <span className="text-sm text-charcoal">Active</span>
+            <label className="flex items-center gap-3">
+              <div className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={newForm.is_vegan}
+                  onChange={(e) => setNewForm({ ...newForm, is_vegan: e.target.checked })}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+              </div>
+              <span className="text-sm text-charcoal">Vegan 🌱</span>
+            </label>
+            <label className="flex items-center gap-3">
+              <div className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={newForm.is_gluten_free}
+                  onChange={(e) => setNewForm({ ...newForm, is_gluten_free: e.target.checked })}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+              </div>
+              <span className="text-sm text-charcoal">Gluten Free 🌾</span>
+            </label>
           </div>
           <div className="mt-4">
             <button
@@ -210,6 +246,8 @@ export default function FoodPage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">Price</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">Unit</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">Min Qty</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">Vegan</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">GF</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">Sort</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-charcoal uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-right text-xs font-medium text-charcoal uppercase tracking-wider">Actions</th>
@@ -257,6 +295,28 @@ export default function FoodPage() {
                       />
                     </td>
                     <td className="px-6 py-4">
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editForm.is_vegan}
+                          onChange={(e) => setEditForm({ ...editForm, is_vegan: e.target.checked })}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                      </label>
+                    </td>
+                    <td className="px-6 py-4">
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editForm.is_gluten_free}
+                          onChange={(e) => setEditForm({ ...editForm, is_gluten_free: e.target.checked })}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                      </label>
+                    </td>
+                    <td className="px-6 py-4">
                       <input
                         type="number"
                         value={editForm.sort_order}
@@ -292,7 +352,11 @@ export default function FoodPage() {
                   </>
                 ) : (
                   <>
-                    <td className="px-6 py-4 text-sm text-charcoal">{item.label}</td>
+                    <td className="px-6 py-4 text-sm text-charcoal">
+                      {item.label}
+                      {item.is_vegan && <span className="ml-2">🌱</span>}
+                      {item.is_gluten_free && <span className="ml-1">🌾</span>}
+                    </td>
                     <td className="px-6 py-4 text-sm text-warm-gray">
                       {item.price ? `$${item.price.toFixed(2)}` : "—"}
                     </td>
@@ -301,6 +365,20 @@ export default function FoodPage() {
                     </td>
                     <td className="px-6 py-4 text-sm text-warm-gray">
                       {item.min_quantity ?? "—"}
+                    </td>
+                    <td className="px-6 py-4">
+                      {item.is_vegan ? (
+                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Vegan</span>
+                      ) : (
+                        <span className="text-xs text-gray-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      {item.is_gluten_free ? (
+                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-800">GF</span>
+                      ) : (
+                        <span className="text-xs text-gray-400">—</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-sm text-warm-gray">{item.sort_order}</td>
                     <td className="px-6 py-4">
