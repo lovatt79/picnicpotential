@@ -90,8 +90,8 @@ interface FormData {
   eventTime: string;
   additionalTime: string;
   occasion: string;
-  city: string;
-  exactLocation: string;
+  location: string;
+  locationDetails: string;
   groupSize: string;
   guestNames: string;
   colorChoice1: string;
@@ -137,12 +137,13 @@ export default function MultiStepForm() {
   const [addonOptions, setAddonOptions] = useState<PricedOption[]>([]);
   const [occasionOptions, setOccasionOptions] = useState<string[]>([]);
   const [attributionOptions, setAttributionOptions] = useState<string[]>([]);
+  const [locationOptions, setLocationOptions] = useState<{ label: string; location_type: string | null; city: string | null }[]>([]);
   const [loadingOptions, setLoadingOptions] = useState(true);
 
   useEffect(() => {
     async function loadFormOptions() {
       const supabase = createClient();
-      const [events, colors, food, desserts, addons, occasions, attribution] = await Promise.all([
+      const [events, colors, food, desserts, addons, occasions, attribution, locations] = await Promise.all([
         supabase.from("form_event_types").select("label").eq("is_active", true).order("sort_order"),
         supabase.from("form_color_options").select("label").eq("is_active", true).order("sort_order"),
         supabase.from("form_food_options").select("label, price, price_unit, min_quantity, is_vegan, is_gluten_free").eq("is_active", true).order("sort_order"),
@@ -150,6 +151,7 @@ export default function MultiStepForm() {
         supabase.from("form_addon_options").select("label, price, price_unit, category").eq("is_active", true).order("sort_order"),
         supabase.from("form_occasion_options").select("label").eq("is_active", true).order("sort_order"),
         supabase.from("form_attribution_options").select("label").eq("is_active", true).order("sort_order"),
+        supabase.from("form_location_options").select("label, location_type, city").eq("is_active", true).order("sort_order"),
       ]);
       setEventTypes((events.data || []).map((e: any) => e.label));
       setColorOptions((colors.data || []).map((c: any) => c.label));
@@ -158,6 +160,7 @@ export default function MultiStepForm() {
       setAddonOptions((addons.data || []) as PricedOption[]);
       setOccasionOptions((occasions.data || []).map((o: any) => o.label));
       setAttributionOptions((attribution.data || []).map((a: any) => a.label));
+      setLocationOptions((locations.data || []) as { label: string; location_type: string | null; city: string | null }[]);
       setLoadingOptions(false);
     }
     loadFormOptions();
@@ -178,8 +181,8 @@ export default function MultiStepForm() {
     eventTime: "",
     additionalTime: "",
     occasion: "",
-    city: "",
-    exactLocation: "",
+    location: "",
+    locationDetails: "",
     groupSize: "",
     guestNames: "",
     colorChoice1: "",
@@ -489,28 +492,45 @@ export default function MultiStepForm() {
             {step === 2 && (
               <div className="space-y-5">
                 <h3 className="font-serif text-2xl text-charcoal">Location &amp; Guests</h3>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">City</label>
-                    <input type="text" value={formData.city} onChange={(e) => updateField("city", e.target.value)} className={inputClass} />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">How many guests?</label>
-                    <input type="text" value={formData.groupSize} onChange={(e) => updateField("groupSize", e.target.value)} className={inputClass} />
-                  </div>
-                </div>
                 <div>
-                  <label className="block text-sm font-medium text-charcoal mb-1">Exact Location</label>
-                  <p className="text-xs text-warm-gray mb-2">
-                    Either &quot;Home&quot; or name of park/place. Winery partners: Kendall Jackson, Mascarin Family Winery, Rodney Strong, Paradise Ridge, Kohmsa Luxury Vacation Rentals, Matanzas Creek Winery. If your preferred winery is not listed we can still set up there if you secure permission.
-                  </p>
-                  <input
-                    type="text"
-                    value={formData.exactLocation}
-                    onChange={(e) => updateField("exactLocation", e.target.value)}
+                  <label className="block text-sm font-medium text-charcoal mb-1">Location</label>
+                  <select
+                    value={formData.location}
+                    onChange={(e) => {
+                      updateField("location", e.target.value);
+                      if (formData.locationDetails) updateField("locationDetails", "");
+                    }}
                     className={inputClass}
-                    placeholder="Home, park name, or winery"
-                  />
+                  >
+                    <option value="">Select a location...</option>
+                    {locationOptions.map((loc) => (
+                      <option key={loc.label} value={loc.label}>
+                        {loc.label}{loc.city ? ` — ${loc.city}` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {(() => {
+                  const selected = locationOptions.find((l) => l.label === formData.location);
+                  const needsDetails = selected?.location_type === "home" || selected?.location_type === "other";
+                  return needsDetails ? (
+                    <div>
+                      <label className="block text-sm font-medium text-charcoal mb-1">
+                        {selected?.location_type === "home" ? "Home Address & Details" : "Venue Details & Address"}
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={formData.locationDetails}
+                        onChange={(e) => updateField("locationDetails", e.target.value)}
+                        className={`${inputClass} resize-none`}
+                        placeholder={selected?.location_type === "home" ? "Please provide the address for your home/backyard setup" : "Please provide the venue name and address"}
+                      />
+                    </div>
+                  ) : null;
+                })()}
+                <div>
+                  <label className="block text-sm font-medium text-charcoal mb-1">How many guests?</label>
+                  <input type="text" value={formData.groupSize} onChange={(e) => updateField("groupSize", e.target.value)} className={inputClass} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-charcoal mb-1">Guest Names</label>

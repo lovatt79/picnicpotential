@@ -73,6 +73,7 @@ interface ProposalFormData {
   proposalDate2: string;
   proposalTime: string;
   location: string;
+  locationDetails: string;
   colors: string;
   package: string;
   addonOptions: string[];
@@ -103,21 +104,24 @@ export default function ProposalForm() {
   const [addonOptions, setAddonOptions] = useState<PricedOption[]>([]);
   const [foodOptions, setFoodOptions] = useState<PricedOption[]>([]);
   const [attributionOptions, setAttributionOptions] = useState<string[]>([]);
+  const [locationOptions, setLocationOptions] = useState<{ label: string; location_type: string | null; city: string | null }[]>([]);
   const [loadingOptions, setLoadingOptions] = useState(true);
 
   useEffect(() => {
     async function loadFormOptions() {
       const supabase = createClient();
-      const [packages, addons, food, attribution] = await Promise.all([
+      const [packages, addons, food, attribution, locations] = await Promise.all([
         supabase.from("prop_package_options").select("label, description, price").eq("is_active", true).order("sort_order"),
         supabase.from("prop_addon_options").select("label, description, price, price_unit").eq("is_active", true).order("sort_order"),
         supabase.from("prop_food_options").select("label, description, price, price_unit, category").eq("is_active", true).order("sort_order"),
         supabase.from("form_attribution_options").select("label").eq("is_active", true).order("sort_order"),
+        supabase.from("form_location_options").select("label, location_type, city").eq("is_active", true).order("sort_order"),
       ]);
       if (packages.data) setPackageOptions(packages.data);
       if (addons.data) setAddonOptions(addons.data.map((a) => ({ ...a, min_quantity: null })));
       if (food.data) setFoodOptions(food.data.map((f) => ({ ...f, min_quantity: null })));
       if (attribution.data) setAttributionOptions(attribution.data.map((a) => a.label));
+      setLocationOptions((locations.data || []) as { label: string; location_type: string | null; city: string | null }[]);
       setLoadingOptions(false);
     }
     loadFormOptions();
@@ -137,6 +141,7 @@ export default function ProposalForm() {
     proposalDate2: "",
     proposalTime: "",
     location: "",
+    locationDetails: "",
     colors: "",
     package: "",
     addonOptions: [],
@@ -397,9 +402,41 @@ export default function ProposalForm() {
 
                 <div>
                   <label className="block text-sm font-medium text-charcoal mb-1">Location *</label>
-                  <input type="text" required value={formData.location} onChange={(e) => updateField("location", e.target.value)} className={getInputClass("location", errors)} placeholder="Where will the proposal take place?" />
+                  <select
+                    value={formData.location}
+                    onChange={(e) => {
+                      updateField("location", e.target.value);
+                      if (formData.locationDetails) updateField("locationDetails", "");
+                    }}
+                    className={getInputClass("location", errors)}
+                  >
+                    <option value="">Select a location...</option>
+                    {locationOptions.map((loc) => (
+                      <option key={loc.label} value={loc.label}>
+                        {loc.label}{loc.city ? ` — ${loc.city}` : ""}
+                      </option>
+                    ))}
+                  </select>
                   <FieldError message={errors.location} />
                 </div>
+                {(() => {
+                  const selected = locationOptions.find((l) => l.label === formData.location);
+                  const needsDetails = selected?.location_type === "home" || selected?.location_type === "other";
+                  return needsDetails ? (
+                    <div>
+                      <label className="block text-sm font-medium text-charcoal mb-1">
+                        {selected?.location_type === "home" ? "Home Address & Details" : "Venue Details & Address"}
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={formData.locationDetails}
+                        onChange={(e) => updateField("locationDetails", e.target.value)}
+                        className={`${inputClass} resize-none`}
+                        placeholder={selected?.location_type === "home" ? "Please provide the address for your home/backyard setup" : "Please provide the venue name and address"}
+                      />
+                    </div>
+                  ) : null;
+                })()}
 
                 <div>
                   <label className="block text-sm font-medium text-charcoal mb-1">Colors (Build Out)</label>

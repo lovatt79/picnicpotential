@@ -131,6 +131,7 @@ export default function ProposalDetailPage() {
               <Field label="Date (2nd Choice)" value={submission.proposal_date_2 ? new Date(submission.proposal_date_2).toLocaleDateString() : null} />
               <Field label="Time" value={submission.proposal_time} />
               <Field label="Location" value={submission.location} />
+              {submission.location_details && <Field label="Location Details" value={submission.location_details} />}
               <Field label="Colors" value={submission.colors} />
             </Section>
 

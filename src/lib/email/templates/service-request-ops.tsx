@@ -13,8 +13,8 @@ interface ServiceRequestOpsProps {
     eventType?: string;
     eventTime?: string;
     additionalTime?: string;
-    city?: string;
-    exactLocation?: string;
+    location?: string;
+    locationDetails?: string;
     groupSize?: string;
     guestNames?: string;
     occasion?: string;
@@ -85,8 +85,8 @@ export default function ServiceRequestOps({ data }: ServiceRequestOpsProps) {
       {/* Location & Guests */}
       <Text style={sectionTitle}>Location &amp; Guests</Text>
       <Section style={detailBox}>
-        {data.city && <Text style={row}><strong>City:</strong> {data.city}</Text>}
-        {data.exactLocation && <Text style={row}><strong>Exact Location:</strong> {data.exactLocation}</Text>}
+        {data.location && <Text style={row}><strong>Location:</strong> {data.location}</Text>}
+        {data.locationDetails && <Text style={row}><strong>Location Details:</strong> {data.locationDetails}</Text>}
         {data.groupSize && <Text style={row}><strong>Group Size:</strong> {data.groupSize}</Text>}
         {data.guestNames && <Text style={row}><strong>Guest Names:</strong> {data.guestNames}</Text>}
       </Section>

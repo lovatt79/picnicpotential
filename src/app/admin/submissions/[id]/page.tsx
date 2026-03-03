@@ -139,8 +139,8 @@ export default function SubmissionDetailPage() {
                   <Field label="Event Time" value={submission.event_time} />
                   <Field label="Additional Time" value={submission.additional_time} />
                   <Field label="Occasion" value={submission.occasion} />
-                  <Field label="City" value={submission.city} />
                   <Field label="Location" value={submission.exact_location} />
+                  {submission.location_details && <Field label="Location Details" value={submission.location_details} />}
                   <Field label="Group Size" value={submission.group_size} />
                   <Field label="Guest Names" value={submission.guest_names} />
                 </Section>

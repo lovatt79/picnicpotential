@@ -49,6 +49,7 @@ export async function POST(request: Request) {
         proposal_date_2: data.proposalDate2 || null,
         proposal_time: data.proposalTime || null,
         location: data.location || null,
+        location_details: data.locationDetails || null,
         colors: data.colors || null,
         package: data.package || null,
         addon_options: (data.addonOptions || []).map((label: string) => ({ label })),

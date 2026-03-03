@@ -13,6 +13,7 @@ interface ProposalOpsProps {
     proposalDate2?: string;
     proposalTime?: string;
     location?: string;
+    locationDetails?: string;
     colors?: string;
     package?: string;
     addonOptions?: string[];
@@ -69,6 +70,7 @@ export default function ProposalOps({ data }: ProposalOpsProps) {
         {data.proposalDate2 && <Text style={row}><strong>Backup Date:</strong> {data.proposalDate2}</Text>}
         {data.proposalTime && <Text style={row}><strong>Time:</strong> {data.proposalTime}</Text>}
         {data.location && <Text style={row}><strong>Location:</strong> {data.location}</Text>}
+        {data.locationDetails && <Text style={row}><strong>Location Details:</strong> {data.locationDetails}</Text>}
         {data.colors && <Text style={row}><strong>Colors:</strong> {data.colors}</Text>}
       </Section>
 

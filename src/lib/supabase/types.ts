@@ -192,8 +192,8 @@ export interface FormSubmission {
   event_type: string | null;
   event_time: string | null;
   additional_time: string | null;
-  city: string | null;
   exact_location: string | null;
+  location_details: string | null;
   group_size: string | null;
   guest_names: string | null;
   occasion: string | null;
@@ -399,6 +399,7 @@ export interface ProposalSubmission {
   proposal_date_2: string | null;
   proposal_time: string | null;
   location: string | null;
+  location_details: string | null;
   colors: string | null;
   package: string | null;
   addon_options: { label: string; price?: number | null }[];

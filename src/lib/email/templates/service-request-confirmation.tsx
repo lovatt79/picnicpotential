@@ -7,7 +7,7 @@ interface ServiceRequestConfirmationProps {
     eventDate?: string;
     backupDate?: string;
     eventType?: string;
-    city?: string;
+    location?: string;
     groupSize?: string;
   };
 }
@@ -42,9 +42,9 @@ export default function ServiceRequestConfirmation({
             <strong>Backup Date:</strong> {data.backupDate}
           </Text>
         )}
-        {data.city && (
+        {data.location && (
           <Text style={summaryRow}>
-            <strong>Location:</strong> {data.city}
+            <strong>Location:</strong> {data.location}
           </Text>
         )}
         {data.groupSize && (
