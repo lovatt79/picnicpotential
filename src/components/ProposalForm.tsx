@@ -421,7 +421,7 @@ export default function ProposalForm() {
                 </div>
                 {(() => {
                   const selected = locationOptions.find((l) => l.label === formData.location);
-                  const needsDetails = selected?.location_type === "home" || selected?.location_type === "other" || selected?.location_type === "venue";
+                  const needsDetails = selected?.location_type === "home" || selected?.location_type === "other";
                   return needsDetails ? (
                     <div>
                       <label className="block text-sm font-medium text-charcoal mb-1">Address and Details</label>
