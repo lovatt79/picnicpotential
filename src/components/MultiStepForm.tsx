@@ -515,15 +515,13 @@ export default function MultiStepForm() {
                   const needsDetails = selected?.location_type === "home" || selected?.location_type === "other";
                   return needsDetails ? (
                     <div>
-                      <label className="block text-sm font-medium text-charcoal mb-1">
-                        {selected?.location_type === "home" ? "Home Address & Details" : "Venue Details & Address"}
-                      </label>
+                      <label className="block text-sm font-medium text-charcoal mb-1">Address and Details</label>
                       <textarea
                         rows={2}
                         value={formData.locationDetails}
                         onChange={(e) => updateField("locationDetails", e.target.value)}
                         className={`${inputClass} resize-none`}
-                        placeholder={selected?.location_type === "home" ? "Please provide the address for your home/backyard setup" : "Please provide the venue name and address"}
+                        placeholder="Please provide the address and any relevant details"
                       />
                     </div>
                   ) : null;
