@@ -232,6 +232,10 @@ export default async function PartnersPage() {
                       logo={partner.logo}
                       href={`/partners/${partner.slug}`}
                       url={partner.website || partner.url ? addUTMTracking(partner.website || partner.url || "") : undefined}
+                      isDogFriendly={partner.is_dog_friendly}
+                      isFamilyFriendly={partner.is_family_friendly}
+                      allowsOutsideFood={partner.allows_outside_food}
+                      allowsPpFoodOnly={partner.allows_pp_food_only}
                     />
                   </div>
                 ))}
@@ -281,6 +285,10 @@ export default async function PartnersPage() {
                       logo={partner.logo}
                       href={`/partners/${partner.slug}`}
                       url={partner.website || partner.url ? addUTMTracking(partner.website || partner.url || "") : undefined}
+                      isDogFriendly={partner.is_dog_friendly}
+                      isFamilyFriendly={partner.is_family_friendly}
+                      allowsOutsideFood={partner.allows_outside_food}
+                      allowsPpFoodOnly={partner.allows_pp_food_only}
                     />
                   </div>
                 ))}

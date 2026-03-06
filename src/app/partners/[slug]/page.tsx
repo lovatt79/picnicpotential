@@ -185,6 +185,22 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                 <span className="text-white drop-shadow-md">📍 {partner.location}</span>
               )}
             </div>
+            {partner.partner_type === "Winery" && (partner.is_dog_friendly || partner.is_family_friendly || partner.allows_outside_food || partner.allows_pp_food_only) && (
+              <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
+                {partner.is_dog_friendly && (
+                  <span className="px-3 py-1 rounded-full bg-amber-500/90 text-white text-xs font-medium shadow-sm">Dog Friendly</span>
+                )}
+                {partner.is_family_friendly && (
+                  <span className="px-3 py-1 rounded-full bg-blue-500/90 text-white text-xs font-medium shadow-sm">Family Friendly</span>
+                )}
+                {partner.allows_outside_food && (
+                  <span className="px-3 py-1 rounded-full bg-green-500/90 text-white text-xs font-medium shadow-sm">Outside Food OK</span>
+                )}
+                {partner.allows_pp_food_only && (
+                  <span className="px-3 py-1 rounded-full bg-purple-500/90 text-white text-xs font-medium shadow-sm">PP Food Only</span>
+                )}
+              </div>
+            )}
           </div>
         </section>
       ) : (
@@ -212,6 +228,22 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                 <span className="text-warm-gray">📍 {partner.location}</span>
               )}
             </div>
+            {partner.partner_type === "Winery" && (partner.is_dog_friendly || partner.is_family_friendly || partner.allows_outside_food || partner.allows_pp_food_only) && (
+              <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
+                {partner.is_dog_friendly && (
+                  <span className="px-3 py-1 rounded-full bg-amber-500 text-white text-xs font-medium">Dog Friendly</span>
+                )}
+                {partner.is_family_friendly && (
+                  <span className="px-3 py-1 rounded-full bg-blue-500 text-white text-xs font-medium">Family Friendly</span>
+                )}
+                {partner.allows_outside_food && (
+                  <span className="px-3 py-1 rounded-full bg-green-500 text-white text-xs font-medium">Outside Food OK</span>
+                )}
+                {partner.allows_pp_food_only && (
+                  <span className="px-3 py-1 rounded-full bg-purple-500 text-white text-xs font-medium">PP Food Only</span>
+                )}
+              </div>
+            )}
           </div>
         </section>
       )}

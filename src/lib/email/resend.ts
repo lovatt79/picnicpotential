@@ -16,10 +16,8 @@ function getResend(): Resend | null {
   return _resend;
 }
 
-// TODO: Switch to "Picnic Potential <hello@picnicpotential.com>" once domain is verified in Resend
-export const FROM_ADDRESS = "Picnic Potential <onboarding@resend.dev>";
-// TODO: Switch back to "info@picnicpotential.com" once domain is verified in Resend
-export const OPS_EMAIL = "lovatt79@gmail.com";
+export const FROM_ADDRESS = "Picnic Potential <info@picnicpotential.com>";
+export const OPS_EMAIL = "info@picnicpotential.com";
 
 export interface SendEmailParams {
   to: string | string[];
