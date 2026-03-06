@@ -78,6 +78,10 @@ export interface VendorPartner {
   section_id: string | null;
   sort_order: number;
   is_published: boolean;
+  is_dog_friendly: boolean;
+  is_family_friendly: boolean;
+  allows_outside_food: boolean;
+  allows_pp_food_only: boolean;
   created_at: string;
   updated_at: string;
 }

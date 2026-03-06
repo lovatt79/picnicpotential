@@ -44,6 +44,12 @@ export default function EditPartnerPage() {
   const [sections, setSections] = useState<PartnerSection[]>([]);
   const [isPublished, setIsPublished] = useState(true);
 
+  // Venue Settings (Winery only)
+  const [isDogFriendly, setIsDogFriendly] = useState(false);
+  const [isFamilyFriendly, setIsFamilyFriendly] = useState(false);
+  const [allowsOutsideFood, setAllowsOutsideFood] = useState(false);
+  const [allowsPpFoodOnly, setAllowsPpFoodOnly] = useState(false);
+
   // Partner Page ID
   const [partnerPageId, setPartnerPageId] = useState<string | null>(null);
 
@@ -100,6 +106,10 @@ export default function EditPartnerPage() {
       setPartnerType(partnerData.partner_type);
       setSectionId(partnerData.section_id || null);
       setIsPublished(partnerData.is_published);
+      setIsDogFriendly(partnerData.is_dog_friendly ?? false);
+      setIsFamilyFriendly(partnerData.is_family_friendly ?? false);
+      setAllowsOutsideFood(partnerData.allows_outside_food ?? false);
+      setAllowsPpFoodOnly(partnerData.allows_pp_food_only ?? false);
 
       // Fetch logo URL if logo_id exists
       if (partnerData.logo_id) {
@@ -205,6 +215,10 @@ export default function EditPartnerPage() {
         partner_type: partnerType,
         section_id: sectionId,
         is_published: isPublished,
+        is_dog_friendly: partnerType === "Winery" ? isDogFriendly : false,
+        is_family_friendly: partnerType === "Winery" ? isFamilyFriendly : false,
+        allows_outside_food: partnerType === "Winery" ? allowsOutsideFood : false,
+        allows_pp_food_only: partnerType === "Winery" ? allowsPpFoodOnly : false,
       })
       .eq("id", params.id);
 
@@ -551,6 +565,42 @@ export default function EditPartnerPage() {
               </label>
               <span className="text-sm text-charcoal">Published</span>
             </div>
+
+            {partnerType === "Winery" && (
+              <div className="border-t border-gray-100 pt-6">
+                <h3 className="text-sm font-medium text-charcoal mb-4">Venue Settings</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" checked={isDogFriendly} onChange={(e) => setIsDogFriendly(e.target.checked)} className="sr-only peer" />
+                      <div className="w-9 h-5 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" style={{ backgroundColor: isDogFriendly ? "#f59e0b" : "#e5e7eb" }}></div>
+                    </label>
+                    <span className="text-sm text-charcoal">Dog Friendly</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" checked={isFamilyFriendly} onChange={(e) => setIsFamilyFriendly(e.target.checked)} className="sr-only peer" />
+                      <div className="w-9 h-5 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" style={{ backgroundColor: isFamilyFriendly ? "#3b82f6" : "#e5e7eb" }}></div>
+                    </label>
+                    <span className="text-sm text-charcoal">Family Friendly</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" checked={allowsOutsideFood} onChange={(e) => setAllowsOutsideFood(e.target.checked)} className="sr-only peer" />
+                      <div className="w-9 h-5 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" style={{ backgroundColor: allowsOutsideFood ? "#22c55e" : "#e5e7eb" }}></div>
+                    </label>
+                    <span className="text-sm text-charcoal">Allows Outside Food</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" checked={allowsPpFoodOnly} onChange={(e) => setAllowsPpFoodOnly(e.target.checked)} className="sr-only peer" />
+                      <div className="w-9 h-5 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" style={{ backgroundColor: allowsPpFoodOnly ? "#a855f7" : "#e5e7eb" }}></div>
+                    </label>
+                    <span className="text-sm text-charcoal">PP Food Only</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           <div className="flex items-center justify-between mt-6">
             <div className="flex items-center gap-4">
