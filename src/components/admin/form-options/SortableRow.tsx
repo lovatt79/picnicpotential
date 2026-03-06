@@ -72,6 +72,14 @@ export default function SortableRow({
         const value = item[col.key];
 
         if (col.type === "toggle") {
+          const colorMap: Record<string, string> = {
+            "bg-green-500": "#22c55e",
+            "bg-amber-500": "#f59e0b",
+            "bg-blue-500": "#3b82f6",
+            "bg-purple-500": "#a855f7",
+            "bg-red-500": "#ef4444",
+          };
+          const checkedColor = col.toggleColor ? colorMap[col.toggleColor] || "#9caf88" : "#9caf88";
           return (
             <div key={col.key} className={`shrink-0 ${col.width || "w-16"}`}>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -84,11 +92,8 @@ export default function SortableRow({
                   className="sr-only peer"
                 />
                 <div
-                  className={`w-9 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all ${
-                    col.toggleColor
-                      ? `peer-checked:${col.toggleColor}`
-                      : "peer-checked:bg-sage"
-                  }`}
+                  className="w-9 h-5 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"
+                  style={{ backgroundColor: value ? checkedColor : "#e5e7eb" }}
                 ></div>
               </label>
             </div>
