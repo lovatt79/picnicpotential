@@ -20,6 +20,10 @@ const columns: ColumnDef[] = [
     ],
   },
   { key: "city", header: "City", type: "text", width: "w-36", placeholder: "e.g., Santa Rosa" },
+  { key: "is_dog_friendly", header: "Dogs", type: "toggle", width: "w-16", toggleColor: "bg-amber-500", defaultValue: false },
+  { key: "is_family_friendly", header: "Family", type: "toggle", width: "w-16", toggleColor: "bg-blue-500", defaultValue: false },
+  { key: "allows_outside_food", header: "Outside Food", type: "toggle", width: "w-16", toggleColor: "bg-green-500", defaultValue: false },
+  { key: "allows_pp_food_only", header: "PP Only", type: "toggle", width: "w-16", toggleColor: "bg-purple-500", defaultValue: false },
   { key: "notes", header: "Notes", type: "text", placeholder: "e.g., Permission required" },
 ];
 
