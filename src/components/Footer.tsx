@@ -9,16 +9,7 @@ export default function Footer() {
       <div className="bg-charcoal border-b border-gray-700 py-6">
         <div className="mx-auto max-w-4xl px-4 text-center text-sm text-gray-300">
           <p>
-            To see photos of color palettes, event type pictures, vendor photos see our{" "}
-            <a
-              href={PINTEREST_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-gold underline hover:text-gold-light"
-            >
-              Pinterest Page
-            </a>
-            . To see reels of past events please visit our{" "}
+            To see reels of past events please visit our{" "}
             <a
               href={INSTAGRAM_URL}
               target="_blank"
