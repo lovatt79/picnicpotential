@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Playfair_Display, Inter } from "next/font/google";
 import { createClient } from "@/lib/supabase/server";
 import LayoutShell from "@/components/LayoutShell";
 import "./globals.css";
+
+const GA_ID = "G-384W4TL7HW";
 
 const playfair = Playfair_Display({
   variable: "--font-serif",
@@ -68,6 +71,20 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_ID}');
+          `}
+        </Script>
+      </head>
       <body className={`${playfair.variable} ${inter.variable} antialiased`}>
         <LayoutShell navItems={navItems}>{children}</LayoutShell>
       </body>
