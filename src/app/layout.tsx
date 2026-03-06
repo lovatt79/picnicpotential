@@ -26,6 +26,9 @@ export const metadata: Metadata = {
   },
   description:
     "A truly unique picnic and event experience that comes in a variety of styles that fit any occasion. Serving Sonoma County wine country.",
+  icons: {
+    icon: "/favicon.ico",
+  },
   keywords: [
     "luxury picnic",
     "Sonoma County",
