@@ -70,14 +70,14 @@ export async function POST(request: Request) {
         console.error("Database insert error:", error);
       }
 
-      // Send email notifications (fire-and-forget)
+      // Send email notifications (awaited so serverless function doesn't exit early)
       if (!error) {
-        sendFormNotifications(
+        await sendFormNotifications(
           "wedding-suite",
           { ...data, id: inserted?.id },
           data.email,
           `${data.firstName} ${data.lastName}`
-        ).catch((err) => console.error("Email notification error:", err));
+        );
       }
     } else {
       console.log("Wedding suite form submission received:", JSON.stringify(data, null, 2));

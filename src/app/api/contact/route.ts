@@ -97,7 +97,7 @@ export async function POST(request: Request) {
         console.error("Database insert error:", error);
       }
 
-      // Send email notifications (fire-and-forget — never blocks response)
+      // Send email notifications (awaited so serverless function doesn't exit early)
       if (!error) {
         const formType = data.type === "hint" ? "hint" as const : "service-request" as const;
         const email = data.type === "hint" ? data.senderEmail : data.email;
@@ -105,8 +105,7 @@ export async function POST(request: Request) {
           ? data.senderName
           : `${data.firstName} ${data.lastName}`;
 
-        sendFormNotifications(formType, { ...data, id: inserted?.id }, email, name)
-          .catch((err) => console.error("Email notification error:", err));
+        await sendFormNotifications(formType, { ...data, id: inserted?.id }, email, name);
       }
     } else {
       // Supabase not configured - just log the submission
