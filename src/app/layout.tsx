@@ -39,6 +39,9 @@ export const metadata: Metadata = {
     "proposals",
     "tablescapes",
   ],
+  verification: {
+    google: "6t6uL90gyYCMw5j4pB81JAe5zQjnUowg7mvoMBTQo9Y",
+  },
 };
 
 export default async function RootLayout({
