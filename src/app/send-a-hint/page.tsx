@@ -7,6 +7,7 @@ export default function SendAHintPage() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [formLoadedAt] = useState(() => Date.now());
   const [formData, setFormData] = useState({
     senderName: "",
     senderEmail: "",
@@ -14,6 +15,7 @@ export default function SendAHintPage() {
     recipientEmail: "",
     occasion: "",
     message: "",
+    website: "", // honeypot
   });
 
   const updateField = (field: string, value: string) => {
@@ -32,7 +34,7 @@ export default function SendAHintPage() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, type: "hint", turnstileToken: turnstileToken || "disabled" }),
+        body: JSON.stringify({ ...formData, type: "hint", turnstileToken: turnstileToken || "disabled", _t: formLoadedAt }),
       });
       if (res.ok) {
         setSubmitted(true);
@@ -161,6 +163,20 @@ export default function SendAHintPage() {
                   placeholder="Add a personal message (optional)"
                 />
               </div>
+            </div>
+
+            {/* Honeypot — hidden from humans, bots will fill it */}
+            <div className="absolute opacity-0 -z-10" aria-hidden="true" tabIndex={-1}>
+              <label htmlFor="website">Website</label>
+              <input
+                id="website"
+                name="website"
+                type="text"
+                autoComplete="off"
+                tabIndex={-1}
+                value={formData.website}
+                onChange={(e) => updateField("website", e.target.value)}
+              />
             </div>
 
             {/* TODO: Re-enable Turnstile once sitekey is configured

@@ -20,6 +20,17 @@ export async function POST(request: Request) {
   try {
     const data = await request.json();
 
+    // Honeypot check — bots fill the hidden "website" field
+    if (data.website) {
+      // Silently accept so bots think it worked
+      return NextResponse.json({ success: true, message: "Form submitted successfully" }, { status: 200 });
+    }
+
+    // Time-based check — reject if submitted faster than 3 seconds
+    if (data._t && Date.now() - Number(data._t) < 3000) {
+      return NextResponse.json({ success: true, message: "Form submitted successfully" }, { status: 200 });
+    }
+
     // Turnstile verification
     const turnstileToken = data.turnstileToken;
     if (!turnstileToken) {
