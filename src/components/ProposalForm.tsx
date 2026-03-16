@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-// import { Turnstile } from "@marsidev/react-turnstile";
+import { Turnstile } from "@marsidev/react-turnstile";
 import { createClient } from "@/lib/supabase/client";
 import { validateStep, type ValidationErrors } from "@/lib/formValidation";
 import { FieldError } from "@/components/form/FieldError";
@@ -188,11 +188,10 @@ export default function ProposalForm() {
       setErrors(stepErrors);
       return;
     }
-    // TODO: Re-enable Turnstile check once sitekey is configured
-    // if (!turnstileToken) {
-    //   alert("Please complete the verification challenge.");
-    //   return;
-    // }
+    if (!turnstileToken) {
+      alert("Please complete the verification challenge.");
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch("/api/proposal", {
@@ -544,7 +543,6 @@ export default function ProposalForm() {
                   />
                 </div>
 
-                {/* TODO: Re-enable Turnstile once sitekey is configured
                 <div className="mt-6">
                   <Turnstile
                     siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
@@ -553,7 +551,6 @@ export default function ProposalForm() {
                     onExpire={() => setTurnstileToken(null)}
                   />
                 </div>
-                */}
               </div>
             )}
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-// import { Turnstile } from "@marsidev/react-turnstile";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 export default function SendAHintPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -24,11 +24,10 @@ export default function SendAHintPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Re-enable Turnstile check once sitekey is configured
-    // if (!turnstileToken) {
-    //   alert("Please complete the verification challenge.");
-    //   return;
-    // }
+    if (!turnstileToken) {
+      alert("Please complete the verification challenge.");
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch("/api/contact", {
@@ -179,7 +178,6 @@ export default function SendAHintPage() {
               />
             </div>
 
-            {/* TODO: Re-enable Turnstile once sitekey is configured
             <div className="mt-6">
               <Turnstile
                 siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
@@ -188,7 +186,6 @@ export default function SendAHintPage() {
                 onExpire={() => setTurnstileToken(null)}
               />
             </div>
-            */}
 
             <button
               type="submit"
