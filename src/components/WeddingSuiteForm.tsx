@@ -5,6 +5,7 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import { createClient } from "@/lib/supabase/client";
 import { validateStep, type ValidationErrors } from "@/lib/formValidation";
 import { FieldError } from "@/components/form/FieldError";
+import { DatePicker } from "@/components/form/DatePicker";
 import {
   PricedCheckboxOption,
   PricedRadioOption,
@@ -490,7 +491,13 @@ export default function WeddingSuiteForm() {
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div>
                     <label className="block text-sm font-medium text-charcoal mb-1">Wedding Date *</label>
-                    <input type="date" required value={formData.eventDate} onChange={(e) => updateField("eventDate", e.target.value)} className={getInputClass("eventDate", errors)} />
+                    <DatePicker
+                      value={formData.eventDate}
+                      onChange={(v) => updateField("eventDate", v)}
+                      hasError={!!errors.eventDate}
+                      formType="wedding"
+                      placeholder="Select your wedding date"
+                    />
                     <FieldError message={errors.eventDate} />
                   </div>
                   <div>

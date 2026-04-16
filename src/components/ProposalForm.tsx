@@ -5,6 +5,7 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import { createClient } from "@/lib/supabase/client";
 import { validateStep, type ValidationErrors } from "@/lib/formValidation";
 import { FieldError } from "@/components/form/FieldError";
+import { DatePicker } from "@/components/form/DatePicker";
 import {
   PricedCheckboxOption,
   PricedRadioOption,
@@ -385,12 +386,23 @@ export default function ProposalForm() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="block text-sm font-medium text-charcoal mb-1">Proposal Date (1st Choice) *</label>
-                    <input type="date" required value={formData.proposalDate1} onChange={(e) => updateField("proposalDate1", e.target.value)} className={getInputClass("proposalDate1", errors)} />
+                    <DatePicker
+                      value={formData.proposalDate1}
+                      onChange={(v) => updateField("proposalDate1", v)}
+                      hasError={!!errors.proposalDate1}
+                      formType="proposal"
+                      placeholder="Select your 1st choice"
+                    />
                     <FieldError message={errors.proposalDate1} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-charcoal mb-1">Proposal Date (2nd Choice)</label>
-                    <input type="date" value={formData.proposalDate2} onChange={(e) => updateField("proposalDate2", e.target.value)} className={inputClass} />
+                    <DatePicker
+                      value={formData.proposalDate2}
+                      onChange={(v) => updateField("proposalDate2", v)}
+                      formType="proposal"
+                      placeholder="Select your 2nd choice"
+                    />
                   </div>
                 </div>
 

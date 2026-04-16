@@ -5,6 +5,7 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import { createClient } from "@/lib/supabase/client";
 import { validateStep, type ValidationErrors } from "@/lib/formValidation";
 import { FieldError } from "@/components/form/FieldError";
+import { DatePicker } from "@/components/form/DatePicker";
 import {
   CheckboxOption,
   PricedCheckboxOption,
@@ -445,12 +446,23 @@ export default function MultiStepForm() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="block text-sm font-medium text-charcoal mb-1">Event Date *</label>
-                    <input type="date" required value={formData.eventDate} onChange={(e) => updateField("eventDate", e.target.value)} className={getInputClass("eventDate", errors)} />
+                    <DatePicker
+                      value={formData.eventDate}
+                      onChange={(v) => updateField("eventDate", v)}
+                      hasError={!!errors.eventDate}
+                      formType="general"
+                      placeholder="Select your event date"
+                    />
                     <FieldError message={errors.eventDate} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-charcoal mb-1">Backup Date</label>
-                    <input type="date" value={formData.backupDate} onChange={(e) => updateField("backupDate", e.target.value)} className={inputClass} />
+                    <DatePicker
+                      value={formData.backupDate}
+                      onChange={(v) => updateField("backupDate", v)}
+                      formType="general"
+                      placeholder="Select a backup date"
+                    />
                   </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
