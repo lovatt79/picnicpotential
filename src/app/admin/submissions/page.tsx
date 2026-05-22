@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { formatDateStr } from "@/lib/formatDate";
 
 const statusColors: Record<string, string> = {
   new: "bg-gold text-charcoal",
@@ -226,7 +227,7 @@ export default function SubmissionsPage() {
                       {getDetails(sub)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-charcoal">
-                      {eventDate ? new Date(eventDate).toLocaleDateString() : "\u2014"}
+                      {formatDateStr(eventDate) ?? "\u2014"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs rounded-full ${statusColors[sub.status] || "bg-gray-200"}`}>

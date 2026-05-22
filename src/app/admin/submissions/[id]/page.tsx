@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { FormSubmission, SubmissionStatus } from "@/lib/supabase/types";
+import { formatDateStr } from "@/lib/formatDate";
 
 const statuses: SubmissionStatus[] = ["new", "contacted", "quoted", "confirmed", "completed", "cancelled"];
 
@@ -134,8 +135,8 @@ export default function SubmissionDetailPage() {
               <>
                 <Section title="Event Details">
                   <Field label="Event Type" value={submission.event_type} />
-                  <Field label="Event Date" value={submission.event_date ? new Date(submission.event_date).toLocaleDateString() : null} />
-                  <Field label="Backup Date" value={submission.backup_date ? new Date(submission.backup_date).toLocaleDateString() : null} />
+                  <Field label="Event Date" value={formatDateStr(submission.event_date)} />
+                  <Field label="Backup Date" value={formatDateStr(submission.backup_date)} />
                   <Field label="Event Time" value={submission.event_time} />
                   <Field label="Additional Time" value={submission.additional_time} />
                   <Field label="Occasion" value={submission.occasion} />

@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { WsSubmission, SubmissionStatus } from "@/lib/supabase/types";
+import { formatDateStr } from "@/lib/formatDate";
 
 const statuses: SubmissionStatus[] = ["new", "contacted", "quoted", "confirmed", "completed", "cancelled"];
 
@@ -141,7 +142,7 @@ export default function WeddingSuiteDetailPage() {
             </Section>
 
             <Section title="Event Timing">
-              <Field label="Wedding Date" value={submission.event_date ? new Date(submission.event_date).toLocaleDateString() : null} />
+              <Field label="Wedding Date" value={formatDateStr(submission.event_date)} />
               <Field label="Arrival Time" value={submission.arrival_time} />
               <Field label="Suite Access Time" value={submission.suite_access_time} />
               <Field label="Party Size" value={submission.people_count} />
