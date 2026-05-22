@@ -1,5 +1,6 @@
 import { Text, Section, Hr, Link } from "@react-email/components";
 import EmailLayout from "./components/EmailLayout";
+import { formatDateStr, formatTimeStr } from "@/lib/formatDate";
 
 interface WeddingSuiteOpsProps {
   data: {
@@ -147,17 +148,17 @@ export default function WeddingSuiteOps({ data }: WeddingSuiteOpsProps) {
       <Section style={detailBox}>
         {data.eventDate && (
           <Text style={row}>
-            <strong>Event Date:</strong> {data.eventDate}
+            <strong>Event Date:</strong> {formatDateStr(data.eventDate)}
           </Text>
         )}
         {data.arrivalTime && (
           <Text style={row}>
-            <strong>Arrival Time:</strong> {data.arrivalTime}
+            <strong>Arrival Time:</strong> {formatTimeStr(data.arrivalTime)}
           </Text>
         )}
         {data.suiteAccessTime && (
           <Text style={row}>
-            <strong>Suite Access Time:</strong> {data.suiteAccessTime}
+            <strong>Suite Access Time:</strong> {formatTimeStr(data.suiteAccessTime)}
           </Text>
         )}
         {data.peopleCount && (

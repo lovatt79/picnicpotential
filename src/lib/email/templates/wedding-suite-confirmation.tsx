@@ -1,5 +1,6 @@
 import { Text, Section } from "@react-email/components";
 import EmailLayout from "./components/EmailLayout";
+import { formatDateStr } from "@/lib/formatDate";
 
 interface WeddingSuiteConfirmationProps {
   data: {
@@ -45,7 +46,7 @@ export default function WeddingSuiteConfirmation({
         )}
         {data.eventDate && (
           <Text style={summaryRow}>
-            <strong>Event Date:</strong> {data.eventDate}
+            <strong>Event Date:</strong> {formatDateStr(data.eventDate)}
           </Text>
         )}
         {data.package && (

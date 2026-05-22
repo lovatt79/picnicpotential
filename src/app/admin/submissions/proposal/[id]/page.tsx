@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { ProposalSubmission, SubmissionStatus } from "@/lib/supabase/types";
-import { formatDateStr } from "@/lib/formatDate";
+import { formatDateStr, formatTimeStr } from "@/lib/formatDate";
 
 const statuses: SubmissionStatus[] = ["new", "contacted", "quoted", "confirmed", "completed", "cancelled"];
 
@@ -130,7 +130,7 @@ export default function ProposalDetailPage() {
               <Field label="Proposee" value={submission.proposee_name} />
               <Field label="Date (1st Choice)" value={formatDateStr(submission.proposal_date_1)} />
               <Field label="Date (2nd Choice)" value={formatDateStr(submission.proposal_date_2)} />
-              <Field label="Time" value={submission.proposal_time} />
+              <Field label="Time" value={formatTimeStr(submission.proposal_time)} />
               <Field label="Location" value={submission.location} />
               {submission.location_details && <Field label="Location Details" value={submission.location_details} />}
               <Field label="Colors" value={submission.colors} />

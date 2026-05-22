@@ -1,5 +1,6 @@
 import { Text, Section, Hr, Link } from "@react-email/components";
 import EmailLayout from "./components/EmailLayout";
+import { formatDateStr, formatTimeStr } from "@/lib/formatDate";
 
 interface ServiceRequestOpsProps {
   data: {
@@ -75,9 +76,9 @@ export default function ServiceRequestOps({ data }: ServiceRequestOpsProps) {
       <Text style={sectionTitle}>Event Details</Text>
       <Section style={detailBox}>
         {data.eventType && <Text style={row}><strong>Event Type:</strong> {data.eventType}</Text>}
-        {data.eventDate && <Text style={row}><strong>Event Date:</strong> {data.eventDate}</Text>}
-        {data.backupDate && <Text style={row}><strong>Backup Date:</strong> {data.backupDate}</Text>}
-        {data.eventTime && <Text style={row}><strong>Event Time:</strong> {data.eventTime}</Text>}
+        {data.eventDate && <Text style={row}><strong>Event Date:</strong> {formatDateStr(data.eventDate)}</Text>}
+        {data.backupDate && <Text style={row}><strong>Backup Date:</strong> {formatDateStr(data.backupDate)}</Text>}
+        {data.eventTime && <Text style={row}><strong>Event Time:</strong> {formatTimeStr(data.eventTime)}</Text>}
         {data.additionalTime && <Text style={row}><strong>Additional Time:</strong> {data.additionalTime}</Text>}
         {data.occasion && <Text style={row}><strong>Occasion:</strong> {data.occasion}</Text>}
       </Section>

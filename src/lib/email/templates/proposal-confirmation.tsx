@@ -1,5 +1,6 @@
 import { Text, Section } from "@react-email/components";
 import EmailLayout from "./components/EmailLayout";
+import { formatDateStr } from "@/lib/formatDate";
 
 interface ProposalConfirmationProps {
   data: {
@@ -33,7 +34,7 @@ export default function ProposalConfirmation({
         )}
         {data.proposalDate1 && (
           <Text style={summaryRow}>
-            <strong>Preferred Date:</strong> {data.proposalDate1}
+            <strong>Preferred Date:</strong> {formatDateStr(data.proposalDate1)}
           </Text>
         )}
         {data.location && (

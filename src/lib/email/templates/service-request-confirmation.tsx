@@ -1,5 +1,6 @@
 import { Text, Section } from "@react-email/components";
 import EmailLayout from "./components/EmailLayout";
+import { formatDateStr } from "@/lib/formatDate";
 
 interface ServiceRequestConfirmationProps {
   data: {
@@ -34,12 +35,12 @@ export default function ServiceRequestConfirmation({
         )}
         {data.eventDate && (
           <Text style={summaryRow}>
-            <strong>Event Date:</strong> {data.eventDate}
+            <strong>Event Date:</strong> {formatDateStr(data.eventDate)}
           </Text>
         )}
         {data.backupDate && (
           <Text style={summaryRow}>
-            <strong>Backup Date:</strong> {data.backupDate}
+            <strong>Backup Date:</strong> {formatDateStr(data.backupDate)}
           </Text>
         )}
         {data.location && (

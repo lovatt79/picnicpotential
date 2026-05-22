@@ -1,5 +1,6 @@
 import { Text, Section, Hr, Link } from "@react-email/components";
 import EmailLayout from "./components/EmailLayout";
+import { formatDateStr, formatTimeStr } from "@/lib/formatDate";
 
 interface ProposalOpsProps {
   data: {
@@ -66,9 +67,9 @@ export default function ProposalOps({ data }: ProposalOpsProps) {
       <Text style={sectionTitle}>Proposal Details</Text>
       <Section style={detailBox}>
         {data.proposeeName && <Text style={row}><strong>Proposee:</strong> {data.proposeeName}</Text>}
-        {data.proposalDate1 && <Text style={row}><strong>Preferred Date:</strong> {data.proposalDate1}</Text>}
-        {data.proposalDate2 && <Text style={row}><strong>Backup Date:</strong> {data.proposalDate2}</Text>}
-        {data.proposalTime && <Text style={row}><strong>Time:</strong> {data.proposalTime}</Text>}
+        {data.proposalDate1 && <Text style={row}><strong>Preferred Date:</strong> {formatDateStr(data.proposalDate1)}</Text>}
+        {data.proposalDate2 && <Text style={row}><strong>Backup Date:</strong> {formatDateStr(data.proposalDate2)}</Text>}
+        {data.proposalTime && <Text style={row}><strong>Time:</strong> {formatTimeStr(data.proposalTime)}</Text>}
         {data.location && <Text style={row}><strong>Location:</strong> {data.location}</Text>}
         {data.locationDetails && <Text style={row}><strong>Location Details:</strong> {data.locationDetails}</Text>}
         {data.colors && <Text style={row}><strong>Colors:</strong> {data.colors}</Text>}
