@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Turnstile } from "@marsidev/react-turnstile";
-import { createClient } from "@/lib/supabase/client";
 import { validateStep, type ValidationErrors } from "@/lib/formValidation";
 import { FieldError } from "@/components/form/FieldError";
 import { DatePicker } from "@/components/form/DatePicker";
@@ -109,23 +108,17 @@ export default function ProposalForm() {
   const [loadingOptions, setLoadingOptions] = useState(true);
 
   useEffect(() => {
-    async function loadFormOptions() {
-      const supabase = createClient();
-      const [packages, addons, food, attribution, locations] = await Promise.all([
-        supabase.from("prop_package_options").select("label, description, price").eq("is_active", true).order("sort_order"),
-        supabase.from("prop_addon_options").select("label, description, price, price_unit").eq("is_active", true).order("sort_order"),
-        supabase.from("prop_food_options").select("label, description, price, price_unit, category").eq("is_active", true).order("sort_order"),
-        supabase.from("form_attribution_options").select("label").eq("is_active", true).order("sort_order"),
-        supabase.from("form_location_options").select("label, location_type, city").eq("is_active", true).order("sort_order"),
-      ]);
-      if (packages.data) setPackageOptions(packages.data);
-      if (addons.data) setAddonOptions(addons.data.map((a) => ({ ...a, min_quantity: null })));
-      if (food.data) setFoodOptions(food.data.map((f) => ({ ...f, min_quantity: null })));
-      if (attribution.data) setAttributionOptions(attribution.data.map((a) => a.label));
-      setLocationOptions((locations.data || []) as { label: string; location_type: string | null; city: string | null }[]);
-      setLoadingOptions(false);
-    }
-    loadFormOptions();
+    fetch("/api/form-options/proposal")
+      .then((r) => r.json())
+      .then((d) => {
+        setPackageOptions(d.packages ?? []);
+        setAddonOptions((d.addons ?? []).map((a: any) => ({ ...a, min_quantity: null })));
+        setFoodOptions((d.food ?? []).map((f: any) => ({ ...f, min_quantity: null })));
+        setAttributionOptions(d.attribution ?? []);
+        setLocationOptions(d.locations ?? []);
+        setLoadingOptions(false);
+      })
+      .catch(() => setLoadingOptions(false));
   }, []);
 
   const scrollToTop = () => {

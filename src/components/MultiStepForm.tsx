@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Turnstile } from "@marsidev/react-turnstile";
-import { createClient } from "@/lib/supabase/client";
 import { validateStep, type ValidationErrors } from "@/lib/formValidation";
 import { FieldError } from "@/components/form/FieldError";
 import { DatePicker } from "@/components/form/DatePicker";
@@ -142,29 +141,20 @@ export default function MultiStepForm() {
   const [loadingOptions, setLoadingOptions] = useState(true);
 
   useEffect(() => {
-    async function loadFormOptions() {
-      const supabase = createClient();
-      const [events, colors, food, desserts, addons, occasions, attribution, locations] = await Promise.all([
-        supabase.from("form_event_types").select("label").eq("is_active", true).order("sort_order"),
-        supabase.from("form_color_options").select("label").eq("is_active", true).order("sort_order"),
-        supabase.from("form_food_options").select("label, price, price_unit, min_quantity, is_vegan, is_gluten_free").eq("is_active", true).order("sort_order"),
-        supabase.from("form_dessert_options").select("label, price, price_unit, min_quantity, is_vegan, is_gluten_free").eq("is_active", true).order("sort_order"),
-        supabase.from("form_addon_options").select("label, price, price_unit, category").eq("is_active", true).order("sort_order"),
-        supabase.from("form_occasion_options").select("label").eq("is_active", true).order("sort_order"),
-        supabase.from("form_attribution_options").select("label").eq("is_active", true).order("sort_order"),
-        supabase.from("form_location_options").select("label, location_type, city").eq("is_active", true).order("sort_order"),
-      ]);
-      setEventTypes((events.data || []).map((e: any) => e.label));
-      setColorOptions((colors.data || []).map((c: any) => c.label));
-      setFoodOptions((food.data || []) as PricedOption[]);
-      setDessertOptions((desserts.data || []) as PricedOption[]);
-      setAddonOptions((addons.data || []) as PricedOption[]);
-      setOccasionOptions((occasions.data || []).map((o: any) => o.label));
-      setAttributionOptions((attribution.data || []).map((a: any) => a.label));
-      setLocationOptions((locations.data || []) as { label: string; location_type: string | null; city: string | null }[]);
-      setLoadingOptions(false);
-    }
-    loadFormOptions();
+    fetch("/api/form-options/general")
+      .then((r) => r.json())
+      .then((d) => {
+        setEventTypes(d.eventTypes ?? []);
+        setColorOptions(d.colors ?? []);
+        setFoodOptions(d.food ?? []);
+        setDessertOptions(d.desserts ?? []);
+        setAddonOptions(d.addons ?? []);
+        setOccasionOptions(d.occasions ?? []);
+        setAttributionOptions(d.attribution ?? []);
+        setLocationOptions(d.locations ?? []);
+        setLoadingOptions(false);
+      })
+      .catch(() => setLoadingOptions(false));
   }, []);
 
   const scrollToTop = () => {

@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Turnstile } from "@marsidev/react-turnstile";
-import { createClient } from "@/lib/supabase/client";
 import { validateStep, type ValidationErrors } from "@/lib/formValidation";
 import { FieldError } from "@/components/form/FieldError";
 import { DatePicker } from "@/components/form/DatePicker";
@@ -124,23 +123,17 @@ export default function WeddingSuiteForm() {
   const [loadingOptions, setLoadingOptions] = useState(true);
 
   useEffect(() => {
-    async function loadFormOptions() {
-      const supabase = createClient();
-      const [packages, food, addons, gifts, attribution] = await Promise.all([
-        supabase.from("ws_package_options").select("label, description, price").eq("is_active", true).order("sort_order"),
-        supabase.from("ws_food_options").select("label, description, price, price_unit, category").eq("is_active", true).order("sort_order"),
-        supabase.from("ws_addon_options").select("label, description, price, price_unit, category").eq("is_active", true).order("sort_order"),
-        supabase.from("ws_gift_options").select("label, description, price, price_unit").eq("is_active", true).order("sort_order"),
-        supabase.from("form_attribution_options").select("label").eq("is_active", true).order("sort_order"),
-      ]);
-      if (packages.data) setPackageOptions(packages.data);
-      if (food.data) setFoodOptions(food.data.map((f) => ({ ...f, min_quantity: null })));
-      if (addons.data) setAddonOptions(addons.data.map((a) => ({ ...a, min_quantity: null })));
-      if (gifts.data) setGiftOptions(gifts.data.map((g) => ({ ...g, min_quantity: null, price_unit: g.price_unit ?? "per_set" })));
-      if (attribution.data) setAttributionOptions(attribution.data.map((a) => a.label));
-      setLoadingOptions(false);
-    }
-    loadFormOptions();
+    fetch("/api/form-options/wedding")
+      .then((r) => r.json())
+      .then((d) => {
+        setPackageOptions(d.packages ?? []);
+        setFoodOptions((d.food ?? []).map((f: any) => ({ ...f, min_quantity: null })));
+        setAddonOptions((d.addons ?? []).map((a: any) => ({ ...a, min_quantity: null })));
+        setGiftOptions((d.gifts ?? []).map((g: any) => ({ ...g, min_quantity: null, price_unit: g.price_unit ?? "per_set" })));
+        setAttributionOptions(d.attribution ?? []);
+        setLoadingOptions(false);
+      })
+      .catch(() => setLoadingOptions(false));
   }, []);
 
   const scrollToTop = () => {
