@@ -9,8 +9,7 @@ export const metadata: Metadata = {
   description: "Our curated list of trusted local vendors for charcuterie, florals, desserts, balloons, photography and more.",
 };
 
-// Force dynamic rendering to always fetch fresh content
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 function slugify(text: string): string {
   return text

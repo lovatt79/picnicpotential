@@ -8,7 +8,7 @@ import { generateItemListSchema } from "@/lib/schema";
 import BuilderPageRenderer from "@/components/builder/BuilderPageRenderer";
 import type { BuilderPage } from "@/lib/builder-types";
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 interface CollectionPageProps {
   params: Promise<{ slug: string }>;

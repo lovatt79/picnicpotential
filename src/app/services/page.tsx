@@ -9,8 +9,7 @@ export const metadata: Metadata = {
   description: "Explore our luxury picnic services, corporate events, tablescapes, proposals, and more in Sonoma County wine country.",
 };
 
-// Force dynamic rendering to always fetch fresh content
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 function slugify(text: string): string {
   return text

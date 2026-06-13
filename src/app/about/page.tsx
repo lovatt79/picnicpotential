@@ -8,8 +8,7 @@ export const metadata: Metadata = {
   description: "Learn about Picnic Potential and our passion for creating unique picnic and event experiences in Sonoma County.",
 };
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 function getIconEmoji(icon: string): string {
   const iconMap: Record<string, string> = {

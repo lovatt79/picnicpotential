@@ -9,8 +9,7 @@ export const metadata: Metadata = {
   description: "Explore our seating options including picnic, lounge, chair vignettes, cabanas, tablescapes, and igloo tents.",
 };
 
-// Force dynamic rendering to always fetch fresh content
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 function slugify(text: string): string {
   return text

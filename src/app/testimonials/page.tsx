@@ -8,8 +8,7 @@ export const metadata: Metadata = {
   description: "Read what our clients have to say about their Picnic Potential experience.",
 };
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 async function getPageHero() {
   try {

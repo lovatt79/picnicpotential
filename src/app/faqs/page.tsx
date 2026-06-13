@@ -10,8 +10,7 @@ export const metadata: Metadata = {
   description: "Frequently asked questions about Picnic Potential services, booking, and policies.",
 };
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 async function getPageHero() {
   try {
