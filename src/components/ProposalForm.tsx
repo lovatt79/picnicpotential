@@ -98,6 +98,7 @@ export default function ProposalForm() {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Database-driven form options
   const [packageOptions, setPackageOptions] = useState<PackageOption[]>([]);
@@ -177,13 +178,14 @@ export default function ProposalForm() {
   };
 
   const handleSubmit = async () => {
+    setSubmitError(null);
     const stepErrors = validateStep("proposal", step, formData as unknown as Record<string, unknown>);
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
       return;
     }
     if (!turnstileToken) {
-      alert("Please complete the verification challenge.");
+      setSubmitError("Please complete the verification challenge.");
       return;
     }
     setSubmitting(true);
@@ -197,10 +199,10 @@ export default function ProposalForm() {
         setSubmitted(true);
       } else {
         const result = await res.json();
-        alert(result.message || "Something went wrong.");
+        setSubmitError(result.message || "Something went wrong.");
       }
     } catch {
-      alert("Something went wrong. Please try again or email us directly at Info@picnicpotential.com");
+      setSubmitError("Something went wrong. Please try again or email us directly at Info@picnicpotential.com");
     } finally {
       setSubmitting(false);
     }
@@ -340,26 +342,26 @@ export default function ProposalForm() {
                 <h3 className="font-serif text-2xl text-charcoal">Contact Information</h3>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">First Name *</label>
-                    <input type="text" required value={formData.firstName} onChange={(e) => updateField("firstName", e.target.value)} className={getInputClass("firstName", errors)} />
-                    <FieldError message={errors.firstName} />
+                    <label htmlFor="p-firstName" className="block text-sm font-medium text-charcoal mb-1">First Name *</label>
+                    <input id="p-firstName" type="text" required aria-required="true" aria-describedby={errors.firstName ? "p-firstName-error" : undefined} value={formData.firstName} onChange={(e) => updateField("firstName", e.target.value)} className={getInputClass("firstName", errors)} />
+                    <FieldError id="p-firstName-error" message={errors.firstName} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Last Name *</label>
-                    <input type="text" required value={formData.lastName} onChange={(e) => updateField("lastName", e.target.value)} className={getInputClass("lastName", errors)} />
-                    <FieldError message={errors.lastName} />
+                    <label htmlFor="p-lastName" className="block text-sm font-medium text-charcoal mb-1">Last Name *</label>
+                    <input id="p-lastName" type="text" required aria-required="true" aria-describedby={errors.lastName ? "p-lastName-error" : undefined} value={formData.lastName} onChange={(e) => updateField("lastName", e.target.value)} className={getInputClass("lastName", errors)} />
+                    <FieldError id="p-lastName-error" message={errors.lastName} />
                   </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Phone Number *</label>
-                    <input type="tel" required value={formData.phone} onChange={(e) => updateField("phone", e.target.value)} className={getInputClass("phone", errors)} />
-                    <FieldError message={errors.phone} />
+                    <label htmlFor="p-phone" className="block text-sm font-medium text-charcoal mb-1">Phone Number *</label>
+                    <input id="p-phone" type="tel" required aria-required="true" aria-describedby={errors.phone ? "p-phone-error" : undefined} value={formData.phone} onChange={(e) => updateField("phone", e.target.value)} className={getInputClass("phone", errors)} />
+                    <FieldError id="p-phone-error" message={errors.phone} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Email *</label>
-                    <input type="email" required value={formData.email} onChange={(e) => updateField("email", e.target.value)} className={getInputClass("email", errors)} />
-                    <FieldError message={errors.email} />
+                    <label htmlFor="p-email" className="block text-sm font-medium text-charcoal mb-1">Email *</label>
+                    <input id="p-email" type="email" required aria-required="true" aria-describedby={errors.email ? "p-email-error" : undefined} value={formData.email} onChange={(e) => updateField("email", e.target.value)} className={getInputClass("email", errors)} />
+                    <FieldError id="p-email-error" message={errors.email} />
                   </div>
                 </div>
               </div>
@@ -371,26 +373,31 @@ export default function ProposalForm() {
                 <h3 className="font-serif text-2xl text-charcoal">Proposal Details</h3>
 
                 <div>
-                  <label className="block text-sm font-medium text-charcoal mb-1">Who are you proposing to? *</label>
-                  <input type="text" required value={formData.proposeeName} onChange={(e) => updateField("proposeeName", e.target.value)} className={getInputClass("proposeeName", errors)} />
-                  <FieldError message={errors.proposeeName} />
+                  <label htmlFor="proposeeName" className="block text-sm font-medium text-charcoal mb-1">Who are you proposing to? *</label>
+                  <input id="proposeeName" type="text" required aria-required="true" aria-describedby={errors.proposeeName ? "proposeeName-error" : undefined} value={formData.proposeeName} onChange={(e) => updateField("proposeeName", e.target.value)} className={getInputClass("proposeeName", errors)} />
+                  <FieldError id="proposeeName-error" message={errors.proposeeName} />
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Proposal Date (1st Choice) *</label>
+                    <label id="proposalDate1-label" className="block text-sm font-medium text-charcoal mb-1">Proposal Date (1st Choice) *</label>
                     <DatePicker
+                      id="proposalDate1"
+                      aria-labelledby="proposalDate1-label"
+                      aria-required={true}
                       value={formData.proposalDate1}
                       onChange={(v) => updateField("proposalDate1", v)}
                       hasError={!!errors.proposalDate1}
                       formType="proposal"
                       placeholder="Select your 1st choice"
                     />
-                    <FieldError message={errors.proposalDate1} />
+                    <FieldError id="proposalDate1-error" message={errors.proposalDate1} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Proposal Date (2nd Choice)</label>
+                    <label id="proposalDate2-label" className="block text-sm font-medium text-charcoal mb-1">Proposal Date (2nd Choice)</label>
                     <DatePicker
+                      id="proposalDate2"
+                      aria-labelledby="proposalDate2-label"
                       value={formData.proposalDate2}
                       onChange={(v) => updateField("proposalDate2", v)}
                       formType="proposal"
@@ -400,18 +407,21 @@ export default function ProposalForm() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-charcoal mb-1">Time of Proposal</label>
-                  <input type="time" value={formData.proposalTime} onChange={(e) => updateField("proposalTime", e.target.value)} className={inputClass} />
+                  <label htmlFor="proposalTime" className="block text-sm font-medium text-charcoal mb-1">Time of Proposal</label>
+                  <input id="proposalTime" type="time" value={formData.proposalTime} onChange={(e) => updateField("proposalTime", e.target.value)} className={inputClass} />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-charcoal mb-1">Location *</label>
+                  <label htmlFor="p-location" className="block text-sm font-medium text-charcoal mb-1">Location *</label>
                   <select
+                    id="p-location"
                     value={formData.location}
                     onChange={(e) => {
                       updateField("location", e.target.value);
                       if (formData.locationDetails) updateField("locationDetails", "");
                     }}
+                    aria-required="true"
+                    aria-describedby={errors.location ? "p-location-error" : undefined}
                     className={getInputClass("location", errors)}
                   >
                     <option value="">Select a location...</option>
@@ -421,15 +431,16 @@ export default function ProposalForm() {
                       </option>
                     ))}
                   </select>
-                  <FieldError message={errors.location} />
+                  <FieldError id="p-location-error" message={errors.location} />
                 </div>
                 {(() => {
                   const selected = locationOptions.find((l) => l.label === formData.location);
                   const needsDetails = selected?.location_type === "home" || selected?.location_type === "other";
                   return needsDetails ? (
                     <div>
-                      <label className="block text-sm font-medium text-charcoal mb-1">Address and Details</label>
+                      <label htmlFor="p-locationDetails" className="block text-sm font-medium text-charcoal mb-1">Address and Details</label>
                       <textarea
+                        id="p-locationDetails"
                         rows={2}
                         value={formData.locationDetails}
                         onChange={(e) => updateField("locationDetails", e.target.value)}
@@ -441,8 +452,8 @@ export default function ProposalForm() {
                 })()}
 
                 <div>
-                  <label className="block text-sm font-medium text-charcoal mb-1">Colors (Build Out)</label>
-                  <input type="text" value={formData.colors} onChange={(e) => updateField("colors", e.target.value)} className={inputClass} placeholder="What colors do you envision?" />
+                  <label htmlFor="colors" className="block text-sm font-medium text-charcoal mb-1">Colors (Build Out)</label>
+                  <input id="colors" type="text" value={formData.colors} onChange={(e) => updateField("colors", e.target.value)} className={inputClass} placeholder="What colors do you envision?" />
                 </div>
               </div>
             )}
@@ -535,11 +546,12 @@ export default function ProposalForm() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-charcoal mb-1">Notes</label>
+                  <label htmlFor="p-notes" className="block text-sm font-medium text-charcoal mb-1">Notes</label>
                   <p className="text-xs text-warm-gray mb-2">
                     Tell us anything else we should know — special themes, dietary needs, or any other details about your proposal.
                   </p>
                   <textarea
+                    id="p-notes"
                     rows={4}
                     value={formData.notes}
                     onChange={(e) => updateField("notes", e.target.value)}
@@ -556,6 +568,13 @@ export default function ProposalForm() {
                     onExpire={() => setTurnstileToken(null)}
                   />
                 </div>
+              </div>
+            )}
+
+            {/* ─── Submit error ───────────────────────── */}
+            {submitError && (
+              <div role="alert" aria-live="assertive" className="mt-6 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+                {submitError}
               </div>
             )}
 

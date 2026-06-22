@@ -113,6 +113,7 @@ export default function WeddingSuiteForm() {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Database-driven form options
   const [packageOptions, setPackageOptions] = useState<PackageOption[]>([]);
@@ -217,13 +218,14 @@ export default function WeddingSuiteForm() {
   };
 
   const handleSubmit = async () => {
+    setSubmitError(null);
     const stepErrors = validateStep("weddingSuite", step, formData as unknown as Record<string, unknown>);
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
       return;
     }
     if (!turnstileToken) {
-      alert("Please complete the verification challenge.");
+      setSubmitError("Please complete the verification challenge.");
       return;
     }
     setSubmitting(true);
@@ -246,10 +248,10 @@ export default function WeddingSuiteForm() {
         setSubmitted(true);
       } else {
         const result = await res.json();
-        alert(result.message || "Something went wrong.");
+        setSubmitError(result.message || "Something went wrong.");
       }
     } catch {
-      alert("Something went wrong. Please try again or email us directly at Info@picnicpotential.com");
+      setSubmitError("Something went wrong. Please try again or email us directly at Info@picnicpotential.com");
     } finally {
       setSubmitting(false);
     }
@@ -402,26 +404,26 @@ export default function WeddingSuiteForm() {
                 <h3 className="font-serif text-2xl text-charcoal">Contact Information</h3>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">First Name *</label>
-                    <input type="text" required value={formData.firstName} onChange={(e) => updateField("firstName", e.target.value)} className={getInputClass("firstName", errors)} />
-                    <FieldError message={errors.firstName} />
+                    <label htmlFor="ws-firstName" className="block text-sm font-medium text-charcoal mb-1">First Name *</label>
+                    <input id="ws-firstName" type="text" required aria-required="true" aria-describedby={errors.firstName ? "ws-firstName-error" : undefined} value={formData.firstName} onChange={(e) => updateField("firstName", e.target.value)} className={getInputClass("firstName", errors)} />
+                    <FieldError id="ws-firstName-error" message={errors.firstName} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Last Name *</label>
-                    <input type="text" required value={formData.lastName} onChange={(e) => updateField("lastName", e.target.value)} className={getInputClass("lastName", errors)} />
-                    <FieldError message={errors.lastName} />
+                    <label htmlFor="ws-lastName" className="block text-sm font-medium text-charcoal mb-1">Last Name *</label>
+                    <input id="ws-lastName" type="text" required aria-required="true" aria-describedby={errors.lastName ? "ws-lastName-error" : undefined} value={formData.lastName} onChange={(e) => updateField("lastName", e.target.value)} className={getInputClass("lastName", errors)} />
+                    <FieldError id="ws-lastName-error" message={errors.lastName} />
                   </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Phone Number *</label>
-                    <input type="tel" required value={formData.phone} onChange={(e) => updateField("phone", e.target.value)} className={getInputClass("phone", errors)} />
-                    <FieldError message={errors.phone} />
+                    <label htmlFor="ws-phone" className="block text-sm font-medium text-charcoal mb-1">Phone Number *</label>
+                    <input id="ws-phone" type="tel" required aria-required="true" aria-describedby={errors.phone ? "ws-phone-error" : undefined} value={formData.phone} onChange={(e) => updateField("phone", e.target.value)} className={getInputClass("phone", errors)} />
+                    <FieldError id="ws-phone-error" message={errors.phone} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Email *</label>
-                    <input type="email" required value={formData.email} onChange={(e) => updateField("email", e.target.value)} className={getInputClass("email", errors)} />
-                    <FieldError message={errors.email} />
+                    <label htmlFor="ws-email" className="block text-sm font-medium text-charcoal mb-1">Email *</label>
+                    <input id="ws-email" type="email" required aria-required="true" aria-describedby={errors.email ? "ws-email-error" : undefined} value={formData.email} onChange={(e) => updateField("email", e.target.value)} className={getInputClass("email", errors)} />
+                    <FieldError id="ws-email-error" message={errors.email} />
                   </div>
                 </div>
               </div>
@@ -434,14 +436,14 @@ export default function WeddingSuiteForm() {
                 <p className="text-warm-gray text-sm">Who&apos;s getting married? We&apos;ll use these names for personalization.</p>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Partner 1 Name *</label>
-                    <input type="text" required value={formData.coupleName1} onChange={(e) => updateField("coupleName1", e.target.value)} className={getInputClass("coupleName1", errors)} />
-                    <FieldError message={errors.coupleName1} />
+                    <label htmlFor="coupleName1" className="block text-sm font-medium text-charcoal mb-1">Partner 1 Name *</label>
+                    <input id="coupleName1" type="text" required aria-required="true" aria-describedby={errors.coupleName1 ? "coupleName1-error" : undefined} value={formData.coupleName1} onChange={(e) => updateField("coupleName1", e.target.value)} className={getInputClass("coupleName1", errors)} />
+                    <FieldError id="coupleName1-error" message={errors.coupleName1} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Partner 2 Name *</label>
-                    <input type="text" required value={formData.coupleName2} onChange={(e) => updateField("coupleName2", e.target.value)} className={getInputClass("coupleName2", errors)} />
-                    <FieldError message={errors.coupleName2} />
+                    <label htmlFor="coupleName2" className="block text-sm font-medium text-charcoal mb-1">Partner 2 Name *</label>
+                    <input id="coupleName2" type="text" required aria-required="true" aria-describedby={errors.coupleName2 ? "coupleName2-error" : undefined} value={formData.coupleName2} onChange={(e) => updateField("coupleName2", e.target.value)} className={getInputClass("coupleName2", errors)} />
+                    <FieldError id="coupleName2-error" message={errors.coupleName2} />
                   </div>
                 </div>
               </div>
@@ -453,13 +455,13 @@ export default function WeddingSuiteForm() {
                 <h3 className="font-serif text-2xl text-charcoal">Venue Details</h3>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Venue Name *</label>
-                    <input type="text" required value={formData.venueName} onChange={(e) => updateField("venueName", e.target.value)} className={getInputClass("venueName", errors)} />
-                    <FieldError message={errors.venueName} />
+                    <label htmlFor="venueName" className="block text-sm font-medium text-charcoal mb-1">Venue Name *</label>
+                    <input id="venueName" type="text" required aria-required="true" aria-describedby={errors.venueName ? "venueName-error" : undefined} value={formData.venueName} onChange={(e) => updateField("venueName", e.target.value)} className={getInputClass("venueName", errors)} />
+                    <FieldError id="venueName-error" message={errors.venueName} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Venue Address</label>
-                    <input type="text" value={formData.venueAddress} onChange={(e) => updateField("venueAddress", e.target.value)} className={inputClass} />
+                    <label htmlFor="venueAddress" className="block text-sm font-medium text-charcoal mb-1">Venue Address</label>
+                    <input id="venueAddress" type="text" value={formData.venueAddress} onChange={(e) => updateField("venueAddress", e.target.value)} className={inputClass} />
                   </div>
                 </div>
 
@@ -467,45 +469,48 @@ export default function WeddingSuiteForm() {
                   <label className="block text-sm font-medium text-charcoal mb-3">Venue Contact</label>
                   <div className="grid gap-4 sm:grid-cols-3">
                     <div>
-                      <label className="block text-xs text-warm-gray mb-1">Name</label>
-                      <input type="text" value={formData.venueContactName} onChange={(e) => updateField("venueContactName", e.target.value)} className={inputClass} />
+                      <label htmlFor="venueContactName" className="block text-xs text-warm-gray mb-1">Name</label>
+                      <input id="venueContactName" type="text" value={formData.venueContactName} onChange={(e) => updateField("venueContactName", e.target.value)} className={inputClass} />
                     </div>
                     <div>
-                      <label className="block text-xs text-warm-gray mb-1">Email</label>
-                      <input type="email" value={formData.venueContactEmail} onChange={(e) => updateField("venueContactEmail", e.target.value)} className={inputClass} />
+                      <label htmlFor="venueContactEmail" className="block text-xs text-warm-gray mb-1">Email</label>
+                      <input id="venueContactEmail" type="email" value={formData.venueContactEmail} onChange={(e) => updateField("venueContactEmail", e.target.value)} className={inputClass} />
                     </div>
                     <div>
-                      <label className="block text-xs text-warm-gray mb-1">Phone</label>
-                      <input type="tel" value={formData.venueContactPhone} onChange={(e) => updateField("venueContactPhone", e.target.value)} className={inputClass} />
+                      <label htmlFor="venueContactPhone" className="block text-xs text-warm-gray mb-1">Phone</label>
+                      <input id="venueContactPhone" type="tel" value={formData.venueContactPhone} onChange={(e) => updateField("venueContactPhone", e.target.value)} className={inputClass} />
                     </div>
                   </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Wedding Date *</label>
+                    <label id="ws-eventDate-label" className="block text-sm font-medium text-charcoal mb-1">Wedding Date *</label>
                     <DatePicker
+                      id="ws-eventDate"
+                      aria-labelledby="ws-eventDate-label"
+                      aria-required={true}
                       value={formData.eventDate}
                       onChange={(v) => updateField("eventDate", v)}
                       hasError={!!errors.eventDate}
                       formType="wedding"
                       placeholder="Select your wedding date"
                     />
-                    <FieldError message={errors.eventDate} />
+                    <FieldError id="ws-eventDate-error" message={errors.eventDate} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Arrival Time</label>
-                    <input type="time" value={formData.arrivalTime} onChange={(e) => updateField("arrivalTime", e.target.value)} className={inputClass} />
+                    <label htmlFor="arrivalTime" className="block text-sm font-medium text-charcoal mb-1">Arrival Time</label>
+                    <input id="arrivalTime" type="time" value={formData.arrivalTime} onChange={(e) => updateField("arrivalTime", e.target.value)} className={inputClass} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Suite Access Time</label>
-                    <input type="time" value={formData.suiteAccessTime} onChange={(e) => updateField("suiteAccessTime", e.target.value)} className={inputClass} />
+                    <label htmlFor="suiteAccessTime" className="block text-sm font-medium text-charcoal mb-1">Suite Access Time</label>
+                    <input id="suiteAccessTime" type="time" value={formData.suiteAccessTime} onChange={(e) => updateField("suiteAccessTime", e.target.value)} className={inputClass} />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-charcoal mb-1">How many people in the wedding party?</label>
-                  <input type="text" value={formData.peopleCount} onChange={(e) => updateField("peopleCount", e.target.value)} className={inputClass} placeholder="e.g., 8" />
+                  <label htmlFor="peopleCount" className="block text-sm font-medium text-charcoal mb-1">How many people in the wedding party?</label>
+                  <input id="peopleCount" type="text" value={formData.peopleCount} onChange={(e) => updateField("peopleCount", e.target.value)} className={inputClass} placeholder="e.g., 8" />
                 </div>
               </div>
             )}
@@ -619,11 +624,12 @@ export default function WeddingSuiteForm() {
                 <h3 className="font-serif text-2xl text-charcoal">Final Details</h3>
 
                 <div>
-                  <label className="block text-sm font-medium text-charcoal mb-1">Swap Requests</label>
+                  <label htmlFor="swapRequest" className="block text-sm font-medium text-charcoal mb-1">Swap Requests</label>
                   <p className="text-xs text-warm-gray mb-2">
                     Want to swap out any items in your package for something else? Let us know!
                   </p>
                   <textarea
+                    id="swapRequest"
                     rows={3}
                     value={formData.swapRequest}
                     onChange={(e) => updateField("swapRequest", e.target.value)}
@@ -647,11 +653,12 @@ export default function WeddingSuiteForm() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-charcoal mb-1">Notes</label>
+                  <label htmlFor="ws-notes" className="block text-sm font-medium text-charcoal mb-1">Notes</label>
                   <p className="text-xs text-warm-gray mb-2">
                     Tell us anything else we should know — special themes, dietary needs, or any other details about your wedding day.
                   </p>
                   <textarea
+                    id="ws-notes"
                     rows={4}
                     value={formData.notes}
                     onChange={(e) => updateField("notes", e.target.value)}
@@ -668,6 +675,13 @@ export default function WeddingSuiteForm() {
                     onExpire={() => setTurnstileToken(null)}
                   />
                 </div>
+              </div>
+            )}
+
+            {/* ─── Submit error ───────────────────────── */}
+            {submitError && (
+              <div role="alert" aria-live="assertive" className="mt-6 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+                {submitError}
               </div>
             )}
 

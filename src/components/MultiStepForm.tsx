@@ -128,6 +128,7 @@ export default function MultiStepForm() {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Database-driven form options
   const [eventTypes, setEventTypes] = useState<string[]>([]);
@@ -249,13 +250,14 @@ export default function MultiStepForm() {
   };
 
   const handleSubmit = async () => {
+    setSubmitError(null);
     const stepErrors = validateStep("multiStep", step, formData as unknown as Record<string, unknown>);
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
       return;
     }
     if (!turnstileToken) {
-      alert("Please complete the verification challenge.");
+      setSubmitError("Please complete the verification challenge.");
       return;
     }
     setSubmitting(true);
@@ -275,10 +277,10 @@ export default function MultiStepForm() {
         setSubmitted(true);
       } else {
         const result = await res.json();
-        alert(result.message || "Something went wrong.");
+        setSubmitError(result.message || "Something went wrong.");
       }
     } catch {
-      alert("Something went wrong. Please try again or email us directly at Info@picnicpotential.com");
+      setSubmitError("Something went wrong. Please try again or email us directly at Info@picnicpotential.com");
     } finally {
       setSubmitting(false);
     }
@@ -404,26 +406,26 @@ export default function MultiStepForm() {
                 <h3 className="font-serif text-2xl text-charcoal">Contact Information</h3>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">First Name *</label>
-                    <input type="text" required value={formData.firstName} onChange={(e) => updateField("firstName", e.target.value)} className={getInputClass("firstName", errors)} />
-                    <FieldError message={errors.firstName} />
+                    <label htmlFor="firstName" className="block text-sm font-medium text-charcoal mb-1">First Name *</label>
+                    <input id="firstName" type="text" required aria-required="true" aria-describedby={errors.firstName ? "firstName-error" : undefined} value={formData.firstName} onChange={(e) => updateField("firstName", e.target.value)} className={getInputClass("firstName", errors)} />
+                    <FieldError id="firstName-error" message={errors.firstName} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Last Name *</label>
-                    <input type="text" required value={formData.lastName} onChange={(e) => updateField("lastName", e.target.value)} className={getInputClass("lastName", errors)} />
-                    <FieldError message={errors.lastName} />
+                    <label htmlFor="lastName" className="block text-sm font-medium text-charcoal mb-1">Last Name *</label>
+                    <input id="lastName" type="text" required aria-required="true" aria-describedby={errors.lastName ? "lastName-error" : undefined} value={formData.lastName} onChange={(e) => updateField("lastName", e.target.value)} className={getInputClass("lastName", errors)} />
+                    <FieldError id="lastName-error" message={errors.lastName} />
                   </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Phone Number *</label>
-                    <input type="tel" required value={formData.phone} onChange={(e) => updateField("phone", e.target.value)} className={getInputClass("phone", errors)} />
-                    <FieldError message={errors.phone} />
+                    <label htmlFor="phone" className="block text-sm font-medium text-charcoal mb-1">Phone Number *</label>
+                    <input id="phone" type="tel" required aria-required="true" aria-describedby={errors.phone ? "phone-error" : undefined} value={formData.phone} onChange={(e) => updateField("phone", e.target.value)} className={getInputClass("phone", errors)} />
+                    <FieldError id="phone-error" message={errors.phone} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Email *</label>
-                    <input type="email" required value={formData.email} onChange={(e) => updateField("email", e.target.value)} className={getInputClass("email", errors)} />
-                    <FieldError message={errors.email} />
+                    <label htmlFor="email" className="block text-sm font-medium text-charcoal mb-1">Email *</label>
+                    <input id="email" type="email" required aria-required="true" aria-describedby={errors.email ? "email-error" : undefined} value={formData.email} onChange={(e) => updateField("email", e.target.value)} className={getInputClass("email", errors)} />
+                    <FieldError id="email-error" message={errors.email} />
                   </div>
                 </div>
               </div>
@@ -435,19 +437,24 @@ export default function MultiStepForm() {
                 <h3 className="font-serif text-2xl text-charcoal">Event Details</h3>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Event Date *</label>
+                    <label id="eventDate-label" className="block text-sm font-medium text-charcoal mb-1">Event Date *</label>
                     <DatePicker
+                      id="eventDate"
+                      aria-labelledby="eventDate-label"
+                      aria-required={true}
                       value={formData.eventDate}
                       onChange={(v) => updateField("eventDate", v)}
                       hasError={!!errors.eventDate}
                       formType="general"
                       placeholder="Select your event date"
                     />
-                    <FieldError message={errors.eventDate} />
+                    <FieldError id="eventDate-error" message={errors.eventDate} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Backup Date</label>
+                    <label id="backupDate-label" className="block text-sm font-medium text-charcoal mb-1">Backup Date</label>
                     <DatePicker
+                      id="backupDate"
+                      aria-labelledby="backupDate-label"
                       value={formData.backupDate}
                       onChange={(v) => updateField("backupDate", v)}
                       formType="general"
@@ -457,12 +464,12 @@ export default function MultiStepForm() {
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Event Time</label>
-                    <input type="time" value={formData.eventTime} onChange={(e) => updateField("eventTime", e.target.value)} className={inputClass} />
+                    <label htmlFor="eventTime" className="block text-sm font-medium text-charcoal mb-1">Event Time</label>
+                    <input id="eventTime" type="time" value={formData.eventTime} onChange={(e) => updateField("eventTime", e.target.value)} className={inputClass} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Occasion</label>
-                    <select value={formData.occasion} onChange={(e) => updateField("occasion", e.target.value)} className={inputClass}>
+                    <label htmlFor="occasion" className="block text-sm font-medium text-charcoal mb-1">Occasion</label>
+                    <select id="occasion" value={formData.occasion} onChange={(e) => updateField("occasion", e.target.value)} className={inputClass}>
                       <option value="">Select an occasion</option>
                       {occasionOptions.map((o) => (<option key={o} value={o}>{o}</option>))}
                     </select>
@@ -494,8 +501,9 @@ export default function MultiStepForm() {
               <div className="space-y-5">
                 <h3 className="font-serif text-2xl text-charcoal">Location &amp; Guests</h3>
                 <div>
-                  <label className="block text-sm font-medium text-charcoal mb-1">Location</label>
+                  <label htmlFor="location" className="block text-sm font-medium text-charcoal mb-1">Location</label>
                   <select
+                    id="location"
                     value={formData.location}
                     onChange={(e) => {
                       updateField("location", e.target.value);
@@ -516,8 +524,9 @@ export default function MultiStepForm() {
                   const needsDetails = selected?.location_type === "home" || selected?.location_type === "other";
                   return needsDetails ? (
                     <div>
-                      <label className="block text-sm font-medium text-charcoal mb-1">Address and Details</label>
+                      <label htmlFor="locationDetails" className="block text-sm font-medium text-charcoal mb-1">Address and Details</label>
                       <textarea
+                        id="locationDetails"
                         rows={2}
                         value={formData.locationDetails}
                         onChange={(e) => updateField("locationDetails", e.target.value)}
@@ -528,13 +537,14 @@ export default function MultiStepForm() {
                   ) : null;
                 })()}
                 <div>
-                  <label className="block text-sm font-medium text-charcoal mb-1">How many guests?</label>
-                  <input type="text" value={formData.groupSize} onChange={(e) => updateField("groupSize", e.target.value)} className={inputClass} />
+                  <label htmlFor="groupSize" className="block text-sm font-medium text-charcoal mb-1">How many guests?</label>
+                  <input id="groupSize" type="text" value={formData.groupSize} onChange={(e) => updateField("groupSize", e.target.value)} className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-charcoal mb-1">Guest Names</label>
+                  <label htmlFor="guestNames" className="block text-sm font-medium text-charcoal mb-1">Guest Names</label>
                   <p className="text-xs text-warm-gray mb-2">For personalized place cards</p>
                   <textarea
+                    id="guestNames"
                     rows={3}
                     value={formData.guestNames}
                     onChange={(e) => updateField("guestNames", e.target.value)}
@@ -629,8 +639,8 @@ export default function MultiStepForm() {
                   ))}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-charcoal mb-1">Other dessert request</label>
-                  <input type="text" value={formData.dessertOther} onChange={(e) => updateField("dessertOther", e.target.value)} className={inputClass} placeholder="Any other dessert you'd like?" />
+                  <label htmlFor="dessertOther" className="block text-sm font-medium text-charcoal mb-1">Other dessert request</label>
+                  <input id="dessertOther" type="text" value={formData.dessertOther} onChange={(e) => updateField("dessertOther", e.target.value)} className={inputClass} placeholder="Any other dessert you'd like?" />
                 </div>
               </div>
             )}
@@ -677,17 +687,18 @@ export default function MultiStepForm() {
 
                 {formData.howDidYouHear === "Referral" && (
                   <div>
-                    <label className="block text-sm font-medium text-charcoal mb-1">Who referred you? (so we can thank them!)</label>
-                    <input type="text" value={formData.referredBy} onChange={(e) => updateField("referredBy", e.target.value)} className={inputClass} />
+                    <label htmlFor="referredBy" className="block text-sm font-medium text-charcoal mb-1">Who referred you? (so we can thank them!)</label>
+                    <input id="referredBy" type="text" value={formData.referredBy} onChange={(e) => updateField("referredBy", e.target.value)} className={inputClass} />
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-charcoal mb-1">Notes</label>
+                  <label htmlFor="notes" className="block text-sm font-medium text-charcoal mb-1">Notes</label>
                   <p className="text-xs text-warm-gray mb-2">
                     Tell us anything we should know — what you&apos;re celebrating, special themes, dietary needs, or any other details.
                   </p>
                   <textarea
+                    id="notes"
                     rows={4}
                     value={formData.notes}
                     onChange={(e) => updateField("notes", e.target.value)}
@@ -704,6 +715,13 @@ export default function MultiStepForm() {
                     onExpire={() => setTurnstileToken(null)}
                   />
                 </div>
+              </div>
+            )}
+
+            {/* ─── Submit error ───────────────────────── */}
+            {submitError && (
+              <div role="alert" aria-live="assertive" className="mt-6 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+                {submitError}
               </div>
             )}
 

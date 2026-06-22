@@ -103,9 +103,13 @@ export default function Footer() {
 
         <div className="mt-12 border-t border-gray-700 pt-8 text-center text-xs text-gray-500">
           <p>&copy; {new Date().getFullYear()} {SITE_NAME}. All rights reserved.</p>
-          <p className="mt-2">
+          <p className="mt-2 flex items-center justify-center gap-4">
             <Link href="/privacy-policy" className="text-gray-500 hover:text-gold transition-colors">
               Privacy Policy
+            </Link>
+            <span className="text-gray-700" aria-hidden="true">·</span>
+            <Link href="/accessibility" className="text-gray-500 hover:text-gold transition-colors">
+              Accessibility
             </Link>
           </p>
         </div>
