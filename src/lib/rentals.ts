@@ -80,8 +80,6 @@ export const RENTAL_ITEMS: RentalItem[] = [
       "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/photo%20backdrop%20%281%29.jpg",
       "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/photo%20backdrop%20%282%29.jpg",
       "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/photo%20backdrop%20%283%29.jpg",
-      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/photo%20backdrop%20%284%29.jpg",
-      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/photo%20backdrop%20%285%29.jpg",
     ],
   },
   {
@@ -96,6 +94,10 @@ export const RENTAL_ITEMS: RentalItem[] = [
       { label: "Fairy Lights", price: 10 },
       { label: "Bistro Lights", price: 15 },
       { label: "Greenery Garland", price: 10 },
+    ],
+    images: [
+      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/photo%20backdrop%20%284%29.jpg",
+      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/photo%20backdrop%20%285%29.jpg",
     ],
   },
   {
