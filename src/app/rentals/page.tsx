@@ -44,7 +44,8 @@ const RENTAL_ITEMS = [
       { label: "Fabric Covers", price: 20 },
     ],
     images: [
-      // TODO: add Vercel Blob URLs — e.g. "https://xxxx.public.blob.vercel-storage.com/Photo-Arch-1.jpg"
+      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/photo%20arch%20%281%29.jpg",
+      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/photo%20arch%20%282%29.jpg",
     ],
   },
   {
