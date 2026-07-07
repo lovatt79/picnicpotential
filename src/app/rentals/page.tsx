@@ -43,6 +43,9 @@ const RENTAL_ITEMS = [
     addOns: [
       { label: "Fabric Covers", price: 20 },
     ],
+    images: [
+      // TODO: add Vercel Blob URLs — e.g. "https://xxxx.public.blob.vercel-storage.com/Photo-Arch-1.jpg"
+    ],
   },
   {
     id: "backdrop-square",
@@ -167,6 +170,7 @@ export default function RentalsPage() {
                 specs={item.specs}
                 pricing={item.pricing}
                 addOns={"addOns" in item ? item.addOns : undefined}
+                images={"images" in item ? (item.images ?? []).filter(Boolean) : undefined}
               />
             ))}
           </div>

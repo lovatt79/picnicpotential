@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface PricingLine {
   label: string;
   price: number;
@@ -14,6 +16,7 @@ interface RentalItemCardProps {
   specs?: Spec[];
   pricing: PricingLine[];
   addOns?: PricingLine[];
+  images?: string[];
 }
 
 const PASTEL_GRADIENTS = [
@@ -31,15 +34,33 @@ export default function RentalItemCard({
   specs,
   pricing,
   addOns,
+  images,
 }: RentalItemCardProps) {
   const gradient = PASTEL_GRADIENTS[title.length % PASTEL_GRADIENTS.length];
+  const hasImages = images && images.length > 0;
 
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm">
-      {/* Gradient header */}
-      <div className={`flex h-24 items-center justify-center bg-gradient-to-br ${gradient} px-6`}>
-        <span className="font-serif text-lg text-charcoal/70 text-center">{title}</span>
-      </div>
+      {/* Header: photos or gradient */}
+      {hasImages ? (
+        images.length === 1 ? (
+          <div className="relative aspect-[4/3] overflow-hidden">
+            <Image src={images[0]} alt={title} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" />
+          </div>
+        ) : (
+          <div className={`grid gap-0.5 ${images.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
+            {images.slice(0, 3).map((src, i) => (
+              <div key={i} className="relative aspect-square overflow-hidden">
+                <Image src={src} alt={`${title} ${i + 1}`} fill sizes="(max-width: 768px) 33vw, 11vw" className="object-cover" />
+              </div>
+            ))}
+          </div>
+        )
+      ) : (
+        <div className={`flex h-24 items-center justify-center bg-gradient-to-br ${gradient} px-6`}>
+          <span className="font-serif text-lg text-charcoal/70 text-center">{title}</span>
+        </div>
+      )}
 
       <div className="flex flex-1 flex-col p-6">
         <p className="text-sm leading-relaxed text-warm-gray">{description}</p>
