@@ -133,6 +133,9 @@ export const RENTAL_ITEMS: RentalItem[] = [
       { label: "3 or more (each)", price: 35 },
       { label: '"Mr & Mrs" set', price: 150 },
     ],
+    images: [
+      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/4ft%20letters.webp",
+    ],
   },
 ];
 
