@@ -39,6 +39,12 @@ export const RENTAL_ITEMS: RentalItem[] = [
       { label: "Per chair", price: 18 },
       { label: "5 or more (each)", price: 15 },
     ],
+    images: [
+      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/Adirondacks%20%281%29.jpg",
+      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/Adirondacks%20%282%29.jpg",
+      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/Adirondacks%20%283%29.jpg",
+      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/Adirondacks%20%284%29.jpg",
+    ],
   },
   {
     id: "backdrop-arch",
