@@ -112,6 +112,15 @@ export const RENTAL_ITEMS: RentalItem[] = [
       { label: '"Let\'s Party"', price: 50 },
       { label: "Assortment of Neon Hearts", price: 20 },
     ],
+    images: [
+      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/neon%20sign%20%281%29.jpg",
+      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/neon%20sign%20%282%29.jpg",
+      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/neon%20sign%20%283%29.jpg",
+      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/neon%20sign%20%284%29.jpg",
+      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/neon%20sign%20%285%29.jpg",
+      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/neon%20sign%20%286%29.jpg",
+      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/neon%20sign%20%287%29.jpg",
+    ],
   },
   {
     id: "marquee-letters",
