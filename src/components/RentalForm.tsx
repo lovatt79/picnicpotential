@@ -41,6 +41,7 @@ interface RentalFormData {
   location: string;
   selectedItems: string[];
   quantities: Record<string, number>;
+  itemColors: Record<string, string[]>;
   selectedAddOns: string[];
   howDidYouHear: string;
   howDidYouHearOther: string;
@@ -82,6 +83,7 @@ export default function RentalForm({ preSelectedItem }: RentalFormProps) {
     location: "",
     selectedItems: preSelectedTitle ? [preSelectedTitle] : [],
     quantities: preSelectedTitle ? { [preSelectedTitle]: 1 } : {},
+    itemColors: {},
     selectedAddOns: [],
     howDidYouHear: "",
     howDidYouHearOther: "",
@@ -105,9 +107,20 @@ export default function RentalForm({ preSelectedItem }: RentalFormProps) {
         ? prev.selectedAddOns.filter((a) => !a.startsWith(`${title}: `))
         : prev.selectedAddOns;
       const quantities = { ...prev.quantities };
-      if (isRemoving) delete quantities[title];
+      const itemColors = { ...prev.itemColors };
+      if (isRemoving) { delete quantities[title]; delete itemColors[title]; }
       else quantities[title] = 1;
-      return { ...prev, selectedItems: selected, quantities, selectedAddOns: addOns };
+      return { ...prev, selectedItems: selected, quantities, itemColors, selectedAddOns: addOns };
+    });
+  };
+
+  const toggleColor = (itemTitle: string, color: string) => {
+    setFormData((prev) => {
+      const current = prev.itemColors[itemTitle] ?? [];
+      const next = current.includes(color)
+        ? current.filter((c) => c !== color)
+        : [...current, color];
+      return { ...prev, itemColors: { ...prev.itemColors, [itemTitle]: next } };
     });
   };
 
@@ -322,6 +335,25 @@ export default function RentalForm({ preSelectedItem }: RentalFormProps) {
                               </div>
                             )}
                           </label>
+
+                          {/* Colors (when item is selected and has color options) */}
+                          {isSelected && item.colors && item.colors.length > 0 && (
+                            <div className="border-t border-gold/20 px-4 pb-4 pt-3">
+                              <p className="text-xs font-medium text-charcoal/60 uppercase tracking-wide mb-2">Color Preference</p>
+                              <div className="flex flex-wrap gap-2">
+                                {item.colors.map((color) => {
+                                  const isChecked = (formData.itemColors[item.title] ?? []).includes(color);
+                                  return (
+                                    <label key={color} className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors ${isChecked ? "border-gold bg-gold/10 text-charcoal font-medium" : "border-sage text-warm-gray hover:border-gold/50"}`}>
+                                      <input type="checkbox" checked={isChecked} onChange={() => toggleColor(item.title, color)} className="sr-only" />
+                                      {color}
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                              <p className="mt-2 text-xs text-warm-gray/70">Select all that apply — we'll confirm what's available</p>
+                            </div>
+                          )}
 
                           {/* Add-ons (only when item is selected and has add-ons) */}
                           {isSelected && item.addOns && item.addOns.length > 0 && (

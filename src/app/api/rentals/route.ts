@@ -48,6 +48,7 @@ export async function POST(request: Request) {
           selected_items: (data.selectedItems || []).map((title: string) => ({
             title,
             quantity: data.quantities?.[title] ?? 1,
+            colors: data.itemColors?.[title] ?? [],
           })),
           selected_addons: data.selectedAddOns || [],
           how_did_you_hear: data.howDidYouHear || null,

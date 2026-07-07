@@ -13,6 +13,7 @@ interface RentalInquiryOpsProps {
     location?: string;
     selectedItems?: string[];
     quantities?: Record<string, number>;
+    itemColors?: Record<string, string[]>;
     selectedAddOns?: string[];
     howDidYouHear?: string;
     howDidYouHearOther?: string;
@@ -52,8 +53,10 @@ export default function RentalInquiryOps({ data }: RentalInquiryOpsProps) {
         {data.selectedItems && data.selectedItems.length > 0 ? (
           data.selectedItems.map((item, i) => {
             const qty = data.quantities?.[item];
+            const colors = data.itemColors?.[item];
+            const colorStr = colors && colors.length > 0 ? ` [${colors.join(", ")}]` : "";
             return (
-              <Text key={i} style={listItem}>&#8226; {item}{qty && qty > 1 ? ` ×${qty}` : ""}</Text>
+              <Text key={i} style={listItem}>&#8226; {item}{qty && qty > 1 ? ` ×${qty}` : ""}{colorStr}</Text>
             );
           })
         ) : (

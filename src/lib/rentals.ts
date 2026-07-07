@@ -15,6 +15,7 @@ export interface RentalItem {
   specs?: Spec[];
   pricing: PricingLine[];
   addOns?: PricingLine[];
+  colors?: string[];
   images?: string[];
 }
 
@@ -39,6 +40,7 @@ export const RENTAL_ITEMS: RentalItem[] = [
       { label: "Per chair", price: 18 },
       { label: "5 or more (each)", price: 15 },
     ],
+    colors: ["White", "Slate Blue", "Gray"],
     images: [
       "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/Adirondacks%20%283%29.jpg",
       "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/Adirondacks%20%281%29.jpg",
