@@ -1,23 +1,6 @@
+import Link from "next/link";
 import Image from "next/image";
-
-interface PricingLine {
-  label: string;
-  price: number;
-}
-
-interface Spec {
-  label: string;
-  value: string;
-}
-
-interface RentalItemCardProps {
-  title: string;
-  description: string;
-  specs?: Spec[];
-  pricing: PricingLine[];
-  addOns?: PricingLine[];
-  images?: string[];
-}
+import type { RentalItem } from "@/lib/rentals";
 
 const PASTEL_GRADIENTS = [
   "from-blush to-peach-light",
@@ -28,42 +11,32 @@ const PASTEL_GRADIENTS = [
   "from-blush-light to-lavender-light",
 ];
 
-export default function RentalItemCard({
-  title,
-  description,
-  specs,
-  pricing,
-  addOns,
-  images,
-}: RentalItemCardProps) {
+export default function RentalItemCard({ id, title, description, specs, pricing, addOns, images }: RentalItem) {
   const gradient = PASTEL_GRADIENTS[title.length % PASTEL_GRADIENTS.length];
-  const hasImages = images && images.length > 0;
+  const coverImage = images?.[0];
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm">
-      {/* Header: photos or gradient */}
-      {hasImages ? (
-        images.length === 1 ? (
-          <div className="relative aspect-[4/3] overflow-hidden">
-            <Image src={images[0]} alt={title} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" />
-          </div>
-        ) : (
-          <div className={`grid gap-0.5 ${images.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
-            {images.slice(0, 3).map((src, i) => (
-              <div key={i} className="relative aspect-square overflow-hidden">
-                <Image src={src} alt={`${title} ${i + 1}`} fill sizes="(max-width: 768px) 33vw, 11vw" className="object-cover" />
-              </div>
-            ))}
-          </div>
-        )
+    <Link href={`/rentals/${id}`} className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm transition-shadow hover:shadow-md">
+      {/* Header: photo or gradient */}
+      {coverImage ? (
+        <div className="relative aspect-[4/3] overflow-hidden">
+          <Image
+            src={coverImage}
+            alt={title}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        </div>
       ) : (
-        <div className={`flex h-24 items-center justify-center bg-gradient-to-br ${gradient} px-6`}>
+        <div className={`flex h-36 items-center justify-center bg-gradient-to-br ${gradient} px-6`}>
           <span className="font-serif text-lg text-charcoal/70 text-center">{title}</span>
         </div>
       )}
 
       <div className="flex flex-1 flex-col p-6">
-        <p className="text-sm leading-relaxed text-warm-gray">{description}</p>
+        <h3 className="font-serif text-lg text-charcoal">{title}</h3>
+        <p className="mt-2 text-sm leading-relaxed text-warm-gray">{description}</p>
 
         {/* Specs */}
         {specs && specs.length > 0 && (
@@ -106,7 +79,11 @@ export default function RentalItemCard({
             </ul>
           </div>
         )}
+
+        {images && images.length > 1 && (
+          <p className="mt-4 text-xs text-warm-gray/70">{images.length} photos →</p>
+        )}
       </div>
-    </div>
+    </Link>
   );
 }
