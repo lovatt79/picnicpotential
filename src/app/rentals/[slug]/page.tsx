@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { RENTAL_ITEMS } from "@/lib/rentals";
 import { CONTACT_EMAIL } from "@/lib/constants";
+import RentalImageGallery from "@/components/RentalImageGallery";
 
 interface RentalDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -60,29 +60,7 @@ export default async function RentalDetailPage({ params }: RentalDetailPageProps
       {hasImages ? (
         <section className="bg-white py-10">
           <div className="mx-auto max-w-6xl px-4">
-            {images.length === 1 && (
-              <div className="relative aspect-[16/9] overflow-hidden rounded-2xl">
-                <Image src={images[0]} alt={title} fill priority sizes="(max-width: 1152px) 100vw, 1152px" className="object-cover" />
-              </div>
-            )}
-            {images.length === 2 && (
-              <div className="grid grid-cols-2 gap-2">
-                {images.map((src, i) => (
-                  <div key={i} className="relative aspect-[4/3] overflow-hidden rounded-2xl">
-                    <Image src={src} alt={`${title} ${i + 1}`} fill priority={i === 0} sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
-                  </div>
-                ))}
-              </div>
-            )}
-            {images.length >= 3 && (
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {images.map((src, i) => (
-                  <div key={i} className={`relative overflow-hidden rounded-2xl ${i === 0 && images.length % 2 !== 0 ? "col-span-2 sm:col-span-1" : ""} aspect-[4/3]`}>
-                    <Image src={src} alt={`${title} ${i + 1}`} fill priority={i === 0} sizes="(max-width: 640px) 50vw, 33vw" className="object-cover" />
-                  </div>
-                ))}
-              </div>
-            )}
+            <RentalImageGallery images={images} title={title} />
           </div>
         </section>
       ) : (
