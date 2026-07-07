@@ -12,6 +12,7 @@ interface RentalInquiryOpsProps {
     eventDate?: string;
     location?: string;
     selectedItems?: string[];
+    quantities?: Record<string, number>;
     selectedAddOns?: string[];
     howDidYouHear?: string;
     howDidYouHearOther?: string;
@@ -49,9 +50,12 @@ export default function RentalInquiryOps({ data }: RentalInquiryOpsProps) {
       <Text style={sectionTitle}>Requested Items</Text>
       <Section style={detailBox}>
         {data.selectedItems && data.selectedItems.length > 0 ? (
-          data.selectedItems.map((item, i) => (
-            <Text key={i} style={listItem}>&#8226; {item}</Text>
-          ))
+          data.selectedItems.map((item, i) => {
+            const qty = data.quantities?.[item];
+            return (
+              <Text key={i} style={listItem}>&#8226; {item}{qty && qty > 1 ? ` ×${qty}` : ""}</Text>
+            );
+          })
         ) : (
           <Text style={row}>No items selected</Text>
         )}

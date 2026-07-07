@@ -40,6 +40,7 @@ interface RentalFormData {
   eventDate: string;
   location: string;
   selectedItems: string[];
+  quantities: Record<string, number>;
   selectedAddOns: string[];
   howDidYouHear: string;
   howDidYouHearOther: string;
@@ -80,6 +81,7 @@ export default function RentalForm({ preSelectedItem }: RentalFormProps) {
     eventDate: "",
     location: "",
     selectedItems: preSelectedTitle ? [preSelectedTitle] : [],
+    quantities: preSelectedTitle ? { [preSelectedTitle]: 1 } : {},
     selectedAddOns: [],
     howDidYouHear: "",
     howDidYouHearOther: "",
@@ -95,15 +97,25 @@ export default function RentalForm({ preSelectedItem }: RentalFormProps) {
 
   const toggleItem = (title: string) => {
     setFormData((prev) => {
-      const selected = prev.selectedItems.includes(title)
+      const isRemoving = prev.selectedItems.includes(title);
+      const selected = isRemoving
         ? prev.selectedItems.filter((t) => t !== title)
         : [...prev.selectedItems, title];
-      // Remove add-ons that belong to this item when unchecking
-      const addOns = selected.includes(title)
-        ? prev.selectedAddOns
-        : prev.selectedAddOns.filter((a) => !a.startsWith(`${title}: `));
-      return { ...prev, selectedItems: selected, selectedAddOns: addOns };
+      const addOns = isRemoving
+        ? prev.selectedAddOns.filter((a) => !a.startsWith(`${title}: `))
+        : prev.selectedAddOns;
+      const quantities = { ...prev.quantities };
+      if (isRemoving) delete quantities[title];
+      else quantities[title] = 1;
+      return { ...prev, selectedItems: selected, quantities, selectedAddOns: addOns };
     });
+  };
+
+  const setQuantity = (title: string, value: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      quantities: { ...prev.quantities, [title]: Math.max(1, value) },
+    }));
   };
 
   const toggleAddOn = (key: string) => {
@@ -296,6 +308,19 @@ export default function RentalForm({ preSelectedItem }: RentalFormProps) {
                                 from ${item.pricing[0].price}
                               </span>
                             </div>
+                            {isSelected && (
+                              <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.preventDefault()}>
+                                <label htmlFor={`qty-${item.id}`} className="text-xs text-warm-gray whitespace-nowrap">Qty</label>
+                                <input
+                                  id={`qty-${item.id}`}
+                                  type="number"
+                                  min={1}
+                                  value={formData.quantities[item.title] ?? 1}
+                                  onChange={(e) => setQuantity(item.title, parseInt(e.target.value) || 1)}
+                                  className="w-14 rounded-lg border border-sage px-2 py-1 text-sm text-center focus:border-gold focus:outline-none"
+                                />
+                              </div>
+                            )}
                           </label>
 
                           {/* Add-ons (only when item is selected and has add-ons) */}

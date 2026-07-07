@@ -45,7 +45,10 @@ export async function POST(request: Request) {
           email: data.email,
           event_date: data.eventDate || null,
           location: data.location || null,
-          selected_items: data.selectedItems || [],
+          selected_items: (data.selectedItems || []).map((title: string) => ({
+            title,
+            quantity: data.quantities?.[title] ?? 1,
+          })),
           selected_addons: data.selectedAddOns || [],
           how_did_you_hear: data.howDidYouHear || null,
           how_did_you_hear_other: data.howDidYouHearOther || null,
