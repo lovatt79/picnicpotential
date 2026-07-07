@@ -10,7 +10,6 @@ export const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
   { label: "Services", href: "/services" },
-  { label: "Rentals", href: "/rentals" },
   { label: "Seating Styles", href: "/seating" },
   { label: "Partners", href: "/partners" },
   { label: "New in 2026", href: "/new-2026" },
