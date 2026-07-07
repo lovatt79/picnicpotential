@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { generateProductSchema, generateBreadcrumbSchema } from "@/lib/schema";
 
@@ -137,9 +138,13 @@ export default async function SeatingDetailPage({ params }: SeatingPageProps) {
       <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
         {displayImage ? (
           <>
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${displayImage})` }}
+            <Image
+              src={displayImage}
+              alt={seatingOption.title}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
             />
             <div className="absolute inset-0 bg-black/40" />
           </>

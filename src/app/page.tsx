@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
 import { createClient } from "@/lib/supabase/server";
 import { generateOrganizationSchema } from "@/lib/schema";
@@ -167,9 +168,13 @@ export default async function Home() {
         {/* Background - uploaded image or gradient fallback */}
         {content?.hero_image?.url ? (
           <>
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${content.hero_image.url})` }}
+            <Image
+              src={content.hero_image.url}
+              alt="Picnic Potential hero"
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
             />
             <div className="absolute inset-0 bg-black/40" />
           </>
@@ -243,11 +248,14 @@ export default async function Home() {
                     className={`group block ${sectionCardWidth[cols]}`}
                   >
                     <div className="h-full overflow-hidden rounded-2xl bg-white shadow-sm transition-all hover:shadow-lg">
-                      <div className="aspect-[4/3] overflow-hidden">
+                      <div className="relative aspect-[4/3] overflow-hidden">
                         {section.image ? (
-                          <div
-                            className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                            style={{ backgroundImage: `url(${section.image})` }}
+                          <Image
+                            src={section.image}
+                            alt={section.title}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-sage-light to-peach-light">

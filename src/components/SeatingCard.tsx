@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 interface SeatingCardProps {
   title: string;
@@ -22,11 +23,14 @@ export default function SeatingCard({ title, description, image, href }: Seating
 
   const content = (
     <div className="group h-full overflow-hidden rounded-2xl bg-white shadow-sm transition-all hover:shadow-lg">
-      <div className="aspect-[4/3] overflow-hidden">
+      <div className="relative aspect-[4/3] overflow-hidden">
         {image ? (
-          <div
-            className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-            style={{ backgroundImage: `url(${image})` }}
+          <Image
+            src={image}
+            alt={title}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${gradient}`}>
