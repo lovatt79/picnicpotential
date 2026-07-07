@@ -96,8 +96,8 @@ export const RENTAL_ITEMS: RentalItem[] = [
       { label: "Greenery Garland", price: 10 },
     ],
     images: [
-      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/photo%20backdrop%20%284%29.jpg",
       "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/photo%20backdrop%20%285%29.jpg",
+      "https://zpzbfhpows2azjpq.public.blob.vercel-storage.com/photo%20backdrop%20%284%29.jpg",
     ],
   },
   {
