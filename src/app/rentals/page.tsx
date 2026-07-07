@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import RentalItemCard from "@/components/RentalItemCard";
 import { RENTAL_ITEMS, PACKAGES } from "@/lib/rentals";
-import { CONTACT_EMAIL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Rentals & DIY Kits",
@@ -84,12 +83,12 @@ export default function RentalsPage() {
             questions. We&apos;ll get back to you within two business days.
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <a
-              href={`mailto:${CONTACT_EMAIL}?subject=Rental%20Inquiry`}
+            <Link
+              href="/rentals/inquire"
               className="inline-block rounded-full bg-gold px-10 py-4 text-base font-medium text-charcoal transition-colors hover:bg-gold-light"
             >
-              Email Us to Reserve
-            </a>
+              Submit a Rental Inquiry
+            </Link>
             <Link
               href="/request"
               className="inline-block rounded-full border-2 border-charcoal px-10 py-4 text-base font-medium text-charcoal transition-colors hover:border-gold hover:text-gold"

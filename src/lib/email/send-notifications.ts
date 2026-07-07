@@ -10,8 +10,10 @@ import WeddingSuiteConfirmation from "./templates/wedding-suite-confirmation";
 import WeddingSuiteOps from "./templates/wedding-suite-ops";
 import HintConfirmation from "./templates/hint-confirmation";
 import HintOps from "./templates/hint-ops";
+import RentalInquiryConfirmation from "./templates/rental-inquiry-confirmation";
+import RentalInquiryOps from "./templates/rental-inquiry-ops";
 
-export type FormType = "service-request" | "proposal" | "wedding-suite" | "hint";
+export type FormType = "service-request" | "proposal" | "wedding-suite" | "hint" | "rental-inquiry";
 
 interface EmailPair {
   subject: string;
@@ -69,6 +71,17 @@ export async function sendFormNotifications(
       ops = {
         subject: `New Hint from ${submitterName}`,
         react: createElement(HintOps, { data: data as never }),
+      };
+      break;
+
+    case "rental-inquiry":
+      confirmation = {
+        subject: "We received your rental inquiry!",
+        react: createElement(RentalInquiryConfirmation, { data: data as never }),
+      };
+      ops = {
+        subject: `New Rental Inquiry from ${submitterName}`,
+        react: createElement(RentalInquiryOps, { data: data as never }),
       };
       break;
   }

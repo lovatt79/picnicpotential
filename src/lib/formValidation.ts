@@ -21,10 +21,17 @@ const weddingSuiteRules: Record<number, string[]> = {
   6: ["howDidYouHear"],
 };
 
+const rentalRules: Record<number, string[]> = {
+  0: ["firstName", "lastName", "phone", "email"],
+  1: ["eventDate"],
+  2: ["howDidYouHear"],
+};
+
 const RULES_MAP = {
   multiStep: multiStepRules,
   proposal: proposalRules,
   weddingSuite: weddingSuiteRules,
+  rental: rentalRules,
 } as const;
 
 export type FormType = keyof typeof RULES_MAP;

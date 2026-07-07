@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { RENTAL_ITEMS } from "@/lib/rentals";
-import { CONTACT_EMAIL } from "@/lib/constants";
 import RentalImageGallery from "@/components/RentalImageGallery";
 
 interface RentalDetailPageProps {
@@ -125,12 +124,12 @@ export default async function RentalDetailPage({ params }: RentalDetailPageProps
               Reach out with your event date and we&apos;ll confirm availability.
             </p>
             <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-              <a
-                href={`mailto:${CONTACT_EMAIL}?subject=Rental%20Inquiry%20%E2%80%93%20${encodeURIComponent(title)}`}
+              <Link
+                href={`/rentals/inquire?item=${item.id}`}
                 className="inline-block rounded-full bg-gold px-8 py-3 text-sm font-medium text-charcoal transition-colors hover:bg-gold-light"
               >
-                Email Us to Reserve
-              </a>
+                Submit a Rental Inquiry
+              </Link>
               <Link
                 href="/rentals"
                 className="inline-block rounded-full border-2 border-charcoal px-8 py-3 text-sm font-medium text-charcoal transition-colors hover:border-gold hover:text-gold"
