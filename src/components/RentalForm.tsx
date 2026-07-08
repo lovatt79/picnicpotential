@@ -289,7 +289,8 @@ export default function RentalForm({ preSelectedItem }: RentalFormProps) {
                       value={formData.eventDate}
                       onChange={(v) => updateField("eventDate", v)}
                       hasError={!!errors.eventDate}
-                      formType="proposal"
+                      formType="general"
+                      ignoreBlockedDates
                       placeholder="Select your event date"
                     />
                     <FieldError id="ri-eventDate-error" message={errors.eventDate} />

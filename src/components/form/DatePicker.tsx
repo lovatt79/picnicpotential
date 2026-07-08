@@ -37,6 +37,7 @@ export interface DatePickerProps {
   onChange: (value: string) => void;
   hasError?: boolean;
   formType: "general" | "proposal" | "wedding";
+  ignoreBlockedDates?: boolean;
   placeholder?: string;
   id?: string;
   "aria-labelledby"?: string;
@@ -48,6 +49,7 @@ export function DatePicker({
   onChange,
   hasError,
   formType,
+  ignoreBlockedDates = false,
   placeholder = "Select a date",
   id,
   "aria-labelledby": ariaLabelledBy,
@@ -113,6 +115,7 @@ export function DatePicker({
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   const isBlocked = (dateStr: string) =>
+    !ignoreBlockedDates &&
     blockedDates.some(
       (bd) =>
         bd.date === dateStr &&
