@@ -417,6 +417,25 @@ export interface ProposalSubmission {
   updated_at: string;
 }
 
+export interface RentalInquiry {
+  id: string;
+  first_name: string;
+  last_name: string;
+  phone: string | null;
+  email: string;
+  event_date: string | null;
+  location: string | null;
+  selected_items: { title: string; quantity: number; colors?: string[] }[];
+  selected_addons: string[];
+  how_did_you_hear: string | null;
+  how_did_you_hear_other: string | null;
+  notes: string | null;
+  status: SubmissionStatus;
+  admin_notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // ─── Builder Page Types ──────────────────────────────────
 
 export type { BuilderPage, BuilderContainer, BuilderColumn, BuilderElement, ColumnLayout, ElementType } from "@/lib/builder-types";

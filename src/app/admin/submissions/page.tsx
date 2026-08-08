@@ -14,7 +14,7 @@ const statusColors: Record<string, string> = {
   cancelled: "bg-red-200 text-red-800",
 };
 
-type Tab = "all" | "service" | "hint" | "wedding" | "proposal";
+type Tab = "all" | "service" | "hint" | "wedding" | "proposal" | "rental";
 
 interface ServiceSubmission {
   id: string;
@@ -55,7 +55,19 @@ interface ProposalSubmissionRow {
   _type: "proposal";
 }
 
-type Submission = ServiceSubmission | WeddingSubmission | ProposalSubmissionRow;
+interface RentalSubmissionRow {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  event_date: string | null;
+  selected_items: { title: string; quantity: number }[];
+  status: string;
+  created_at: string;
+  _type: "rental";
+}
+
+type Submission = ServiceSubmission | WeddingSubmission | ProposalSubmissionRow | RentalSubmissionRow;
 
 export default function SubmissionsPage() {
   const supabase = createClient();
@@ -64,11 +76,12 @@ export default function SubmissionsPage() {
   const [hintSubmissions, setHintSubmissions] = useState<ServiceSubmission[]>([]);
   const [weddingSubmissions, setWeddingSubmissions] = useState<WeddingSubmission[]>([]);
   const [proposalSubmissions, setProposalSubmissions] = useState<ProposalSubmissionRow[]>([]);
+  const [rentalSubmissions, setRentalSubmissions] = useState<RentalSubmissionRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const [svcRes, wsRes, propRes] = await Promise.all([
+      const [svcRes, wsRes, propRes, rentalRes] = await Promise.all([
         supabase
           .from("form_submissions")
           .select("id, first_name, last_name, email, event_type, event_date, status, created_at")
@@ -80,6 +93,10 @@ export default function SubmissionsPage() {
         supabase
           .from("proposal_submissions")
           .select("id, first_name, last_name, email, package, proposal_date_1, proposee_name, status, created_at")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("rental_inquiries")
+          .select("id, first_name, last_name, email, event_date, selected_items, status, created_at")
           .order("created_at", { ascending: false }),
       ]);
 
@@ -101,6 +118,9 @@ export default function SubmissionsPage() {
       if (propRes.data) {
         setProposalSubmissions(propRes.data.map((s) => ({ ...s, _type: "proposal" as const })));
       }
+      if (rentalRes.data) {
+        setRentalSubmissions(rentalRes.data.map((s) => ({ ...s, _type: "rental" as const })));
+      }
       setLoading(false);
     }
     load();
@@ -115,11 +135,13 @@ export default function SubmissionsPage() {
       ? weddingSubmissions
       : tab === "proposal"
       ? proposalSubmissions
-      : [...serviceSubmissions, ...hintSubmissions, ...weddingSubmissions, ...proposalSubmissions].sort(
+      : tab === "rental"
+      ? rentalSubmissions
+      : [...serviceSubmissions, ...hintSubmissions, ...weddingSubmissions, ...proposalSubmissions, ...rentalSubmissions].sort(
           (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
 
-  const totalCount = serviceSubmissions.length + hintSubmissions.length + weddingSubmissions.length + proposalSubmissions.length;
+  const totalCount = serviceSubmissions.length + hintSubmissions.length + weddingSubmissions.length + proposalSubmissions.length + rentalSubmissions.length;
 
   const tabs: { key: Tab; label: string; count: number }[] = [
     { key: "all", label: "All Requests", count: totalCount },
@@ -127,28 +149,36 @@ export default function SubmissionsPage() {
     { key: "hint", label: "Hints", count: hintSubmissions.length },
     { key: "wedding", label: "Wedding Suite", count: weddingSubmissions.length },
     { key: "proposal", label: "Proposals", count: proposalSubmissions.length },
+    { key: "rental", label: "Rentals", count: rentalSubmissions.length },
   ];
 
   const getEventDate = (sub: Submission): string | null => {
     if (sub._type === "proposal") return (sub as ProposalSubmissionRow).proposal_date_1;
-    return (sub as ServiceSubmission | WeddingSubmission).event_date;
+    return (sub as ServiceSubmission | WeddingSubmission | RentalSubmissionRow).event_date;
   };
 
   const getDetails = (sub: Submission): string => {
     if (sub._type === "service") return (sub as ServiceSubmission).event_type || "\u2014";
     if (sub._type === "wedding") return (sub as WeddingSubmission).package || "\u2014";
+    if (sub._type === "rental") {
+      const items = (sub as RentalSubmissionRow).selected_items;
+      if (!items || items.length === 0) return "\u2014";
+      return items.map((i) => i.title).join(", ");
+    }
     return (sub as ProposalSubmissionRow).package || "\u2014";
   };
 
   const getDetailLink = (sub: Submission): string => {
     if (sub._type === "wedding") return `/admin/submissions/wedding-suite/${sub.id}`;
     if (sub._type === "proposal") return `/admin/submissions/proposal/${sub.id}`;
+    if (sub._type === "rental") return `/admin/submissions/rental/${sub.id}`;
     return `/admin/submissions/${sub.id}`;
   };
 
   const getTypeBadge = (sub: Submission) => {
     if (sub._type === "wedding") return { className: "bg-pink-100 text-pink-700", label: "Wedding Suite" };
     if (sub._type === "proposal") return { className: "bg-rose-100 text-rose-700", label: "Proposal" };
+    if (sub._type === "rental") return { className: "bg-emerald-100 text-emerald-700", label: "Rental" };
     if (sub._type === "service" && (sub as ServiceSubmission).event_type === "Send a Hint") {
       return { className: "bg-amber-100 text-amber-700", label: "Hint" };
     }
