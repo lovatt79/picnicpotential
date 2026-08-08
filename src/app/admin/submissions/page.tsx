@@ -223,8 +223,8 @@ export default function SubmissionsPage() {
       </div>
 
       {displayed.length > 0 ? (
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <table className="w-full">
+        <div className="bg-white rounded-xl shadow-sm overflow-x-auto">
+          <table className="w-full min-w-[780px]">
             <thead className="bg-gray-50 border-b">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-warm-gray uppercase tracking-wider">Name</th>
@@ -253,7 +253,7 @@ export default function SubmissionsPage() {
                         {badge.label}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-charcoal">
+                    <td className="px-6 py-4 text-sm text-charcoal max-w-[200px]">
                       {getDetails(sub)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-charcoal">
@@ -267,12 +267,12 @@ export default function SubmissionsPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-warm-gray">
                       {new Date(sub.created_at).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                    <td className="px-6 py-4 text-right">
                       <Link
                         href={getDetailLink(sub)}
-                        className="text-gold hover:text-charcoal text-sm font-medium"
+                        className="text-gold hover:text-charcoal text-sm font-medium whitespace-nowrap"
                       >
-                        View Details
+                        View Details →
                       </Link>
                     </td>
                   </tr>

@@ -11,9 +11,9 @@ export default function AdminLayout({
 }) {
   // Auth is handled by middleware, no need to check here
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-gray-50">
       <AdminSidebar />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-y-auto">
         <div className="p-8">
           {children}
         </div>

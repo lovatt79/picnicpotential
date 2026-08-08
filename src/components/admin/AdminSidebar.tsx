@@ -80,7 +80,7 @@ export default function AdminSidebar() {
   };
 
   return (
-    <aside className="w-64 bg-charcoal min-h-screen flex flex-col">
+    <aside className="w-64 bg-charcoal h-full flex flex-col flex-shrink-0">
       <div className="p-6 border-b border-gray-700">
         <Link href="/admin" className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gold rounded-full flex items-center justify-center">
