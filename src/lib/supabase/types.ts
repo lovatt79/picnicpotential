@@ -183,7 +183,7 @@ export interface FormHearAboutOption {
   created_at: string;
 }
 
-export type SubmissionStatus = "new" | "contacted" | "quoted" | "confirmed" | "completed" | "cancelled";
+export type SubmissionStatus = "new" | "contacted" | "quoted" | "confirmed" | "scheduled" | "completed" | "cancelled";
 
 export interface FormSubmission {
   id: string;

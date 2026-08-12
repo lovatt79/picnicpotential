@@ -10,6 +10,7 @@ const statusColors: Record<string, string> = {
   contacted: "bg-sky text-charcoal",
   quoted: "bg-lavender text-charcoal",
   confirmed: "bg-sage text-charcoal",
+  scheduled: "bg-violet-100 text-violet-700",
   completed: "bg-gray-500 text-white",
   cancelled: "bg-red-200 text-red-800",
 };

@@ -7,13 +7,14 @@ import { createClient } from "@/lib/supabase/client";
 import type { ProposalSubmission, SubmissionStatus } from "@/lib/supabase/types";
 import { formatDateStr, formatTimeStr } from "@/lib/formatDate";
 
-const statuses: SubmissionStatus[] = ["new", "contacted", "quoted", "confirmed", "completed", "cancelled"];
+const statuses: SubmissionStatus[] = ["new", "contacted", "quoted", "confirmed", "scheduled", "completed", "cancelled"];
 
 const statusColors: Record<string, string> = {
   new: "bg-gold text-charcoal",
   contacted: "bg-sky text-charcoal",
   quoted: "bg-lavender text-charcoal",
   confirmed: "bg-sage text-charcoal",
+  scheduled: "bg-violet-100 text-violet-700",
   completed: "bg-gray-500 text-white",
   cancelled: "bg-red-200 text-red-800",
 };
