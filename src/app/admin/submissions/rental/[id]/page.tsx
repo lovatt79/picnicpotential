@@ -45,9 +45,11 @@ export default function RentalDetailPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    await supabase.from("rental_inquiries").update({ status, admin_notes: adminNotes }).eq("id", params.id);
+    const { error } = await supabase.from("rental_inquiries").update({ status, admin_notes: adminNotes }).eq("id", params.id);
     setSaving(false);
-    router.refresh();
+    if (!error) {
+      setSubmission((prev) => prev ? { ...prev, status, admin_notes: adminNotes } : prev);
+    }
   };
 
   const handleDelete = async () => {

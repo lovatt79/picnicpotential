@@ -45,9 +45,11 @@ export default function ProposalDetailPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    await supabase.from("proposal_submissions").update({ status, admin_notes: adminNotes }).eq("id", params.id);
+    const { error } = await supabase.from("proposal_submissions").update({ status, admin_notes: adminNotes }).eq("id", params.id);
     setSaving(false);
-    router.refresh();
+    if (!error) {
+      setSubmission((prev) => prev ? { ...prev, status, admin_notes: adminNotes } : prev);
+    }
   };
 
   const handleDelete = async () => {
